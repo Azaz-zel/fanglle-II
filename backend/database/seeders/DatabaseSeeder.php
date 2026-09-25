@@ -30,18 +30,14 @@ class DatabaseSeeder extends Seeder
             VenueTable::create(compact('code', 'zone', 'shape', 'capacity', 'x', 'y'));
         }
 
-        // F2: before noon it is still last night, so the week is the one tonight belongs to.
-        $thursday = now()->subHours(12)->startOfWeek(Carbon::MONDAY)->addDays(3);
+        $thursday = Night::tonight()->startOfWeek(Carbon::MONDAY)->addDays(3);
 
         foreach ($this->events() as $day => [$event, $lineup]) {
             $event = Event::create(['date' => $thursday->copy()->addDays($day)->toDateString()] + $event);
-            $event->lineupSlots()->createMany(
-                collect($lineup)
-                    ->sortBy(fn ($slot) => Night::minutes($slot[2]))
-                    ->values()
-                    ->map(fn ($slot, $i) => ['performer' => $slot[0], 'role' => $slot[1], 'starts_at' => $slot[2], 'ends_at' => $slot[3], 'position' => $i])
-                    ->all(),
-            );
+            $event->replaceLineup(array_map(
+                fn ($slot) => array_combine(['performer', 'role', 'starts_at', 'ends_at'], $slot),
+                $lineup,
+            ));
         }
 
         // Names and emails from STAFF in docs/mockup/fanglle-pengelola-mockup.jsx. Dev password: "password".

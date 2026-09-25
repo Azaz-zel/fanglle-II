@@ -1,5 +1,9 @@
 <?php
 
+use App\Http\Middleware\EnsureRole;
+use App\Models\Event;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -15,11 +19,17 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->statefulApi();
+        $middleware->alias(['role' => EnsureRole::class]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(
             fn (Request $request) => $request->is('api/*') || $request->expectsJson(),
         );
+
+        // Two saves racing past validation: the database kept one, so the other is a state conflict, not a crash.
+        $exceptions->render(fn (UniqueConstraintViolationException $e, Request $request) => $request->is('api/*')
+            ? response()->json(['message' => 'That changed while you were saving. Reload and try again.'], 409)
+            : null);
 
         // Dokumen 0 §2.4: API errors are { message } even in debug mode. 401 and 422 already have that shape.
         $exceptions->render(function (HttpExceptionInterface $e, Request $request) {
@@ -27,6 +37,13 @@ return Application::configure(basePath: dirname(__DIR__))
                 return null;
             }
 
-            return response()->json(['message' => $e->getMessage()], $e->getStatusCode(), $e->getHeaders());
+            // Missing records would otherwise say "No query results for model [App\Models\...]".
+            $message = match ($e->getPrevious() instanceof ModelNotFoundException ? $e->getPrevious()->getModel() : null) {
+                null => $e->getMessage(),
+                Event::class => "There's no event on that night.",
+                default => 'Not found.',
+            };
+
+            return response()->json(['message' => $message], $e->getStatusCode(), $e->getHeaders());
         });
     })->create();
