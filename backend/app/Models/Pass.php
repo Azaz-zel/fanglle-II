@@ -2,9 +2,11 @@
 
 namespace App\Models;
 
+use App\Enums\CheckInMethod;
 use App\Enums\PassKind;
 use App\Support\EntryCode;
 use App\Support\Night;
+use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Attributes\Unguarded;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -14,6 +16,9 @@ use Illuminate\Support\Str;
 #[Unguarded]
 class Pass extends Model
 {
+    /** A scan this recent reached the server while the door had signal. */
+    public const ONLINE_SCAN_SECONDS = 120;
+
     protected function casts(): array
     {
         return ['kind' => PassKind::class, 'revoked_at' => 'datetime'];
@@ -70,5 +75,33 @@ class Pass extends Model
             $this->inside_count > 0 => 'partial',
             default => 'ready',
         };
+    }
+
+    /**
+     * Dokumen 1: a cancelled pass is refused when it is scanned online. An older scan is a door syncing after
+     * losing signal: that person is already inside, so it is recorded (as a conflict) instead. Overrides go through.
+     */
+    public function refusesScan(CarbonInterface $scannedAt, CheckInMethod $method): bool
+    {
+        return $this->revoked_at !== null && $method !== CheckInMethod::Override
+            && $scannedAt->gte(now()->subSeconds(self::ONLINE_SCAN_SECONDS));
+    }
+
+    /** One pass as a door device keeps it: the last 4 phone digits only (F14), and the code's hash, never the code (F17). */
+    public function manifestItem(): array
+    {
+        $booking = $this->tableBooking;
+
+        return [
+            'public_id' => $this->public_id,
+            'kind' => $this->kind,
+            'holder_name' => $this->holder_name,
+            'people' => $this->people,
+            'inside_count' => $this->inside_count,
+            'phone_last4' => substr(($this->guestlistSignup ?? $booking)?->phone ?? '', -4) ?: null,
+            'table_code' => $booking?->venueTable->code,
+            'revoked' => $this->revoked_at !== null,
+            'entry_code_hash' => hash('sha256', $this->entry_code), // entry_code is stored normalized
+        ];
     }
 }

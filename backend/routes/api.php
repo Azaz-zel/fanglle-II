@@ -38,6 +38,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::middleware('role:door,manager')->prefix('door')->group(function () {
         Route::get('/public-key', [DoorController::class, 'publicKey']);
+        Route::get('/{event:date}/manifest', [DoorController::class, 'manifest']);
+        Route::get('/{event:date}/codes/{code}', [DoorController::class, 'code']);
+        Route::post('/check-ins', [DoorController::class, 'checkIns']);
     });
 
     Route::middleware('role:manager')->prefix('admin')->group(function () {
