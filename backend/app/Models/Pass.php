@@ -32,6 +32,11 @@ class Pass extends Model
         return $this->belongsTo(Event::class);
     }
 
+    public function guestlistSignup(): BelongsTo
+    {
+        return $this->belongsTo(GuestlistSignup::class);
+    }
+
     public function tableBooking(): BelongsTo
     {
         return $this->belongsTo(TableBooking::class);

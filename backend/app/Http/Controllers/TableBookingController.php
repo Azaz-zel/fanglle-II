@@ -6,8 +6,8 @@ use App\Enums\BookingStatus;
 use App\Models\Event;
 use App\Models\TableBooking;
 use App\Models\VenueTable;
-use App\Rules\Turnstile;
 use App\Support\EntryCode;
+use App\Support\GuestContact;
 use App\Support\Night;
 use App\Support\Xendit;
 use Illuminate\Database\UniqueConstraintViolationException;
@@ -29,19 +29,14 @@ class TableBookingController extends Controller
             'date' => ['required', 'date_format:Y-m-d'],
             'table_code' => ['required', 'string', 'exists:venue_tables,code'],
             'party_size' => ['required', 'integer', 'min:1', 'max:255'],
-            'name' => ['required', 'string', 'max:80'],
-            'phone' => ['required', 'string', 'regex:/^\+?[0-9\s-]{9,16}$/'],
-            'email' => ['required', 'string', 'email', 'max:255'],
-            'age_confirmed' => ['accepted'],
-            'turnstile_token' => [new Turnstile],
+            ...GuestContact::rules(),
         ], [
             'date' => 'Choose a night.',
             'table_code' => 'Choose a table on the plan.',
             'party_size' => 'Enter how many people are coming.',
             'name.required' => 'Enter the name for the booking.',
             'phone' => 'Enter your phone number. The door uses it to find your booking.',
-            'email' => 'Enter your email. Your QR is sent there.',
-            'age_confirmed' => 'Everyone in the group must be 21 or over.',
+            ...GuestContact::messages(),
         ]);
 
         $event = Event::where('date', $data['date'])->first()
@@ -59,7 +54,7 @@ class TableBookingController extends Controller
         $booking = $this->hold($event, $table, [
             'status' => BookingStatus::Held,
             'name' => $data['name'],
-            'phone' => preg_replace('/[\s-]+/', '', $data['phone']),
+            'phone' => GuestContact::phone($data['phone']),
             'email' => $data['email'],
             'party_size' => $data['party_size'],
             'min_spend' => $minSpend,

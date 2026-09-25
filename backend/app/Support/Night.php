@@ -22,6 +22,14 @@ final class Night
         return Carbon::parse($date)->startOfDay()->addMinutes(self::minutes($time));
     }
 
+    /** How the pages say a time: 23:00 is "11 pm", 00:30 is "12:30 am". */
+    public static function spoken(string $time): string
+    {
+        $at = Carbon::createFromFormat('H:i', substr($time, 0, 5));
+
+        return $at->format($at->minute ? 'g:i a' : 'g a');
+    }
+
     /** The night happening now. Before noon it is still last night. */
     public static function tonight(): Carbon
     {

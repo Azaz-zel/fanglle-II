@@ -37,8 +37,7 @@ class EventRequest extends FormRequest
             'close_time' => ['bail', 'required', 'date_format:H:i', function (string $attribute, string $close, Closure $fail) {
                 $opens = config('fanglle.night_opens_at');
                 if (Night::minutes($close) <= Night::minutes($opens)) {
-                    $at = Carbon::createFromFormat('H:i', $opens);
-                    $fail('Closing has to be after the '.$at->format($at->minute ? 'g:i a' : 'g a').' opening.');
+                    $fail('Closing has to be after the '.Night::spoken($opens).' opening.');
                 }
             }],
             'min_spend' => ['required', 'array'],

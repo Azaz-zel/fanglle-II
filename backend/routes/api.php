@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\EventController;
+use App\Http\Controllers\GuestlistController;
 use App\Http\Controllers\TableBookingController;
 use App\Http\Controllers\XenditWebhookController;
 use Illuminate\Support\Facades\Route;
@@ -20,6 +21,9 @@ Route::withoutMiddleware(EnsureFrontendRequestsAreStateful::class)->group(functi
     Route::post('/table-bookings', [TableBookingController::class, 'store']);
     Route::get('/table-bookings/{code}', [TableBookingController::class, 'show']);
     Route::post('/table-bookings/{code}/release', [TableBookingController::class, 'release']);
+
+    Route::post('/guestlist', [GuestlistController::class, 'store']);
+    Route::post('/guestlist/resend', [GuestlistController::class, 'resend']);
 
     Route::post('/webhooks/xendit', XenditWebhookController::class);
 });
