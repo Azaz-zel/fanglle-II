@@ -6,7 +6,10 @@ import { Button, Solo } from './ui.jsx';
 import './styles.css';
 
 // One chunk per region: /p/:id on a guest's phone never downloads the door scanner or the admin panel.
-const Public = lazy(() => import('./Public.jsx'));
+const publicPage = (name) => lazy(() => import('./Public.jsx').then((m) => ({ default: m[name] })));
+const Home = publicPage('Home');
+const EventPage = publicPage('EventPage');
+const Pass = publicPage('Pass');
 const Login = lazy(() => import('./Login.jsx'));
 const Door = lazy(() => import('./Door.jsx'));
 const Admin = lazy(() => import('./Admin.jsx'));
@@ -41,13 +44,15 @@ class LoadError extends Component {
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <QueryClientProvider client={new QueryClient()}>
+    {/* Retry only when the request never got an answer; a 404 or 422 won't change on its own. */}
+    <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: (n, e) => !e.status && n < 2 } } })}>
       <BrowserRouter>
         <LoadError>
           <Suspense fallback={null}>
             <Routes>
-              <Route path="/" element={<Public />} />
-              <Route path="/p/:id" element={<Public />} />
+              <Route path="/" element={<Home />} />
+              <Route path="/events/:date" element={<EventPage />} />
+              <Route path="/p/:id" element={<Pass />} />
               <Route path="/login" element={<Login />} />
               <Route path="/door" element={<Door />} />
               <Route path="/admin/*" element={<Admin />} />

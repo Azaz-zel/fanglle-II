@@ -42,6 +42,9 @@ export async function api(path, { method = 'GET', body } = {}, retried = false) 
   return data;
 }
 
+// This week's nights. Shared by Home, the event page and admin Events (which reads opens_at from it).
+export const weekQuery = { queryKey: ['events'], queryFn: () => api('/api/events') };
+
 // What to show for any thrown error: the server's own sentence, or a network hint when fetch itself failed.
 export const errorText = (e) =>
   e instanceof ApiError ? e.message : "Can't reach the server. Check the connection, then try again.";
