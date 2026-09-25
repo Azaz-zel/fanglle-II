@@ -118,6 +118,31 @@ class TableBooking extends Model
         abort_unless($this->status === BookingStatus::Released, 409, "This table is already paid. Deposits aren't refunded.");
     }
 
+    /**
+     * F6: a paid table nobody came for. Its pass stops working; the deposit is kept, so Xendit is never called.
+     * Locks the booking, then the pass, the same pass lock a door check-in takes, so nobody slips in meanwhile.
+     */
+    public function markNoShow(): void
+    {
+        DB::transaction(function () {
+            $booking = static::lockForUpdate()->find($this->id);
+            $pass = $booking->pass()->lockForUpdate()->first();
+
+            $refusal = match ($booking->status) {
+                BookingStatus::Held => "This table isn't paid. Release it instead.",
+                BookingStatus::Released => 'This table was already released.',
+                BookingStatus::NoShow => 'This table is already marked as a no-show.',
+                BookingStatus::Paid => $pass->inside_count > 0 ? 'Someone from this table is already inside.' : null,
+            };
+            abort_if($refusal !== null, 409, $refusal);
+
+            $booking->update(['status' => BookingStatus::NoShow]);
+            $pass->update(['revoked_at' => now()]); // Eloquent, so updated_at moves and the next manifest ?since= carries it
+        });
+
+        $this->refresh();
+    }
+
     /** Polling fallback for a late webhook, at most one Xendit call per booking every 10 seconds. */
     public function syncWithXendit(): void
     {

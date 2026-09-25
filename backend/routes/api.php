@@ -48,5 +48,13 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/events', [Admin\EventController::class, 'store']);
         Route::get('/events/{event:date}', [Admin\EventController::class, 'show']);
         Route::put('/events/{event:date}', [Admin\EventController::class, 'update']);
+
+        Route::get('/tonight', Admin\TonightController::class);
+        Route::get('/events/{event:date}/table-bookings', [Admin\TableBookingController::class, 'index']);
+        Route::post('/table-bookings/{booking:code}/release', [Admin\TableBookingController::class, 'release']);
+        Route::post('/table-bookings/{booking:code}/no-show', [Admin\TableBookingController::class, 'noShow']);
+        Route::get('/events/{event:date}/guestlist', [Admin\GuestlistController::class, 'index']);
+        Route::delete('/guestlist/{id}', [Admin\GuestlistController::class, 'destroy']);
+        Route::get('/events/{event:date}/check-ins', Admin\CheckInController::class);
     });
 });

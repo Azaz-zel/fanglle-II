@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Attributes\Unguarded;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
 
 #[Unguarded]
@@ -47,6 +48,11 @@ class Pass extends Model
     public function tableBooking(): BelongsTo
     {
         return $this->belongsTo(TableBooking::class);
+    }
+
+    public function checkIns(): HasMany
+    {
+        return $this->hasMany(CheckIn::class)->orderBy('scanned_at')->orderBy('id');
     }
 
     public function url(): string

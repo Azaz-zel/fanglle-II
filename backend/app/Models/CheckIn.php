@@ -23,6 +23,12 @@ class CheckIn extends Model
         return $this->belongsTo(Pass::class);
     }
 
+    /** The staff member who let them in. */
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
+
     /**
      * One door check-in, in its own transaction. The same client_uuid again counts once (F12). Going past
      * `people`, or a cancelled pass synced from a door without signal, is recorded with conflict: they are inside (F11, F12).
