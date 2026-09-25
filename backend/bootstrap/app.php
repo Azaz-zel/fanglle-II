@@ -2,6 +2,7 @@
 
 use App\Http\Middleware\EnsureRole;
 use App\Models\Event;
+use App\Models\Pass;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Foundation\Application;
@@ -41,6 +42,7 @@ return Application::configure(basePath: dirname(__DIR__))
             $message = match ($e->getPrevious() instanceof ModelNotFoundException ? $e->getPrevious()->getModel() : null) {
                 null => $e->getMessage(),
                 Event::class => "There's no event on that night.",
+                Pass::class => "We couldn't find that pass.",
                 default => 'Not found.',
             };
 

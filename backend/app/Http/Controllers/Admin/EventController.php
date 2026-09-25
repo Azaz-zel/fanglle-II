@@ -60,6 +60,7 @@ class EventController extends Controller
             'genre' => $event->genre,
             'blurb' => $event->blurb,
             'guestlist_quota' => $event->guestlist_quota,
+            'opens_at' => config('fanglle.night_opens_at'),
             'guestlist_cutoff' => $event->guestlist_cutoff,
             'close_time' => $event->close_time,
             'min_spend' => $event->minSpend(),

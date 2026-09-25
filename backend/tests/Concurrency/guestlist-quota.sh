@@ -1,13 +1,17 @@
 #!/usr/bin/env bash
 # F8 / B4 pass criterion: a night with a guestlist quota of 40 takes 50 simultaneous one-person signups,
-# each with its own phone, spread over 10 separate PHP servers on the dev MySQL database.
+# each with its own phone, spread over 10 separate PHP servers on a MySQL database of their own.
 # Exactly 40 may get in (201); the other 10 get 422, and MySQL must hold exactly 40 people.
 #
 #   bash tests/Concurrency/guestlist-quota.sh      (from backend/, or anywhere)
 #
-# Resets the dev database before and after. Servers run as `php -S` from public/ (Laravel's router uses the cwd).
+# Uses its own database (fanglle_concurrency), so the dev database and a browser test running at the same time are never touched. Servers run as `php -S` from public/ (Laravel's router uses the cwd).
 set -u
 cd "$(dirname "$0")/../.."
+
+# Env beats .env for every artisan call and every php -S server below.
+export DB_DATABASE=fanglle_concurrency
+mysql -u "${DB_USERNAME:-root}" -h 127.0.0.1 -e "CREATE DATABASE IF NOT EXISTS fanglle_concurrency CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci"
 
 QUOTA=40
 REQUESTS=50
@@ -25,14 +29,12 @@ stop_port() { # php.exe on Windows ignores the shell's kill, so find it by port 
 }
 cleanup() {
   for p in "${PORTS[@]}"; do stop_port "$p"; done
-  echo "== reset dev database"
-  php artisan migrate:fresh --seed --no-ansi >/dev/null && echo "dev database migrated and seeded"
   rm -rf "$WORK"
 }
 trap cleanup EXIT
 
-echo "== fresh dev database"
-php artisan migrate:fresh --seed --no-ansi >/dev/null && echo "dev database migrated and seeded"
+echo "== fresh concurrency database ($DB_DATABASE)"
+php artisan migrate:fresh --seed --no-ansi >/dev/null && echo "$DB_DATABASE migrated and seeded"
 # The first seeded night whose guestlist is still open, with its quota set to 40.
 DATE=$(php artisan tinker --execute "\$e = App\Models\Event::orderBy('date')->get()->first(fn (\$e) => now()->lt(App\Support\Night::at(\$e->date->toDateString(), \$e->guestlist_cutoff))); \$e?->update(['guestlist_quota' => $QUOTA]); echo \$e?->date->toDateString();" | tr -d '\r\n')
 [ -n "$DATE" ] || { echo "No seeded night still takes guestlist signups."; exit 1; }

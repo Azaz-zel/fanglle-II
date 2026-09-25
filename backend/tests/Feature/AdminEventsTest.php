@@ -75,7 +75,7 @@ class AdminEventsTest extends TestCase
         $this->asManager()->getJson('/api/admin/events/2026-09-24')->assertOk()->assertExactJson([
             'date' => '2026-09-24', 'name' => 'Descent', 'genre' => 'Melodic techno',
             'blurb' => 'Long, slow builds and a room that gets darker as it gets louder.',
-            'guestlist_quota' => 200, 'guestlist_cutoff' => '23:00', 'close_time' => '04:00',
+            'guestlist_quota' => 200, 'opens_at' => '15:00', 'guestlist_cutoff' => '23:00', 'close_time' => '04:00',
             'min_spend' => ['stage' => 10000000, 'booth' => 15000000, 'bar' => 5000000],
             'lineup' => [
                 ['performer' => 'Rafi Hartono', 'role' => 'warm_up', 'starts_at' => '22:00', 'ends_at' => '00:00'],

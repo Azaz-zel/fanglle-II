@@ -1,13 +1,17 @@
 #!/usr/bin/env bash
 # F4 / B3 pass criterion: 20 simultaneous holds on table B5 for one night, spread over 10 separate PHP
-# servers on the dev MySQL database. Exactly one may win (201); the other 19 get 409.
+# servers on a MySQL database of their own. Exactly one may win (201); the other 19 get 409.
 #
 #   bash tests/Concurrency/hold-same-table.sh      (from backend/, or anywhere)
 #
-# Resets the dev database before and after. Xendit is a local stub, reached through XENDIT_BASE_URL.
+# Uses its own database (fanglle_concurrency), so the dev database and a browser test running at the same time are never touched. Xendit is a local stub, reached through XENDIT_BASE_URL.
 # Servers run as `php -S` directly: `php artisan serve` doesn't pass custom env vars to its child.
 set -u
 cd "$(dirname "$0")/../.."
+
+# Env beats .env for every artisan call and every php -S server below.
+export DB_DATABASE=fanglle_concurrency
+mysql -u "${DB_USERNAME:-root}" -h 127.0.0.1 -e "CREATE DATABASE IF NOT EXISTS fanglle_concurrency CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci"
 
 TABLE=B5
 REQUESTS=20
@@ -28,14 +32,12 @@ stop_port() { # php.exe on Windows ignores the shell's kill, so find it by port 
 }
 cleanup() {
   for p in "${PORTS[@]}" "$STUB_PORT"; do stop_port "$p"; done
-  echo "== reset dev database"
-  php artisan migrate:fresh --seed --no-ansi >/dev/null && echo "dev database migrated and seeded"
   rm -rf "$WORK"
 }
 trap cleanup EXIT
 
-echo "== fresh dev database"
-php artisan migrate:fresh --seed --no-ansi >/dev/null && echo "dev database migrated and seeded"
+echo "== fresh concurrency database ($DB_DATABASE)"
+php artisan migrate:fresh --seed --no-ansi >/dev/null && echo "$DB_DATABASE migrated and seeded"
 DATE=$(php artisan tinker --execute 'echo App\Models\Event::orderBy("date")->get()->first(fn ($e) => now()->lt(App\Support\Night::at($e->date->toDateString(), $e->close_time)))?->date->toDateString();' | tr -d '\r\n')
 [ -n "$DATE" ] || { echo "No seeded night is still open for bookings."; exit 1; }
 echo "night: $DATE, table: $TABLE, requests: $REQUESTS, servers: ${#PORTS[@]}"

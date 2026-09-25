@@ -2,8 +2,10 @@
 
 use App\Http\Controllers\Admin;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\DoorController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\GuestlistController;
+use App\Http\Controllers\PassController;
 use App\Http\Controllers\TableBookingController;
 use App\Http\Controllers\XenditWebhookController;
 use Illuminate\Support\Facades\Route;
@@ -25,12 +27,18 @@ Route::withoutMiddleware(EnsureFrontendRequestsAreStateful::class)->group(functi
     Route::post('/guestlist', [GuestlistController::class, 'store']);
     Route::post('/guestlist/resend', [GuestlistController::class, 'resend']);
 
+    Route::get('/passes/{pass:public_id}', [PassController::class, 'show']);
+
     Route::post('/webhooks/xendit', XenditWebhookController::class);
 });
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/me', [AuthController::class, 'me']);
+
+    Route::middleware('role:door,manager')->prefix('door')->group(function () {
+        Route::get('/public-key', [DoorController::class, 'publicKey']);
+    });
 
     Route::middleware('role:manager')->prefix('admin')->group(function () {
         Route::get('/events', [Admin\EventController::class, 'index']);
