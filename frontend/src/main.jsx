@@ -1,0 +1,61 @@
+import { Component, StrictMode, Suspense, lazy } from 'react';
+import { createRoot } from 'react-dom/client';
+import { BrowserRouter, Link, Route, Routes } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { Button, Solo } from './ui.jsx';
+import './styles.css';
+
+// One chunk per region: /p/:id on a guest's phone never downloads the door scanner or the admin panel.
+const Public = lazy(() => import('./Public.jsx'));
+const Login = lazy(() => import('./Login.jsx'));
+const Door = lazy(() => import('./Door.jsx'));
+const Admin = lazy(() => import('./Admin.jsx'));
+
+const NotFound = () => (
+  <Solo>
+    <h1 className="head">Page not found</h1>
+    <p className="sub">The address may be incomplete or copied wrong.</p>
+    <Link className="btn solid" to="/">
+      Go to the home page
+    </Link>
+  </Solo>
+);
+
+// A region chunk that fails to download (offline, or replaced by a newer build) lands here, not on a blank page.
+class LoadError extends Component {
+  state = { failed: false };
+  static getDerivedStateFromError() {
+    return { failed: true };
+  }
+  render() {
+    if (!this.state.failed) return this.props.children;
+    return (
+      <Solo>
+        <h1 className="head">This page didn't load</h1>
+        <p className="sub">Check the connection, then reload.</p>
+        <Button onClick={() => window.location.reload()}>Reload</Button>
+      </Solo>
+    );
+  }
+}
+
+createRoot(document.getElementById('root')).render(
+  <StrictMode>
+    <QueryClientProvider client={new QueryClient()}>
+      <BrowserRouter>
+        <LoadError>
+          <Suspense fallback={null}>
+            <Routes>
+              <Route path="/" element={<Public />} />
+              <Route path="/p/:id" element={<Public />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/door" element={<Door />} />
+              <Route path="/admin/*" element={<Admin />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </Suspense>
+        </LoadError>
+      </BrowserRouter>
+    </QueryClientProvider>
+  </StrictMode>,
+);

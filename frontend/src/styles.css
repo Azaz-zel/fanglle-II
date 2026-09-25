@@ -1,0 +1,109 @@
+/* Poiret One and Didact Gothic, self-hosted from public/fonts (SIL OFL 1.1, licences beside the files).
+   Latin and latin-ext subsets. Both faces have one weight and one upright style. */
+@font-face{font-family:'Poiret One';font-style:normal;font-weight:400;font-display:swap;src:url(/fonts/poiret-one-latin-ext.woff2) format('woff2');
+  unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:'Poiret One';font-style:normal;font-weight:400;font-display:swap;src:url(/fonts/poiret-one-latin.woff2) format('woff2');
+  unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'Didact Gothic';font-style:normal;font-weight:400;font-display:swap;src:url(/fonts/didact-gothic-latin-ext.woff2) format('woff2');
+  unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:'Didact Gothic';font-style:normal;font-weight:400;font-display:swap;src:url(/fonts/didact-gothic-latin.woff2) format('woff2');
+  unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+
+/* Tokens: PRD Frontend 2.1, exactly. */
+:root{
+  --obsidian:#0C0812; --surface:#150E1F; --raised:#1E1530; --line:#2E2342; --line-soft:#221931;
+  --amethyst:#563C7A; --amethyst-deep:#3D2A58; --amethyst-soft:#7A5BA6;
+  --text:#EEE9F3; --soft:#C9BDD9; --muted:#A99DB8;
+  --garnet:#A3162F; --garnet-hover:#B91C38; --garnet-text:#E5566B; --on-garnet:#FBF7FB;
+  --held:#F0B55A; --paid:#6FD49A;
+  --head:'Poiret One','Helvetica Neue',Arial,sans-serif; --body:'Didact Gothic','Helvetica Neue',Arial,sans-serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+/* One weight, upright only: the browser may not fake bold or slanted faces. Emphasis is colour. */
+html{font-synthesis:none}
+h1,h2,h3,h4,h5,h6,b,strong,th,legend,optgroup{font-weight:400}
+em,i,cite,dfn,var,address{font-style:normal}
+body{min-height:100vh;background:var(--obsidian);color:var(--text);font-family:var(--body);font-size:16px;line-height:1.5}
+a{color:inherit}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--text);outline-offset:3px}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}
+}
+
+/* Shared pieces, from fanglle-pengelola-mockup.jsx */
+.head{font-family:var(--head);font-weight:400}
+.two{color:var(--garnet-text)}
+.brand{font-size:18px;letter-spacing:.12em;white-space:nowrap}
+.sub{color:var(--muted);margin-top:4px}
+.lab{display:block;font-size:13px;color:var(--muted);margin-bottom:6px}
+.err{font-size:14px;color:var(--garnet-text)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:20px}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:46px;padding:10px 22px;border-radius:8px;font-size:16px;
+  line-height:1.2;white-space:nowrap;cursor:pointer;border:1px solid transparent;text-decoration:none;transition:background .15s,border-color .15s}
+.btn.solid{background:var(--garnet);color:var(--on-garnet);border-color:var(--garnet)}
+.btn.solid:hover{background:var(--garnet-hover);border-color:var(--garnet-hover)}
+.btn.line{background:transparent;color:var(--text);border-color:var(--amethyst-soft)}
+.btn.line:hover{background:var(--raised);border-color:var(--text)}
+
+/* Mockup chips are 40px; raised to the 44px touch target. */
+.chip{min-height:44px;padding:6px 14px;border-radius:20px;border:1px solid var(--line);background:transparent;color:var(--soft);font-size:15px;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--raised);color:var(--text);border-color:var(--amethyst-soft)}
+.chip em{color:var(--muted);margin-left:4px}
+
+.badge{display:inline-block;font-size:13px;padding:3px 10px;border-radius:12px;background:var(--raised);white-space:nowrap}
+.b-held{color:var(--held)}.b-paid{color:var(--paid)}.b-in{color:var(--soft)}.b-off{color:var(--muted)}
+
+/* Native <dialog>; the reset above removes its auto margin, so centre it again. */
+.dlg{margin:auto;width:min(440px,calc(100% - 32px));background:var(--surface);color:var(--text);border:1px solid var(--garnet);border-radius:12px;padding:24px}
+.dlg[open]{display:flex;flex-direction:column;gap:14px}
+.dlg::backdrop{background:rgba(12,8,18,.8)}
+.dlg h2{font-size:26px}
+.dlg p{color:var(--soft)}
+
+/* Single-card screens: login, signed out, not found (the mockup's "Signed out" card) */
+.center{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
+.solo{width:100%;max-width:420px;display:flex;flex-direction:column;gap:14px}
+.solo h1{font-size:30px}
+.solo form{display:flex;flex-direction:column;gap:14px}
+.field{display:flex;flex-direction:column;gap:6px}
+.field label{font-size:15px}
+.field input{min-height:46px;padding:8px 12px;background:var(--obsidian);border:1px solid var(--line);border-radius:8px;color:var(--text);font-size:16px}
+.field input[aria-invalid="true"]{border-color:var(--garnet-text)}
+/* Focus is moved into fields by script (autofocus, first error); Chrome skips :focus-visible then, so fields ring on any focus. */
+.field input:focus{outline:2px solid var(--text);outline-offset:3px}
+
+/* Public region, from fanglle-halaman-depan-mockup.jsx */
+.site{min-height:100vh;font-size:17px;line-height:1.65}
+.nav{position:sticky;top:0;z-index:5;background:var(--obsidian);border-bottom:1px solid var(--line-soft)}
+.navin{max-width:1240px;margin:0 auto;padding:14px 24px;display:flex;align-items:center;gap:28px}
+.mark{display:inline-block;padding:6px 0;font-size:20px;letter-spacing:.12em;text-decoration:none;white-space:nowrap}
+.wrap{max-width:1240px;margin:0 auto;padding:48px 24px}
+
+/* Manager region, from fanglle-pengelola-mockup.jsx */
+.app{min-height:100vh;display:grid;grid-template-columns:1fr}
+@media (min-width:960px){.app{grid-template-columns:248px minmax(0,1fr)}}
+@media (max-width:959px){.app{align-content:start}}
+.side{background:var(--surface);border-right:1px solid var(--line-soft);display:flex;flex-direction:column;padding:20px 14px}
+@media (max-width:959px){.side{flex-direction:row;align-items:center;gap:8px;overflow-x:auto;padding:10px 14px;border-right:0;border-bottom:1px solid var(--line-soft)}}
+.side .brand{padding:4px 10px 22px}
+@media (max-width:959px){.side .brand{padding:0 8px 0 0}}
+.spacer{flex:1}
+.out{margin-top:16px;min-height:44px;padding:0 14px;border:1px solid var(--line);background:transparent;color:var(--soft);border-radius:6px;font-size:15px;cursor:pointer}
+@media (max-width:959px){.out{margin:0}}
+.main{min-width:0}
+/* Mockup pads the top bar 28px against 24px content; 24px lines the two up. */
+.topbar{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;padding:14px 24px;border-bottom:1px solid var(--line-soft);
+  font-size:15px;color:var(--muted)}
+.content{padding:28px 24px;display:flex;flex-direction:column;gap:22px;max-width:1120px;margin:0 auto}
+
+/* Door region, from fanglle-pemindai-pintu-mockup.jsx. Scanner result colours live only here. */
+.doorapp{min-height:100vh;font-size:17px;
+  --ok:#0F6B38; --ok-text:#F2FFF6; --bad:#A3162F; --bad-text:#FBF7FB; --warn:#C77A12; --warn-text:#140A00}
+/* Name sits under the brand so Sign out keeps its row at 360px instead of wrapping alone. */
+.top{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:14px 18px;border-bottom:1px solid var(--line)}
+.top .n{font-size:14px;color:var(--muted)}
+.top .out{margin:0}
+.doorapp main{padding:18px}
