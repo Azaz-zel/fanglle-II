@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\BookingStatus;
 use App\Models\Event;
 use App\Models\VenueTable;
 use App\Support\Night;
@@ -33,6 +34,19 @@ class EventController extends Controller
     public function show(Event $event): JsonResponse
     {
         return response()->json($this->present(Event::withAvailability()->find($event->id), VenueTable::count()));
+    }
+
+    public function tables(Event $event): JsonResponse
+    {
+        $holds = $event->tableHolds()->pluck('status', 'venue_table_id');
+
+        return response()->json(['tables' => VenueTable::orderBy('id')->get()->map(fn (VenueTable $table) => $table->only(['code', 'zone', 'shape', 'capacity', 'x', 'y']) + [
+            'status' => match ($holds->get($table->id)) {
+                BookingStatus::Paid => 'booked',
+                BookingStatus::Held => 'held',
+                default => 'free',
+            },
+        ])]);
     }
 
     private function present(Event $event, int $tables): array

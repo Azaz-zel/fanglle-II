@@ -1,7 +1,9 @@
 <?php
 
+use App\Models\TableBooking;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Schedule;
 
 Artisan::command('fanglle:keys {--force : Replace the existing key}', function () {
     $path = config('fanglle.qr_private_key_path');
@@ -30,3 +32,10 @@ Artisan::command('fanglle:keys {--force : Replace the existing key}', function (
     chmod($path, 0600);
     $this->info("QR signing key (ECDSA P-256) written to {$path}.");
 })->purpose('Create the private key that signs QR passes');
+
+// F5: every minute, holds past held_until go back to the floor. Idempotent beside webhooks and polling.
+Artisan::command('bookings:expire', function () {
+    $this->info(TableBooking::releaseExpired().' expired table holds released.');
+})->purpose('Release table holds whose 15 minutes have run out');
+
+Schedule::command('bookings:expire')->everyMinute()->withoutOverlapping();
