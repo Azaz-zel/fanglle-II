@@ -2,6 +2,7 @@
 
 use App\Http\Middleware\EnsureActive;
 use App\Http\Middleware\EnsureRole;
+use App\Http\Middleware\SecurityHeaders;
 use App\Models\Event;
 use App\Models\GuestlistSignup;
 use App\Models\Pass;
@@ -25,6 +26,7 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->statefulApi();
+        $middleware->append(SecurityHeaders::class);
         $middleware->alias(['role' => EnsureRole::class]);
         // The role check runs before records are looked up, so door staff get 403 on admin routes, never a 404 that confirms a booking code.
         $middleware->prependToPriorityList(SubstituteBindings::class, EnsureRole::class);

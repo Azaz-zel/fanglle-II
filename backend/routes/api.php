@@ -21,15 +21,16 @@ Route::withoutMiddleware(EnsureFrontendRequestsAreStateful::class)->group(functi
     Route::get('/events/{event:date}', [EventController::class, 'show']);
     Route::get('/events/{event:date}/tables', [EventController::class, 'tables']);
 
-    Route::post('/table-bookings', [TableBookingController::class, 'store']);
-    Route::get('/table-bookings/{code}', [TableBookingController::class, 'show']);
-    Route::post('/table-bookings/{code}/release', [TableBookingController::class, 'release']);
+    Route::post('/table-bookings', [TableBookingController::class, 'store'])->middleware('throttle:public-posts');
+    Route::get('/table-bookings/{code}', [TableBookingController::class, 'show'])->middleware('throttle:guest-polls');
+    Route::post('/table-bookings/{code}/release', [TableBookingController::class, 'release'])->middleware('throttle:guest-polls');
 
-    Route::post('/guestlist', [GuestlistController::class, 'store']);
-    Route::post('/guestlist/resend', [GuestlistController::class, 'resend']);
+    Route::post('/guestlist', [GuestlistController::class, 'store'])->middleware('throttle:public-posts');
+    Route::post('/guestlist/resend', [GuestlistController::class, 'resend'])->middleware('throttle:public-posts'); // plus 3 an hour per signup
 
     Route::get('/passes/{pass:public_id}', [PassController::class, 'show']);
 
+    // No throttle here: see AppServiceProvider.
     Route::post('/webhooks/xendit', XenditWebhookController::class);
 
     Route::post('/invites/{token}/accept', [AuthController::class, 'acceptInvite'])->middleware('throttle:10,1');

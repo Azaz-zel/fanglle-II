@@ -11,6 +11,8 @@ cd "$(dirname "$0")/../.."
 
 # Env beats .env for every artisan call and every php -S server below.
 export DB_DATABASE=fanglle_concurrency
+# Every request comes from 127.0.0.1; the per-IP limit of 10 a minute (B10.1) would turn most of them into 429.
+export PUBLIC_POSTS_PER_MINUTE=1000
 mysql -u "${DB_USERNAME:-root}" -h 127.0.0.1 -e "CREATE DATABASE IF NOT EXISTS fanglle_concurrency CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci"
 
 TABLE=B5
