@@ -8,6 +8,7 @@ use App\Http\Controllers\GuestlistController;
 use App\Http\Controllers\PassController;
 use App\Http\Controllers\TableBookingController;
 use App\Http\Controllers\XenditWebhookController;
+use App\Http\Middleware\EnsureActive;
 use Illuminate\Support\Facades\Route;
 use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
 
@@ -30,9 +31,11 @@ Route::withoutMiddleware(EnsureFrontendRequestsAreStateful::class)->group(functi
     Route::get('/passes/{pass:public_id}', [PassController::class, 'show']);
 
     Route::post('/webhooks/xendit', XenditWebhookController::class);
+
+    Route::post('/invites/{token}/accept', [AuthController::class, 'acceptInvite'])->middleware('throttle:10,1');
 });
 
-Route::middleware('auth:sanctum')->group(function () {
+Route::middleware(['auth:sanctum', EnsureActive::class])->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/me', [AuthController::class, 'me']);
 
@@ -56,5 +59,14 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/events/{event:date}/guestlist', [Admin\GuestlistController::class, 'index']);
         Route::delete('/guestlist/{id}', [Admin\GuestlistController::class, 'destroy']);
         Route::get('/events/{event:date}/check-ins', Admin\CheckInController::class);
+
+        Route::get('/staff', [Admin\StaffController::class, 'index']);
+        Route::post('/staff', [Admin\StaffController::class, 'store']);
+        Route::patch('/staff/{staff}', [Admin\StaffController::class, 'update']);
+        Route::post('/staff/{staff}/disable', [Admin\StaffController::class, 'disable']);
+        Route::post('/staff/{staff}/enable', [Admin\StaffController::class, 'enable']);
+        Route::post('/staff/{staff}/reset-password', [Admin\StaffController::class, 'resetPassword']);
+        Route::post('/staff/{staff}/resend-invite', [Admin\StaffController::class, 'resendInvite']);
+        Route::delete('/staff/{staff}/invite', [Admin\StaffController::class, 'cancelInvite']);
     });
 });

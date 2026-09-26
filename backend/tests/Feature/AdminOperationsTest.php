@@ -100,7 +100,7 @@ class AdminOperationsTest extends TestCase
     public function test_door_staff_are_refused_on_every_admin_route(): void
     {
         $routes = collect(Route::getRoutes()->getRoutes())->filter(fn ($route) => str_starts_with($route->uri(), 'api/admin/'));
-        $this->assertGreaterThanOrEqual(11, $routes->count());
+        $this->assertGreaterThanOrEqual(19, $routes->count()); // S7 operations and S8 team
 
         $this->actingAs(User::firstWhere('role', StaffRole::Door));
         foreach ($routes as $route) {

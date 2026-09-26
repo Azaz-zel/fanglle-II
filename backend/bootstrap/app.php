@@ -1,10 +1,12 @@
 <?php
 
+use App\Http\Middleware\EnsureActive;
 use App\Http\Middleware\EnsureRole;
 use App\Models\Event;
 use App\Models\GuestlistSignup;
 use App\Models\Pass;
 use App\Models\TableBooking;
+use App\Models\User;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Foundation\Application;
@@ -26,6 +28,8 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias(['role' => EnsureRole::class]);
         // The role check runs before records are looked up, so door staff get 403 on admin routes, never a 404 that confirms a booking code.
         $middleware->prependToPriorityList(SubstituteBindings::class, EnsureRole::class);
+        // A disabled account is signed out (401) before its role is looked at (T-A6).
+        $middleware->prependToPriorityList(EnsureRole::class, EnsureActive::class);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(
@@ -50,6 +54,7 @@ return Application::configure(basePath: dirname(__DIR__))
                 Pass::class => "We couldn't find that pass.",
                 TableBooking::class => "We couldn't find that booking.",
                 GuestlistSignup::class => "We couldn't find that signup.",
+                User::class => "We couldn't find that account.",
                 default => 'Not found.',
             };
 
