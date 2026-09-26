@@ -1,5 +1,8 @@
 import { expect, test } from 'vitest';
-import { clock, dayLabel, dayParts, guestNames, lineupWarnings, mmss, nightMinutes, secondsLeft, tableState, waShare } from './night.js';
+import {
+  clock, dayLabel, dayParts, entryCode, guestNames, lineupWarnings, mmss, nightMinutes, passOrCopy, passState, secondsLeft, tableState,
+  validUntil, waShare,
+} from './night.js';
 
 test('nightMinutes: before 12:00 belongs to the night before (F2)', () => {
   const cases = {
@@ -84,4 +87,80 @@ test('waShare: plain wa.me link, no number, message and pass link from data (F13
   expect(u.searchParams.get('text')).toBe(
     'Rina & Bayu, here is your entry QR for The Fanglle II, Second Wave, Fri 25 Sep. Valid until 11:30 pm with your ID: https://fanglle.test/p/01J8Z6Q3',
   );
+});
+
+// Pass page (S5). Hours in these fixtures are deliberately not the demo's, so a hard-coded "11 pm" would fail.
+const ev = { date: '2026-09-24', name: 'Descent', opens_at: '15:00', close_time: '03:30', guestlist_cutoff: '22:45' };
+const pass = (o) => ({ kind: 'group', people: 4, inside_count: 0, status: 'ready', event: ev, ...o });
+const said = (st) => st.line.join('');
+
+test('validUntil: guestlist QR until the cutoff, table QR all night, both from data', () => {
+  expect(validUntil(pass({ kind: 'group' }))).toBe('Valid until 10:45 pm');
+  expect(validUntil(pass({ kind: 'personal', event: { ...ev, guestlist_cutoff: '00:00' } }))).toBe('Valid until midnight');
+  expect(validUntil(pass({ kind: 'table' }))).toBe('Valid all night');
+});
+
+test('passState: status line, emphasis and stamp for every state', () => {
+  const ready = passState(pass());
+  expect(said(ready)).toBe('Ready for the door. Show it with your ID.');
+  expect(ready.line[1]).toBe('ID'); // odd pieces are emphasised
+  expect(ready.stamp).toBeNull();
+
+  const partial = passState(pass({ status: 'partial', inside_count: 3 }));
+  expect(said(partial)).toBe('3 of 4 in. The QR still works for the other 1.');
+  expect(partial.line[1]).toBe('3 of 4');
+  expect(partial.stamp).toBeNull();
+
+  expect(passState(pass({ status: 'used', inside_count: 4 }))).toEqual({
+    line: ['', 'All 4 checked in', ". This QR can't be scanned again."], stamp: ['USED', 'All 4 checked in'],
+  });
+  expect(passState(pass({ kind: 'personal', people: 1, status: 'used', inside_count: 1 })).stamp).toEqual(['USED', 'Checked in']);
+
+  const late = passState(pass({ status: 'expired' }));
+  expect(said(late)).toBe('The guestlist closed at 10:45 pm. Entry now is at the door price.');
+  expect(late.stamp).toEqual(['CLOSED', 'Guestlist ended at 10:45 pm']);
+  const over = passState(pass({ kind: 'table', status: 'expired' }));
+  expect(said(over)).toBe('The night ended at 3:30 am.');
+  expect(over.stamp).toEqual(['CLOSED', 'The night ended at 3:30 am']);
+
+  const off = passState(pass({ status: 'revoked' }));
+  expect(said(off)).toBe("This QR was cancelled. It won't open the door.");
+  expect(off.stamp[0]).toBe('CANCELLED');
+});
+
+test('entryCode: capitals in two groups of four, whatever the input', () => {
+  expect(entryCode('K7QM-4TXP')).toBe('K7QM-4TXP');
+  expect(entryCode('k7qm4txp')).toBe('K7QM-4TXP');
+  expect(entryCode(' k7qm 4txp ')).toBe('K7QM-4TXP');
+});
+
+// A Map stands in for IndexedDB: the fallback logic is what is tested, not the browser's storage.
+const memory = () => {
+  const m = new Map();
+  return { m, get: async (id) => m.get(id), put: async (id, v) => void m.set(id, v) };
+};
+const offline = () => Promise.reject(new TypeError('Failed to fetch'));
+
+test('passOrCopy: online saves the answer; offline shows the saved copy with its time', async () => {
+  const store = memory();
+  const p = pass({ qr: 'FNG2.x', entry_code: 'K7QM-4TXP' });
+  expect(await passOrCopy('01J', { fetchPass: async () => p, store, now: () => 1000 })).toEqual({ pass: p, savedAt: null });
+  expect(store.m.get('01J')).toEqual({ pass: p, saved_at: 1000 });
+
+  expect(await passOrCopy('01J', { fetchPass: offline, store })).toEqual({ pass: p, savedAt: 1000 });
+  // no answer at all within the wait counts as no signal too
+  const hang = () => new Promise(() => {});
+  expect(await passOrCopy('01J', { fetchPass: hang, store, wait: 5 })).toEqual({ pass: p, savedAt: 1000 });
+});
+
+test('passOrCopy: a real answer is never hidden, and offline with nothing saved is an error', async () => {
+  const store = memory();
+  await store.put('01J', { pass: pass(), saved_at: 1 });
+  const gone = Object.assign(new Error("We couldn't find that pass."), { status: 404 });
+  await expect(passOrCopy('01J', { fetchPass: () => Promise.reject(gone), store })).rejects.toBe(gone);
+  await expect(passOrCopy('02K', { fetchPass: offline, store })).rejects.toThrow('Failed to fetch');
+  // storage that fails (private mode) neither breaks the online page nor the offline error
+  const broken = { get: () => Promise.reject(new Error('no idb')), put: () => Promise.reject(new Error('no idb')) };
+  expect((await passOrCopy('01J', { fetchPass: async () => pass(), store: broken })).savedAt).toBeNull();
+  await expect(passOrCopy('01J', { fetchPass: offline, store: broken })).rejects.toThrow('Failed to fetch');
 });

@@ -4,12 +4,12 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { api, errorText, weekQuery } from './api.js';
 import {
   clock, dayLabel, dayParts, earliest, guestNames, headliners, idr, latest, mmss, nightMinutes, others, ROLES, secondsLeft, tableState,
-  waShare,
+  waShare, ZONES,
 } from './night.js';
 import { Button, Mark } from './ui.jsx';
 
-// Public region: Home (/), event detail (/events/:date), table booking (/book/:date, /booking/:code), guestlist (/guestlist/:date)
-// and the QR page (/p/:id, S5). Gallery and About links arrive with S9; nothing links to them yet.
+// Public region: Home (/), event detail (/events/:date), table booking (/book/:date, /booking/:code), guestlist (/guestlist/:date).
+// The QR page (/p/:id) is its own chunk, Pass.jsx. Gallery and About links arrive with S9; nothing links to them yet.
 
 const SHARDS = [
   { p: '120,-40 210,-40 180,90', f: '#2A1D3D', d: 0 },
@@ -541,21 +541,8 @@ export function EventPage() {
   );
 }
 
-export function Pass() {
-  return (
-    <Site>
-      <section>
-        <div className="wrap">
-          <p className="sub">This page isn't available yet.</p>
-        </div>
-      </section>
-    </Site>
-  );
-}
-
 // Table booking (S3), from fanglle-pilih-meja-mockup.jsx: /book/:date chooses and holds, /booking/:code pays and confirms.
 
-const ZONES = { stage: 'Stage front', booth: 'Booths', bar: 'Bar tables' };
 const people = (n) => `${n} ${n === 1 ? 'person' : 'people'}`;
 const places = (n) => `${n} ${n === 1 ? 'place' : 'places'}`;
 

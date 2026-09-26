@@ -73,6 +73,53 @@ export const mmss = (s) => `${String(Math.floor(s / 60)).padStart(2, '0')}:${Str
 // exactly party - 1 of them; a group QR carries only the organiser's name, so it sends none (F9).
 export const guestNames = (mode, party, guests) => (mode === 'personal' ? guests.slice(0, party - 1) : []);
 
+export const ZONES = { stage: 'Stage front', booth: 'Booths', bar: 'Bar tables' };
+
+// QR page (S5), from fanglle-qr-tamu-mockup.jsx. Every hour comes from the pass's event.
+export const PASS_KINDS = { group: 'Guestlist · group', personal: 'Guestlist · personal', table: 'Table booking' };
+
+// A guestlist QR stops at the guestlist cutoff; a table QR works until closing.
+export const validUntil = (p) => (p.kind === 'table' ? 'Valid all night' : `Valid until ${clock(p.event.guestlist_cutoff)}`);
+
+// "K7QM4TXP" or "k7qm-4txp" -> "K7QM-4TXP"
+export const entryCode = (c) => {
+  const s = String(c).toUpperCase().replace(/[^0-9A-Z]/g, '');
+  return s.length === 8 ? `${s.slice(0, 4)}-${s.slice(4)}` : s;
+};
+
+// The status line as [plain, emphasised, plain], and the stamp over the QR once it stops working (null while it works).
+// The API has no check-in time, so "used" says who is in instead of the mockup's "Used at 22:14".
+export function passState(p) {
+  const { status, people: n, inside_count: inside, event: e } = p;
+  const all = n === 1 ? 'Checked in' : `All ${n} checked in`;
+  if (status === 'used') return { line: ['', all, ". This QR can't be scanned again."], stamp: ['USED', all] };
+  if (status === 'revoked') return { line: ['This QR was ', 'cancelled', ". It won't open the door."], stamp: ['CANCELLED', 'No longer valid'] };
+  if (status === 'expired')
+    return p.kind === 'table'
+      ? { line: ['The night ended at ', clock(e.close_time), '.'], stamp: ['CLOSED', `The night ended at ${clock(e.close_time)}`] }
+      : {
+          line: ['The guestlist closed at ', clock(e.guestlist_cutoff), '. Entry now is at the door price.'],
+          stamp: ['CLOSED', `Guestlist ended at ${clock(e.guestlist_cutoff)}`],
+        };
+  if (status === 'partial') return { line: ['', `${inside} of ${n}`, ` in. The QR still works for the other ${n - inside}.`], stamp: null };
+  return { line: ['Ready for the door. Show it with your ', 'ID', '.'], stamp: null };
+}
+
+// Online: the fresh pass, saved for later. No answer (offline, or nothing within `wait` ms in a basement with one bar):
+// the copy saved on this phone, with the time it was saved. A real answer such as a 404 is shown as it is.
+export async function passOrCopy(id, { fetchPass, store, wait = 8000, now = Date.now }) {
+  try {
+    const pass = await Promise.race([fetchPass(id), new Promise((_, no) => setTimeout(no, wait, new TypeError('No answer')))]);
+    await store.put(id, { pass, saved_at: now() }).catch(() => {}); // storage off (private mode): still fine online
+    return { pass, savedAt: null };
+  } catch (e) {
+    if (e.status) throw e;
+    const copy = await store.get(id).catch(() => undefined);
+    if (!copy) throw e;
+    return { pass: copy.pass, savedAt: copy.saved_at };
+  }
+}
+
 // F13: a plain wa.me link with no number in it. WhatsApp opens on the organiser's own phone and they choose the chat.
 export const waShare = (holder, e, url) =>
   `https://wa.me/?text=${encodeURIComponent(

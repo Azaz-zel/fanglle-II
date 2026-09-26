@@ -406,3 +406,37 @@ html{scroll-behavior:smooth}
 .top .n{font-size:14px;color:var(--muted)}
 .top .out{margin:0}
 .doorapp main{padding:18px}
+
+/* Guest QR page (/p/:id), from fanglle-qr-tamu-mockup.jsx. The mockup's phone frame is preview chrome; the page is the phone. */
+.pass{min-height:100vh;max-width:480px;margin:0 auto;display:flex;flex-direction:column;font-size:17px;line-height:1.55}
+.pass .top{padding:18px 20px 12px}
+.pass .mark{padding:0;font-size:17px}
+.pass .kind{font-size:13px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase}
+.pass main{flex:1;display:flex;flex-direction:column}
+.pass .banner{padding:12px 20px;font-size:15px;background:var(--raised);border-bottom:1px solid var(--line)}
+.pass .body{flex:1;padding:20px;display:flex;flex-direction:column;gap:16px}
+.pass .state{font-size:15px;color:var(--soft)}
+.pass .state strong{color:var(--text)}
+.ticket{background:#FFFFFF;color:#0C0812;border-radius:4px;padding:18px 18px 16px;position:relative}
+.ticket .qr{display:block;width:100%;aspect-ratio:1}
+.ticket.off .qr{opacity:.12}
+.ticket .stamp{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px}
+.ticket .stamp strong{font-size:40px;letter-spacing:.08em;color:#0C0812}
+.ticket .stamp span{font-size:16px;color:#3B3346}
+.ticket .who{margin-top:12px;text-align:center;color:#0C0812}
+.ticket .nm{font-size:24px;line-height:1.2;overflow-wrap:anywhere}
+.ticket .ct{font-size:15px;color:#3B3346}
+/* PRD 2.3: at least 28px, capitals, wide tracking. Didact Gothic: Poiret One's hairlines are hard to read out under door lights. */
+.ticket .entry{margin-top:14px;text-align:center}
+.ticket .entry span{display:block;font-size:13px;color:#3B3346}
+.ticket .entry strong{display:block;font-size:30px;line-height:1.2;letter-spacing:.16em;margin-right:-.16em}
+.pass .btn{width:100%;min-height:48px;padding:12px 18px;border-radius:2px;white-space:normal;text-align:center}
+.pass .msg{font-size:14px;color:var(--soft)}
+.pass .center{min-height:0;flex:1;flex-direction:column;gap:12px;text-align:center;padding:28px}
+.pass .center h1{font-size:30px;line-height:1.15}
+.pass .center p{color:var(--muted);max-width:30ch}
+.pass .center .btn{width:auto}
+.pass .skel{margin:0}
+.pass .dlg{border-color:var(--amethyst-deep);border-radius:0;padding:26px}
+.pass .dlg .tag{font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.pass .dlg ol{color:var(--soft);padding-left:20px}

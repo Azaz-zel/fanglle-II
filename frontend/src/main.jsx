@@ -12,7 +12,8 @@ const EventPage = publicPage('EventPage');
 const Book = publicPage('Book');
 const Booking = publicPage('Booking');
 const Guestlist = publicPage('Guestlist');
-const Pass = publicPage('Pass');
+// The guest's QR page is its own region: qrcode and idb stay out of every other page.
+const Pass = lazy(() => import('./Pass.jsx'));
 const Login = lazy(() => import('./Login.jsx'));
 const Door = lazy(() => import('./Door.jsx'));
 const Admin = lazy(() => import('./Admin.jsx'));
