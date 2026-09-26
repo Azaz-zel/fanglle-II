@@ -4,6 +4,7 @@ export class ApiError extends Error {
     super(body.message || 'Something went wrong on our side. Try again in a moment.');
     this.status = status;
     this.errors = body.errors || {};
+    this.body = body; // extra fields beside message and errors, e.g. places_left on a guestlist 422
   }
 }
 

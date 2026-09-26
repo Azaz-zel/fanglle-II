@@ -1,5 +1,5 @@
 import { expect, test } from 'vitest';
-import { clock, dayLabel, dayParts, lineupWarnings, mmss, nightMinutes, secondsLeft, tableState } from './night.js';
+import { clock, dayLabel, dayParts, guestNames, lineupWarnings, mmss, nightMinutes, secondsLeft, tableState, waShare } from './night.js';
 
 test('nightMinutes: before 12:00 belongs to the night before (F2)', () => {
   const cases = {
@@ -63,4 +63,25 @@ test('tableState: booked and held win over size, then small, then free', () => {
   expect(tableState(t('free', 4), 6)).toBe('small');
   expect(tableState(t('free', 4), 4)).toBe('free');
   expect(tableState(t('free', 12), 1)).toBe('free');
+});
+
+test('guestNames: personal sends exactly party - 1 names, group sends none (F9)', () => {
+  const typed = ['Rina', '', 'Dewi & Co', 'left over from a bigger group', '', '', '', '', ''];
+  expect(guestNames('personal', 4, typed)).toEqual(['Rina', '', 'Dewi & Co']); // empties go too: the server names the gap
+  expect(guestNames('personal', 1, typed)).toEqual([]);
+  expect(guestNames('personal', 10, typed)).toHaveLength(9);
+  expect(guestNames('group', 4, typed)).toEqual([]);
+  expect(guestNames('group', 10, typed)).toEqual([]);
+});
+
+test('waShare: plain wa.me link, no number, message and pass link from data (F13)', () => {
+  const e = { name: 'Second Wave', date: '2026-09-25', guestlist_cutoff: '23:30' };
+  const url = 'https://fanglle.test/p/01J8Z6Q3';
+  const link = waShare('Rina & Bayu', e, url);
+  const u = new URL(link);
+  expect(u.origin + u.pathname).toBe('https://wa.me/'); // no phone number: WhatsApp asks which chat
+  expect([...u.searchParams.keys()]).toEqual(['text']); // the & in the name didn't split the query
+  expect(u.searchParams.get('text')).toBe(
+    'Rina & Bayu, here is your entry QR for The Fanglle II, Second Wave, Fri 25 Sep. Valid until 11:30 pm with your ID: https://fanglle.test/p/01J8Z6Q3',
+  );
 });

@@ -68,3 +68,13 @@ export const tableState = (t, party) =>
 // ponytail: trusts the guest's clock; send server time with the booking if skewed phones become a problem.
 export const secondsLeft = (until, now = Date.now()) => Math.max(0, Math.ceil((Date.parse(until) - now) / 1000));
 export const mmss = (s) => `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
+
+// Guestlist (S4). guest_names are everyone after the organiser. A personal QR carries one name each, so the form sends
+// exactly party - 1 of them; a group QR carries only the organiser's name, so it sends none (F9).
+export const guestNames = (mode, party, guests) => (mode === 'personal' ? guests.slice(0, party - 1) : []);
+
+// F13: a plain wa.me link with no number in it. WhatsApp opens on the organiser's own phone and they choose the chat.
+export const waShare = (holder, e, url) =>
+  `https://wa.me/?text=${encodeURIComponent(
+    `${holder}, here is your entry QR for The Fanglle II, ${e.name}, ${dayLabel(e.date)}. Valid until ${clock(e.guestlist_cutoff)} with your ID: ${url}`,
+  )}`;

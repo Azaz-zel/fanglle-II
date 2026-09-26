@@ -44,9 +44,10 @@ button,input,select,textarea{font:inherit;color:inherit}
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:46px;padding:10px 22px;border-radius:8px;font-size:16px;
   line-height:1.2;white-space:nowrap;cursor:pointer;border:1px solid transparent;text-decoration:none;transition:background .15s,border-color .15s}
 .btn.solid{background:var(--garnet);color:var(--on-garnet);border-color:var(--garnet)}
-.btn.solid:hover{background:var(--garnet-hover);border-color:var(--garnet-hover)}
+/* :enabled: a disabled button under the pointer keeps its disabled look */
+.btn.solid:enabled:hover,a.btn.solid:hover{background:var(--garnet-hover);border-color:var(--garnet-hover)}
 .btn.line{background:transparent;color:var(--text);border-color:var(--amethyst-soft)}
-.btn.line:hover{background:var(--raised);border-color:var(--text)}
+.btn.line:enabled:hover,a.btn.line:hover{background:var(--raised);border-color:var(--text)}
 
 /* Mockup chips are 40px; raised to the 44px touch target. */
 .chip{min-height:44px;padding:6px 14px;border-radius:20px;border:1px solid var(--line);background:transparent;color:var(--soft);font-size:15px;cursor:pointer}
@@ -116,6 +117,7 @@ html{scroll-behavior:smooth}
 .word{line-height:1.02;letter-spacing:.12em;font-size:clamp(40px,11vw,160px)}
 .word .ln{display:block}
 .home .lede{max-width:34ch;margin-top:30px;font-size:clamp(18px,2.1vw,22px)}
+.ctas{display:flex;flex-wrap:wrap;gap:14px;margin-top:36px}
 
 .divider{display:flex;align-items:center;gap:16px;max-width:1240px;margin:0 auto;padding:0 24px}
 .divider .rule{flex:1;height:1px;background:var(--line)}
@@ -296,6 +298,39 @@ html{scroll-behavior:smooth}
 .soldout{margin-top:28px;border:1px solid var(--line);padding:40px 28px;text-align:center}
 .soldout h2{font-size:32px;margin-bottom:10px}
 .soldout p{color:var(--muted);max-width:44ch;margin:0 auto 20px}
+
+/* Guestlist (/guestlist/:date), from fanglle-guestlist-mockup.jsx. Rides on the .bk booking styles above. */
+.gl .block{padding:26px 0;border-top:1px solid var(--line)}
+.gl .block:first-child{border-top:0;padding-top:0}
+.gl .chip small.low{color:var(--garnet-text)}
+.gl .note{margin-top:12px}
+.gl fieldset{border:0;min-width:0}
+.modes{display:grid;grid-template-columns:1fr;gap:10px}
+.mode{display:flex;gap:14px;align-items:flex-start;padding:16px;border:1px solid var(--line);cursor:pointer}
+.mode.on{border-color:var(--garnet);background:var(--surface)}
+.mode input{width:22px;height:22px;margin-top:3px;accent-color:var(--garnet);flex:none}
+.mode strong{display:block;font-size:17px}
+.mode span span{display:block;font-size:14px;color:var(--muted)}
+.fields{display:grid;grid-template-columns:minmax(0,1fr);gap:16px}
+@media (min-width:640px){.modes,.fields{grid-template-columns:1fr 1fr}}
+.gl .block .lead{margin-bottom:14px}
+.gl .submit{display:flex;flex-direction:column;gap:10px;align-items:flex-start;padding-top:26px;border-top:1px solid var(--line)}
+.rules{list-style:none;display:flex;flex-direction:column;gap:8px;font-size:15px;color:var(--soft)}
+.rules li::before{content:"";display:inline-block;width:6px;height:6px;margin-right:12px;vertical-align:2px;background:var(--amethyst-soft);clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%)}
+.result{max-width:760px;margin-top:32px}
+.result:focus{outline:none}
+.result:focus-visible{outline:2px solid var(--text);outline-offset:6px}
+.result h2{font-size:clamp(32px,4.5vw,48px);line-height:1.1}
+.result .lead{margin-top:16px}
+.result .alert{margin-top:16px}
+.result .ts{margin-top:20px}
+.gl .card{border-color:var(--amethyst-deep);border-radius:0;padding:22px;margin-top:20px;display:flex;flex-direction:column;gap:14px}
+.one{font-size:20px}
+.qrlist{list-style:none;margin-top:20px;border-top:1px solid var(--line)}
+.qrlist li{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding:16px 0;border-bottom:1px solid var(--line)}
+.holder{overflow-wrap:anywhere}
+.holder small{display:block;color:var(--muted);font-size:14px}
+.again{margin-top:24px}
 
 /* Manager region, from fanglle-pengelola-mockup.jsx */
 .app{min-height:100vh;display:grid;grid-template-columns:1fr}

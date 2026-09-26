@@ -3,12 +3,13 @@ import { Link, useLocation, useNavigate, useParams, useSearchParams } from 'reac
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { api, errorText, weekQuery } from './api.js';
 import {
-  clock, dayLabel, dayParts, earliest, headliners, idr, latest, mmss, nightMinutes, others, ROLES, secondsLeft, tableState,
+  clock, dayLabel, dayParts, earliest, guestNames, headliners, idr, latest, mmss, nightMinutes, others, ROLES, secondsLeft, tableState,
+  waShare,
 } from './night.js';
 import { Button, Mark } from './ui.jsx';
 
-// Public region: Home (/), event detail (/events/:date), table booking (/book/:date, /booking/:code) and the QR page (/p/:id, S5).
-// Guestlist, Gallery and About links arrive with their own slices (S4, S9); nothing links to them yet.
+// Public region: Home (/), event detail (/events/:date), table booking (/book/:date, /booking/:code), guestlist (/guestlist/:date)
+// and the QR page (/p/:id, S5). Gallery and About links arrive with S9; nothing links to them yet.
 
 const SHARDS = [
   { p: '120,-40 210,-40 180,90', f: '#2A1D3D', d: 0 },
@@ -153,18 +154,19 @@ function Night({ e }) {
           {g === 'full' ? 'Guestlist full' : g === 'closed' ? 'Guestlist closed' : `Guestlist open until ${clock(e.guestlist_cutoff)}`}
         </span>
       </div>
-      {/* Sold-out tables with an open guestlist get "Guestlist only" in S4, when that form exists. */}
       <div className="cta">
         {t !== 'sold_out' ? (
           <Link className="btn line" to={`/book/${e.date}`} aria-label={`Reserve a table for ${e.name}`}>
             Reserve
           </Link>
+        ) : g === 'open' ? (
+          <Link className="btn line" to={`/guestlist/${e.date}`} aria-label={`Join the guestlist for ${e.name}`}>
+            Guestlist only
+          </Link>
         ) : (
-          g !== 'open' && (
-            <button type="button" className="btn line" disabled>
-              Fully booked
-            </button>
-          )
+          <button type="button" className="btn line" disabled>
+            Fully booked
+          </button>
         )}
       </div>
     </li>
@@ -185,6 +187,7 @@ export function Home() {
   const firstHeadliner = earliest(events.flatMap((e) => headliners(e.lineup).map((s) => s.starts_at)));
   const lastClose = latest(events.map((e) => e.close_time));
   const cutoffs = [...new Set(events.map((e) => e.guestlist_cutoff))].sort(byNight).map(clock).join(' or ');
+  const firstList = events.find((e) => e.guestlist.status === 'open')?.date; // no open night, no button
 
   return (
     <Site home className="home">
@@ -199,6 +202,14 @@ export function Home() {
             </span>
           </h1>
           <p className="lede">Named for the second fall: not the one that ends the night, the one that starts it.</p>
+          <div className="ctas">
+            <a className="btn solid" href="#ways-in">
+              Book a table
+            </a>
+            <a className="btn line" href="#ways-in">
+              Join the guestlist
+            </a>
+          </div>
         </div>
       </section>
 
@@ -261,6 +272,11 @@ export function Home() {
                 {cutoffs && <li>Valid until {cutoffs} on the night</li>}
                 <li>Names checked against ID at the door</li>
               </ul>
+              {firstList && (
+                <Link className="btn line" to={`/guestlist/${firstList}`}>
+                  Join the guestlist
+                </Link>
+              )}
             </article>
           </div>
         </div>
@@ -415,8 +431,17 @@ function Details({ e }) {
                   ? 'Guestlist full'
                   : g === 'closed'
                     ? `Guestlist closed at ${clock(e.guestlist_cutoff)}`
-                    : `Guestlist: ${left} ${left === 1 ? 'place' : 'places'} left, free until ${clock(e.guestlist_cutoff)}`}
+                    : `Guestlist: ${places(left)} left, free until ${clock(e.guestlist_cutoff)}`}
               </span>
+              {g === 'open' ? (
+                <Link className="btn line" to={`/guestlist/${e.date}`}>
+                  Join the guestlist
+                </Link>
+              ) : (
+                <button type="button" className="btn line" disabled>
+                  {g === 'full' ? 'Guestlist full' : 'Guestlist closed'}
+                </button>
+              )}
             </div>
           </aside>
         </div>
@@ -532,6 +557,7 @@ export function Pass() {
 
 const ZONES = { stage: 'Stage front', booth: 'Booths', bar: 'Bar tables' };
 const people = (n) => `${n} ${n === 1 ? 'person' : 'people'}`;
+const places = (n) => `${n} ${n === 1 ? 'place' : 'places'}`;
 
 // "Tables for up to 6", "Booths for 8 to 12": seat ranges come from the tables themselves.
 function seats(zone, tables) {
@@ -579,6 +605,15 @@ const Err = ({ id, children }) =>
       {children}
     </p>
   ) : null;
+
+// A 422's errors, first message per field: { name: "...", "guest_names.2": "..." }.
+const fieldErrors = (err) => Object.fromEntries(Object.entries(err.errors).map(([k, v]) => [k, v[0]]));
+
+// Server errors: focus the first one on the page, input or message.
+const useFirstError = (errors) =>
+  useEffect(() => {
+    document.querySelector('main [aria-invalid="true"], main [data-err]')?.focus();
+  }, [errors]);
 
 const Input = ({ id, label, err, ...rest }) => (
   <div className="field">
@@ -628,6 +663,72 @@ function Turnstile({ onToken }) {
   }, [onToken]);
   return <div ref={box} className="ts" />;
 }
+
+// The widget plus its token for one form. reset() after a failed try: the token was spent, so draw a fresh widget.
+function useTurnstile() {
+  const [token, setToken] = useState('');
+  const [tries, setTries] = useState(0);
+  return {
+    body: TURNSTILE_KEY ? { turnstile_token: token } : {},
+    widget: TURNSTILE_KEY ? <Turnstile key={tries} onToken={setToken} /> : null,
+    reset: () => {
+      if (!TURNSTILE_KEY) return;
+      setToken('');
+      setTries((n) => n + 1);
+    },
+  };
+}
+
+// Group size, 1 to max.
+const Step = ({ labelledBy, value, max, disabled, onChange }) => (
+  <div className="step" role="group" aria-labelledby={labelledBy}>
+    <button type="button" aria-label="One fewer person" disabled={disabled || value <= 1} onClick={() => onChange(value - 1)}>
+      −
+    </button>
+    <output aria-live="polite">{value}</output>
+    <button type="button" aria-label="One more person" disabled={disabled || value >= max} onClick={() => onChange(value + 1)}>
+      +
+    </button>
+  </div>
+);
+
+// Night chips for this week. off(x): can't be chosen; note(x): the small line under the date.
+const NightChips = ({ nights, date, onNight, off, note }) => (
+  <>
+    <span className="lbl" id="night-l">
+      Night
+    </span>
+    <div className="chips" role="group" aria-labelledby="night-l">
+      {nights.map((x) => (
+        <button
+          key={x.date}
+          type="button"
+          className="chip"
+          aria-pressed={x.date === date}
+          disabled={off(x)}
+          onClick={() => x.date !== date && onNight(x.date)}
+        >
+          {dayLabel(x.date)}
+          {note(x)}
+        </button>
+      ))}
+    </div>
+  </>
+);
+
+const Age = ({ checked, onChange, err }) => (
+  <div className="field check">
+    <input id="ag" type="checkbox" checked={checked} aria-invalid={!!err} aria-describedby={err ? 'ag-e' : undefined} onChange={onChange} />
+    <div>
+      <label htmlFor="ag">Everyone in my group is 21 or over and will bring ID</label>
+      {err && (
+        <div id="ag-e" className="err">
+          {err}
+        </div>
+      )}
+    </div>
+  </div>
+);
 
 // Night chips, group size, the night's details, floor plan or list, and the side panel.
 // locked: 'held' or 'paid' once this guest has a table; panel(tables, event) fills the side.
@@ -798,39 +899,20 @@ function Planner({ date, party, onParty, sel, onPick, onNight, locked, errors = 
 
       <div className="bar">
         <div>
-          <span className="lbl" id="night-l">
-            Night
-          </span>
-          <div className="chips" role="group" aria-labelledby="night-l">
-            {nights.map((x) => (
-              <button
-                key={x.date}
-                type="button"
-                className="chip"
-                aria-pressed={x.date === date}
-                disabled={!!locked}
-                onClick={() => x.date !== date && onNight(x.date)}
-              >
-                {dayLabel(x.date)}
-                <small>{x.tables.status === 'sold_out' ? 'Sold out' : x.name}</small>
-              </button>
-            ))}
-          </div>
+          <NightChips
+            nights={nights}
+            date={date}
+            onNight={onNight}
+            off={() => !!locked}
+            note={(x) => <small>{x.tables.status === 'sold_out' ? 'Sold out' : x.name}</small>}
+          />
           <Err id="date-e">{errors.date}</Err>
         </div>
         <div>
           <span className="lbl" id="party-l">
             Group size
           </span>
-          <div className="step" role="group" aria-labelledby="party-l">
-            <button type="button" aria-label="One fewer person" disabled={!!locked || party <= 1} onClick={() => onParty(party - 1)}>
-              −
-            </button>
-            <output aria-live="polite">{party}</output>
-            <button type="button" aria-label="One more person" disabled={!!locked || party >= most} onClick={() => onParty(party + 1)}>
-              +
-            </button>
-          </div>
+          <Step labelledBy="party-l" value={party} max={most} disabled={!!locked} onChange={onParty} />
           <Err id="party-e">{errors.party_size}</Err>
         </div>
       </div>
@@ -887,8 +969,7 @@ export function Book() {
   const [errors, setErrors] = useState({});
   const [alert, setAlert] = useState(null);
   const [busy, setBusy] = useState(false);
-  const [token, setToken] = useState('');
-  const [tries, setTries] = useState(0);
+  const ts = useTurnstile();
   const panelRef = useRef(null);
 
   // The choice only counts while that table is still free for this group, on this night.
@@ -898,10 +979,7 @@ export function Book() {
     window.scrollTo({ top: 0, behavior: 'instant' });
   }, [date]);
 
-  // Server errors: focus the first one on the page, input or message.
-  useEffect(() => {
-    document.querySelector('main [aria-invalid="true"], main [data-err]')?.focus();
-  }, [errors]);
+  useFirstError(errors);
 
   const onPick = (x) => {
     setPick({ date, code: x.code });
@@ -932,19 +1010,16 @@ export function Book() {
           phone: form.phone,
           email: form.email,
           age_confirmed: form.age,
-          ...(TURNSTILE_KEY && { turnstile_token: token }),
+          ...ts.body,
         },
       });
       remember(r.code, { secret: r.secret, payment_url: r.payment_url, date, table: t.code, party, deposit: r.deposit, min_spend: r.min_spend });
       navigate(`/booking/${r.code}?k=${encodeURIComponent(r.secret)}`, { replace: true });
     } catch (err) {
       setBusy(false);
-      if (TURNSTILE_KEY) {
-        setToken('');
-        setTries((n) => n + 1);
-      }
+      ts.reset();
       if (err.status === 422) {
-        setErrors(Object.fromEntries(Object.entries(err.errors).map(([k, v]) => [k, v[0]])));
+        setErrors(fieldErrors(err));
       } else if (err.status === 409) {
         // Someone else got it first: fresh plan, same details, choose again.
         setErrors({});
@@ -1017,25 +1092,8 @@ export function Book() {
           err={errors.phone}
         />
         <Input id="em" label="Email, for your QR" type="email" autoComplete="email" value={form.email} onChange={set('email')} err={errors.email} />
-        <div className="field check">
-          <input
-            id="ag"
-            type="checkbox"
-            checked={form.age}
-            aria-invalid={!!errors.age_confirmed}
-            aria-describedby={errors.age_confirmed ? 'ag-e' : undefined}
-            onChange={set('age')}
-          />
-          <div>
-            <label htmlFor="ag">Everyone in my group is 21 or over and will bring ID</label>
-            {errors.age_confirmed && (
-              <div id="ag-e" className="err">
-                {errors.age_confirmed}
-              </div>
-            )}
-          </div>
-        </div>
-        {TURNSTILE_KEY && <Turnstile key={tries} onToken={setToken} />}
+        <Age checked={form.age} onChange={set('age')} err={errors.age_confirmed} />
+        {ts.widget}
         <Err id="ts-e">{errors.turnstile_token}</Err>
         {alertBox}
         <button type="submit" className="btn solid" disabled={busy}>
@@ -1258,6 +1316,419 @@ export function Booking() {
         ) : (
           <Wait q={q} loading="Loading your booking..." fail="Your booking didn't load. Check the connection, then try again.">
             {() => null}
+          </Wait>
+        )}
+      </div>
+    </Site>
+  );
+}
+
+// Guestlist (S4), from fanglle-guestlist-mockup.jsx: one sign-up for 1 to 10 people, one QR for the group or one each.
+
+const MODES = [
+  ['group', 'One QR for the group', 'Only your name is needed. The door counts people in as they arrive.'],
+  ['personal', 'One QR per person', 'Friends can arrive on their own. Each QR carries one name.'],
+];
+const blankList = { ...blank, guests: Array(9).fill('') };
+const listState = (g) => (g.status === 'full' ? 'Guestlist full' : g.status === 'closed' ? 'Guestlist closed' : `${places(g.places_left)} left`);
+
+export function Guestlist() {
+  const { date } = useParams();
+  const navigate = useNavigate();
+  const qc = useQueryClient();
+  const week = useQuery(weekQuery);
+  // The week list carries every field this page reads, so a newly chosen night shows at once, then refreshes.
+  const ev = useQuery({ ...eventQuery(date), placeholderData: () => week.data?.events.find((x) => x.date === date) });
+  const [party, setParty] = useState(4);
+  const [mode, setMode] = useState('group');
+  const [form, setForm] = useState(blankList);
+  const [errors, setErrors] = useState({});
+  const [alert, setAlert] = useState(null);
+  const [busy, setBusy] = useState(false);
+  const [done, setDone] = useState(null); // { e, party, mode, name, phone, email, passes }; no passes: the number was already in (409)
+  const [sent, setSent] = useState(null); // resend answer: { ok, text }
+  const ts = useTurnstile();
+  const resultRef = useRef(null);
+  const nights = week.data?.events ?? [];
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  }, [date]);
+  useFirstError(errors);
+  useEffect(() => {
+    if (done) resultRef.current?.focus();
+  }, [done]);
+
+  const set = (k) => (x) => setForm({ ...form, [k]: x.target.type === 'checkbox' ? x.target.checked : x.target.value });
+  const setGuest = (i) => (x) => setForm({ ...form, guests: form.guests.map((v, j) => (j === i ? x.target.value : v)) });
+  const onNight = (d) => {
+    setErrors({});
+    setAlert(null);
+    navigate(`/guestlist/${d}`);
+  };
+  const onParty = (n) => {
+    setParty(n);
+    if (errors.party_size) setErrors(({ party_size, ...rest }) => rest); // the server's answer was for the old size
+  };
+  const restart = () => {
+    setDone(null);
+    setSent(null);
+    setForm(blankList);
+    setErrors({});
+  };
+
+  async function submit(x) {
+    x.preventDefault();
+    const e = ev.data;
+    setBusy(true);
+    setAlert(null);
+    try {
+      const r = await api('/api/guestlist', {
+        method: 'POST',
+        guest: true,
+        body: {
+          date,
+          party_size: party,
+          qr_mode: mode,
+          name: form.name,
+          phone: form.phone,
+          email: form.email,
+          guest_names: guestNames(mode, party, form.guests),
+          age_confirmed: form.age,
+          ...ts.body,
+        },
+      });
+      setErrors({});
+      setDone({ e, party, mode, name: form.name, email: form.email, passes: r.passes });
+      qc.invalidateQueries({ queryKey: ['events'] });
+      qc.invalidateQueries({ queryKey: ['event', date] });
+    } catch (err) {
+      const f = err.status === 422 ? fieldErrors(err) : {};
+      setErrors(f);
+      if (err.status === 409) setDone({ e, phone: form.phone });
+      else if (err.status !== 422) setAlert(errorText(err));
+      // Not enough places: the 422 says how many are left. Show that number everywhere now, not after a refetch.
+      const n = err.body?.places_left;
+      if (n !== undefined) {
+        const patch = (y) => (y.date === date ? { ...y, guestlist: { status: n ? 'open' : 'full', places_left: n } } : y);
+        qc.setQueryData(['event', date], (old) => old && patch(old));
+        qc.setQueryData(['events'], (old) => old && { ...old, events: old.events.map(patch) });
+      }
+      if (f.date) {
+        qc.invalidateQueries({ queryKey: ['events'] });
+        qc.invalidateQueries({ queryKey: ['event', date] });
+      }
+    }
+    setBusy(false);
+    ts.reset(); // each token is single use, sent or not
+  }
+
+  async function resend() {
+    setBusy(true);
+    setSent(null);
+    try {
+      const r = await api('/api/guestlist/resend', { method: 'POST', guest: true, body: { date: done.e.date, phone: done.phone, ...ts.body } });
+      setSent({ ok: true, text: r.message });
+    } catch (err) {
+      setSent({ ok: false, text: errorText(err) });
+    }
+    setBusy(false);
+    ts.reset();
+  }
+
+  const signedUp = (r) => (
+    <div className="result" ref={resultRef} tabIndex={-1} aria-live="polite">
+      <div className="lbl">Signed up</div>
+      <h2 className="head">
+        You're on the <span className="two">list</span>
+      </h2>
+      <p className="sub">
+        {people(r.party)} for {r.e.name}, {dayLabel(r.e.date)}. Free entry until {clock(r.e.guestlist_cutoff)}. We emailed your QR to {r.email}.
+        It's also on this page.
+      </p>
+      {r.mode === 'group' || r.passes.length === 1 ? (
+        <div className="card">
+          <div>
+            <div className="one">One QR for {people(r.party)}</div>
+            <div className="hint">
+              Organiser: {r.name}.{r.party > 1 && ' Guests can come in separately; the door counts who has arrived.'}
+            </div>
+          </div>
+          <div className="row">
+            <Link className="btn solid" to={r.passes[0].pass_url}>
+              View your QR
+            </Link>
+          </div>
+        </div>
+      ) : (
+        <>
+          <p className="hint lead">Send each guest their own QR. It opens WhatsApp from your phone with the link ready.</p>
+          <ul className="qrlist">
+            {r.passes.map((p, i) => (
+              <li key={p.pass_url}>
+                <div className="holder">
+                  {p.holder_name}
+                  <small>{i === 0 ? 'Your QR' : `Guest ${i + 1}`}</small>
+                </div>
+                <div className="row">
+                  <Link className="btn line slim" to={p.pass_url} aria-label={`View ${p.holder_name}'s QR`}>
+                    View
+                  </Link>
+                  {i > 0 && (
+                    <a
+                      className="btn line slim"
+                      href={waShare(p.holder_name, r.e, window.location.origin + p.pass_url)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label={`Share on WhatsApp, for ${p.holder_name}`}
+                    >
+                      Share on WhatsApp
+                    </a>
+                  )}
+                </div>
+              </li>
+            ))}
+          </ul>
+        </>
+      )}
+      <div className="row again">
+        <button type="button" className="btn line" onClick={restart}>
+          Sign up for another night
+        </button>
+      </div>
+    </div>
+  );
+
+  const alreadyIn = (r) => (
+    <div className="result" ref={resultRef} tabIndex={-1} role="alert">
+      <div className="lbl">Already on the list</div>
+      <h2 className="head">
+        This number is already <span className="two">in</span>
+      </h2>
+      <p className="sub">
+        {r.phone} already has a guestlist spot for {r.e.name}. Each number can sign up once per night. Your QR is in the email we sent earlier.
+      </p>
+      {ts.widget}
+      <div role="status">{sent?.ok && <p className="sub">{sent.text}</p>}</div>
+      {sent && !sent.ok && (
+        <p className="alert" role="alert">
+          {sent.text}
+        </p>
+      )}
+      <div className="row again">
+        <button type="button" className="btn solid" disabled={busy} onClick={resend}>
+          Send my QR again
+        </button>
+        <button
+          type="button"
+          className="btn line"
+          onClick={() => {
+            setDone(null);
+            setSent(null);
+          }}
+        >
+          Choose another night
+        </button>
+      </div>
+    </div>
+  );
+
+  const signUp = (e) => {
+    const g = e.guestlist;
+    const open = g.status === 'open';
+    const cutoff = clock(e.guestlist_cutoff);
+    const hls = headliners(e.lineup);
+    const rest = others(e.lineup);
+    // One note per problem: the server's sentence when there is one, else what the night's data says.
+    const nightNote =
+      errors.date ??
+      (errors.party_size
+        ? null
+        : g.status === 'full'
+          ? `The guestlist for ${e.name} is full. Choose another night.`
+          : g.status === 'closed'
+            ? `The guestlist for ${e.name} closed at ${cutoff}. Choose another night.`
+            : null);
+    const partyNote =
+      errors.party_size ??
+      (open && party > g.places_left ? `Only ${places(g.places_left)} left on ${e.name}. Make your group smaller, or choose another night.` : null);
+    return (
+      <div className="grid">
+        <form onSubmit={submit} noValidate>
+          <div className="block">
+            <NightChips
+              nights={nights}
+              date={date}
+              onNight={onNight}
+              off={(x) => x.guestlist.status !== 'open'}
+              note={(x) => (
+                <small className={x.guestlist.status === 'open' && x.guestlist.places_left <= 10 ? 'low' : undefined}>
+                  {listState(x.guestlist)}
+                </small>
+              )}
+            />
+            {nightNote && (
+              <p id="date-e" className="alert note" role="status" tabIndex={-1} data-err={errors.date ? '' : undefined}>
+                {nightNote}
+              </p>
+            )}
+          </div>
+
+          <div className="block">
+            <span className="lbl" id="party-l">
+              How many people, including you
+            </span>
+            <Step labelledBy="party-l" value={party} max={10} onChange={onParty} />
+            {partyNote && (
+              <p id="party-e" className="alert note" role="status" tabIndex={-1} data-err={errors.party_size ? '' : undefined}>
+                {partyNote}
+              </p>
+            )}
+          </div>
+
+          {party > 1 && (
+            <div className="block">
+              <fieldset>
+                <legend className="lbl">How do you want your QR</legend>
+                <div className="modes">
+                  {MODES.map(([k, title, text]) => (
+                    <label key={k} className={`mode${mode === k ? ' on' : ''}`}>
+                      <input type="radio" name="qr" checked={mode === k} onChange={() => setMode(k)} />
+                      <span>
+                        <strong>{title}</strong>
+                        <span>{text}</span>
+                      </span>
+                    </label>
+                  ))}
+                </div>
+                <Err id="qr-e">{errors.qr_mode}</Err>
+              </fieldset>
+            </div>
+          )}
+
+          <div className="block">
+            <span className="lbl">Your details</span>
+            <div className="fields">
+              <Input id="gn" label="Full name, as on your ID" type="text" autoComplete="name" value={form.name} onChange={set('name')} err={errors.name} />
+              <Input
+                id="gp"
+                label="Phone number"
+                type="tel"
+                autoComplete="tel"
+                inputMode="tel"
+                placeholder="+62 812 3456 7890"
+                value={form.phone}
+                onChange={set('phone')}
+                err={errors.phone}
+              />
+              <Input id="ge" label="Email, for your QR" type="email" autoComplete="email" value={form.email} onChange={set('email')} err={errors.email} />
+            </div>
+          </div>
+
+          {party > 1 && mode === 'personal' && (
+            <div className="block">
+              <span className="lbl">Guest names</span>
+              <p className="hint lead">Required: each QR carries the name that will be checked against ID.</p>
+              <div className="fields">
+                {Array.from({ length: party - 1 }, (_, i) => (
+                  <Input
+                    key={i}
+                    id={`g-${i}`}
+                    label={`Guest ${i + 2} name`}
+                    type="text"
+                    value={form.guests[i]}
+                    onChange={setGuest(i)}
+                    err={errors[`guest_names.${i}`]}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div className="block">
+            <Age checked={form.age} onChange={set('age')} err={errors.age_confirmed} />
+          </div>
+
+          <div className="submit">
+            {ts.widget}
+            <Err id="ts-e">{errors.turnstile_token}</Err>
+            {alert && (
+              <p className="alert" role="alert">
+                {alert}
+              </p>
+            )}
+            <button type="submit" className="btn solid" disabled={busy || !open || party > g.places_left}>
+              {busy ? 'Adding you to the list...' : `Add ${people(party)} to the list`}
+            </button>
+            <p className="hint">No account needed. Your QR shows on the next screen and arrives by email.</p>
+          </div>
+        </form>
+
+        <aside className="panel" aria-labelledby="night-h">
+          <div className="lbl">Your night</div>
+          <h2 id="night-h" className="head" aria-live="polite">
+            {e.name}
+          </h2>
+          <dl className="facts">
+            <dt>Date</dt>
+            <dd>{dayLabel(e.date)}</dd>
+            {hls.length > 0 && (
+              <>
+                <dt>{hls.length > 1 ? 'Headliners' : 'Headliner'}</dt>
+                <dd>{who(e)}</dd>
+              </>
+            )}
+            {rest.length > 0 && (
+              <>
+                <dt>With</dt>
+                <dd>{rest.join(', ')}</dd>
+              </>
+            )}
+            {e.genre && (
+              <>
+                <dt>Sound</dt>
+                <dd>{e.genre}</dd>
+              </>
+            )}
+            <dt>Free entry</dt>
+            <dd>Until {cutoff}</dd>
+            <dt>Places left</dt>
+            <dd>{g.status === 'closed' ? 'Closed' : g.places_left || 'None'}</dd>
+          </dl>
+          <ul className="rules">
+            <li>Arrive before {cutoff}. After that, the list closes.</li>
+            <li>Bring ID. Names are checked at the door.</li>
+            <li>One sign-up per phone number each night.</li>
+          </ul>
+        </aside>
+      </div>
+    );
+  };
+
+  const e = ev.data;
+  return (
+    <Site flow className="bk gl">
+      <div className="wrap bkin">
+        <h1 className="h1 head">
+          Join the <em>guestlist</em>
+        </h1>
+        <p className="sub">
+          {e && `Free entry before ${clock(e.guestlist_cutoff)}. `}One sign-up covers up to ten people.
+        </p>
+        {done?.passes ? (
+          signedUp(done)
+        ) : done ? (
+          alreadyIn(done)
+        ) : ev.error?.status === 404 ? (
+          <div className="fail" role="alert">
+            <p>{ev.error.message}</p>
+            <Link className="btn line" to="/">
+              Go to the home page
+            </Link>
+          </div>
+        ) : (
+          <Wait q={ev} loading="Loading the night..." fail="This night didn't load. Check the connection, then try again.">
+            {signUp}
           </Wait>
         )}
       </div>
