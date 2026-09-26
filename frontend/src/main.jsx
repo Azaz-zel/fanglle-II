@@ -9,6 +9,8 @@ import './styles.css';
 const publicPage = (name) => lazy(() => import('./Public.jsx').then((m) => ({ default: m[name] })));
 const Home = publicPage('Home');
 const EventPage = publicPage('EventPage');
+const Book = publicPage('Book');
+const Booking = publicPage('Booking');
 const Pass = publicPage('Pass');
 const Login = lazy(() => import('./Login.jsx'));
 const Door = lazy(() => import('./Door.jsx'));
@@ -52,6 +54,8 @@ createRoot(document.getElementById('root')).render(
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/events/:date" element={<EventPage />} />
+              <Route path="/book/:date" element={<Book />} />
+              <Route path="/booking/:code" element={<Booking />} />
               <Route path="/p/:id" element={<Pass />} />
               <Route path="/login" element={<Login />} />
               <Route path="/door" element={<Door />} />

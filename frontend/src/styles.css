@@ -135,9 +135,13 @@ html{scroll-behavior:smooth}
 .status{grid-column:2;display:flex;flex-wrap:wrap;gap:8px 22px;font-size:15px;color:var(--muted)}
 .gone{text-decoration:line-through;text-decoration-color:var(--amethyst)}
 .last{color:var(--garnet-text)}
+/* .cta, not the mockup's .act: that name is the admin action button. */
+.cta{grid-column:2}
 @media (min-width:860px){
-  .night{grid-template-columns:110px minmax(0,1.4fr) minmax(0,1fr);align-items:center}
+  .night{grid-template-columns:110px minmax(0,1.4fr) minmax(0,1fr) 180px;align-items:center}
   .status{grid-column:auto;flex-direction:column;gap:4px}
+  .cta{grid-column:auto}
+  .cta .btn{width:100%}
 }
 
 .doors{display:grid;grid-template-columns:1fr;gap:18px;margin-top:48px}
@@ -149,6 +153,7 @@ html{scroll-behavior:smooth}
 .door h3{font-size:clamp(28px,3vw,38px);line-height:1.15}
 .door p{color:var(--soft);max-width:46ch}
 .door ul{list-style:none;display:flex;flex-direction:column;gap:8px;font-size:15px;color:var(--muted)}
+.door .btn{align-self:flex-start;margin-top:auto}
 .door li::before{content:"";display:inline-block;width:6px;height:6px;margin-right:12px;vertical-align:2px;background:var(--amethyst);clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%)}
 
 .info{display:grid;grid-template-columns:1fr;margin-top:48px;border-top:1px solid var(--line)}
@@ -200,6 +205,97 @@ html{scroll-behavior:smooth}
 .foot .mark{font-size:18px;color:var(--text)}
 .foot nav{display:flex;gap:22px;flex-wrap:wrap}
 .fine{margin-top:22px}
+
+/* Table booking (/book/:date, /booking/:code), from fanglle-pilih-meja-mockup.jsx */
+.back{margin-left:auto;display:inline-flex;align-items:center;min-height:44px;font-size:15px;color:var(--muted);text-decoration:none}
+.back:hover{color:var(--text)}
+.bkin{padding-top:40px;padding-bottom:96px}
+.alone{max-width:560px}
+.bk .btn{white-space:normal;text-align:center}
+.bk .btn.slim{min-height:44px;padding:8px 16px;font-size:15px}
+.h1{font-size:clamp(34px,5vw,56px);line-height:1.1;letter-spacing:.02em}
+.h1 em{color:var(--soft)}
+.bk .sub{margin-top:10px;max-width:60ch}
+.lbl{display:block;font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+.bar{display:flex;flex-wrap:wrap;gap:24px 40px;align-items:flex-end;margin-top:32px;padding-bottom:28px;border-bottom:1px solid var(--line)}
+.bar .err{margin-top:8px}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.bk .chip{min-height:52px;padding:8px 16px;border-radius:2px;color:var(--text);text-align:left;line-height:1.3}
+.bk .chip small{display:block;color:var(--muted);font-size:13px}
+.bk .chip[aria-pressed="true"]{border-color:var(--garnet);background:var(--surface)}
+.bk .chip:disabled{cursor:not-allowed;opacity:.55}
+.step{display:flex;align-items:center;width:max-content;border:1px solid var(--line);border-radius:2px}
+.step button{width:48px;height:52px;background:transparent;border:0;color:var(--text);font-size:22px;cursor:pointer}
+.step button:disabled{color:var(--line);cursor:not-allowed}
+.step output{min-width:64px;text-align:center;font-size:20px}
+.site section.evinfo{display:grid;grid-template-columns:1fr;gap:12px 28px;align-items:center;margin-top:24px;padding:18px 22px;border:1px solid var(--amethyst-deep);background:var(--surface)}
+@media (min-width:860px){.site section.evinfo{grid-template-columns:auto minmax(0,1fr) auto}}
+.evname{font-size:28px;line-height:1.1;letter-spacing:.04em}
+.evmeta{font-size:14px;color:var(--muted);margin-top:4px}
+.evhead{display:block;font-size:18px}
+.evwith{display:block;font-size:15px;color:var(--muted)}
+.evlink{justify-self:start}
+.bk .grid{display:grid;grid-template-columns:minmax(0,1fr);gap:28px;margin-top:28px}
+@media (min-width:1000px){.bk .grid{grid-template-columns:minmax(0,1.7fr) minmax(320px,1fr);align-items:start}}
+.viewtoggle{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+.viewtoggle p{font-size:15px;color:var(--muted)}
+/* The plan keeps its proportions and scrolls inside its frame on a phone; the list view needs no scrolling. */
+.scroller{overflow-x:auto;border:1px solid var(--line);background:var(--surface)}
+.plan{position:relative;min-width:640px;aspect-ratio:1000/620}
+.plan svg{position:absolute;inset:0;width:100%;height:100%}
+.plan rect{fill:var(--raised);stroke:var(--amethyst-deep)}
+.plan rect.floor{fill:none;stroke:var(--line);stroke-dasharray:6 6}
+.plan text{fill:var(--muted);font-family:var(--body);font-size:15px;text-anchor:middle}
+.plan text.big{font-size:18px}
+.plan text.df{fill:var(--amethyst);font-family:var(--head);font-size:22px;letter-spacing:4px}
+.plan text.start{text-anchor:start}
+/* min 44px: the mockup's high tables are 41px wide at the plan's narrowest */
+.tb{position:absolute;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:44px;min-height:44px;
+  font-size:14px;line-height:1.1;cursor:pointer;border:1px solid var(--amethyst-soft);background:var(--raised);color:var(--text);transition:background .15s,border-color .15s}
+.tb small{font-size:11px;color:var(--muted);margin-top:2px}
+.tb.round{width:7.6%;aspect-ratio:1;border-radius:50%}
+.tb.high{width:6.4%;aspect-ratio:1;border-radius:4px}
+.tb.booth{width:10%;height:15%;border-radius:22px 22px 6px 6px}
+.tb.free:not([aria-disabled]):hover{border-color:var(--text);background:var(--amethyst-deep)}
+.tb.sel{background:var(--garnet);border-color:var(--garnet);color:var(--on-garnet)}
+.tb.sel small{color:var(--on-garnet)}
+.tb.booked{background:var(--obsidian);border-color:var(--line);color:var(--muted);text-decoration:line-through}
+.tb.held{background:var(--obsidian);border:1px dashed var(--amethyst-soft);color:var(--muted)}
+.tb.small{background:var(--obsidian);border-color:var(--line);color:var(--muted)}
+.tb[aria-disabled]{cursor:not-allowed}
+.legend{display:flex;flex-wrap:wrap;gap:8px 20px;margin-top:12px;font-size:14px;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:8px}
+.sw{width:14px;height:14px;border:1px solid var(--amethyst-soft);background:var(--raised)}
+.sw.sel{background:var(--garnet);border-color:var(--garnet)}
+.sw.held{background:var(--obsidian);border-style:dashed}
+.sw.booked{background:var(--obsidian);border-color:var(--line)}
+.bk .list{list-style:none;border:1px solid var(--line)}
+.bk .list li{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 16px;border-top:1px solid var(--line)}
+.bk .list li:first-child{border-top:0}
+.dim{font-size:15px;color:var(--muted)}
+.bk .panel{border:1px solid var(--amethyst-deep);background:var(--surface);padding:28px 24px;display:flex;flex-direction:column;gap:18px}
+.bk .panel form{display:flex;flex-direction:column;gap:18px}
+.bk .panel:focus{outline:none}
+.bk .panel:focus-visible{outline:2px solid var(--text);outline-offset:3px}
+.bk .panel h2{font-size:32px;line-height:1.1;overflow-wrap:anywhere}
+.facts{display:grid;grid-template-columns:auto 1fr;gap:6px 16px;font-size:15px}
+.facts dt{color:var(--muted)}
+.facts dd{text-align:right}
+.facts .big{font-size:18px}
+.hint{font-size:14px;color:var(--muted)}
+.bk .zones{display:flex;flex-direction:column;gap:10px}
+.bk .zones li{padding:0 0 10px;border-bottom:1px solid var(--line)}
+.bk .field input:not([type=checkbox]){min-height:48px;padding:10px 12px;border-radius:2px}
+.bk .check{flex-direction:row;align-items:flex-start;gap:12px}
+.bk .check input{width:22px;height:22px;min-height:0;padding:0;margin-top:2px;accent-color:var(--garnet);flex:none}
+.timer{border:1px solid var(--garnet);padding:16px;display:flex;justify-content:space-between;align-items:center;gap:12px}
+.timer strong{font-family:var(--head);font-size:40px;letter-spacing:.06em}
+.alert{border-left:2px solid var(--garnet-text);padding:10px 14px;background:var(--raised);font-size:15px}
+.bk .row{display:flex;gap:10px;flex-wrap:wrap}
+.code{font-family:var(--head);font-size:30px;letter-spacing:.12em}
+.soldout{margin-top:28px;border:1px solid var(--line);padding:40px 28px;text-align:center}
+.soldout h2{font-size:32px;margin-bottom:10px}
+.soldout p{color:var(--muted);max-width:44ch;margin:0 auto 20px}
 
 /* Manager region, from fanglle-pengelola-mockup.jsx */
 .app{min-height:100vh;display:grid;grid-template-columns:1fr}

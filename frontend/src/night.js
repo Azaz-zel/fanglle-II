@@ -59,3 +59,12 @@ export function lineupWarnings(rows, close, opens) {
     });
   return w;
 }
+
+// Table booking (S3). A table is booked, held by someone else, too small for the group, or free.
+export const tableState = (t, party) =>
+  t.status === 'booked' ? 'booked' : t.status === 'held' ? 'held' : t.capacity < party ? 'small' : 'free';
+
+// Whole seconds until the server's held_until (ISO with offset); 0 once it has passed.
+// ponytail: trusts the guest's clock; send server time with the booking if skewed phones become a problem.
+export const secondsLeft = (until, now = Date.now()) => Math.max(0, Math.ceil((Date.parse(until) - now) / 1000));
+export const mmss = (s) => `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;

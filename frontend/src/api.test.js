@@ -74,3 +74,12 @@ test('on 419 refreshes the CSRF cookie and retries once, no more', async () => {
   expect(fetch.mock.calls.map((c) => c[0])).toEqual(['/api/login', '/sanctum/csrf-cookie', '/api/login']);
   expect(err.status).toBe(419);
 });
+
+test('guest writes skip the CSRF cookie and header (public routes carry no session)', async () => {
+  const fetch = vi.fn(async () => json(201, { code: 'F2-AB12' }));
+  vi.stubGlobal('fetch', fetch);
+
+  expect(await api('/api/table-bookings', { method: 'POST', body: { date: '2026-09-24' }, guest: true })).toEqual({ code: 'F2-AB12' });
+  expect(fetch.mock.calls.map((c) => c[0])).toEqual(['/api/table-bookings']);
+  expect(fetch.mock.calls[0][1].headers['X-XSRF-TOKEN']).toBeUndefined();
+});

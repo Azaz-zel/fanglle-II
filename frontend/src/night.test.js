@@ -1,5 +1,5 @@
 import { expect, test } from 'vitest';
-import { clock, dayLabel, dayParts, lineupWarnings, nightMinutes } from './night.js';
+import { clock, dayLabel, dayParts, lineupWarnings, mmss, nightMinutes, secondsLeft, tableState } from './night.js';
 
 test('nightMinutes: before 12:00 belongs to the night before (F2)', () => {
   const cases = {
@@ -43,4 +43,24 @@ test('sets across midnight compare by night time, and sets outside opening hours
   expect(lineupWarnings([set('Early', 'support', '14:00', '16:00')], '04:00', '15:00')).toEqual([
     'Early runs outside opening hours, 3 pm to 4 am.',
   ]);
+});
+
+test('secondsLeft counts down to the server held_until and stops at 0', () => {
+  const now = Date.parse('2026-09-24T22:00:00+08:00');
+  expect(secondsLeft('2026-09-24T22:15:00+08:00', now)).toBe(900);
+  expect(secondsLeft('2026-09-24T14:15:00Z', now)).toBe(900); // same instant, other offset
+  expect(secondsLeft('2026-09-24T22:00:00.400+08:00', now)).toBe(1); // part of a second still counts
+  expect(secondsLeft('2026-09-24T22:00:00+08:00', now)).toBe(0);
+  expect(secondsLeft('2026-09-24T21:59:00+08:00', now)).toBe(0); // passed: 0, never negative
+  expect([900, 61, 9, 0].map(mmss)).toEqual(['15:00', '01:01', '00:09', '00:00']);
+});
+
+test('tableState: booked and held win over size, then small, then free', () => {
+  const t = (status, capacity) => ({ status, capacity });
+  expect(tableState(t('booked', 12), 2)).toBe('booked');
+  expect(tableState(t('held', 12), 2)).toBe('held');
+  expect(tableState(t('booked', 4), 6)).toBe('booked');
+  expect(tableState(t('free', 4), 6)).toBe('small');
+  expect(tableState(t('free', 4), 4)).toBe('free');
+  expect(tableState(t('free', 12), 1)).toBe('free');
 });

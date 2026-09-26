@@ -15,13 +15,14 @@ const xsrf = () => {
 
 const csrfCookie = () => fetch('/sanctum/csrf-cookie', { credentials: 'same-origin', headers: { Accept: 'application/json' } });
 
-export async function api(path, { method = 'GET', body } = {}, retried = false) {
-  const write = method !== 'GET' && method !== 'HEAD';
-  if (write && !xsrf()) await csrfCookie();
+// guest: public routes run without the session middleware (F1), so there is no CSRF cookie to fetch.
+export async function api(path, { method = 'GET', body, guest = false } = {}, retried = false) {
+  const csrf = !guest && method !== 'GET' && method !== 'HEAD';
+  if (csrf && !xsrf()) await csrfCookie();
 
   const headers = { Accept: 'application/json' };
   if (body !== undefined) headers['Content-Type'] = 'application/json';
-  const token = write && xsrf();
+  const token = csrf && xsrf();
   if (token) headers['X-XSRF-TOKEN'] = token;
 
   const res = await fetch(path, {
@@ -32,7 +33,7 @@ export async function api(path, { method = 'GET', body } = {}, retried = false) 
   });
 
   // 419 = stale CSRF token (tab left open past the session). Refresh it and try once more.
-  if (res.status === 419 && write && !retried) {
+  if (res.status === 419 && csrf && !retried) {
     await csrfCookie();
     return api(path, { method, body }, true);
   }
