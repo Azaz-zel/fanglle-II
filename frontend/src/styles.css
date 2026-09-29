@@ -359,6 +359,96 @@ html{scroll-behavior:smooth}
   background:transparent;color:var(--text);font-size:14px;line-height:1.2;cursor:pointer;white-space:nowrap;transition:background .15s,border-color .15s}
 .act:hover{border-color:var(--text);background:var(--raised)}
 .ok{color:var(--paid);font-size:15px}
+.navgrp{display:contents}
+.navbtn{justify-content:space-between;gap:10px}
+.count{font-size:12px;min-width:22px;padding:1px 7px;border-radius:10px;background:var(--garnet);color:var(--on-garnet);text-align:center}
+.vh{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+
+/* Manager's night (S7): Overview, Table bookings, Guestlist, Door log, detail panel. Scoped to .app: .hero, .meter and friends
+   are the admin mockup's names, and the public site and the door have their own. Timeline steps are .tstep, the two-card
+   row is .duo: .step and .pair are taken. */
+.app .flash{border:1px solid var(--amethyst-soft);background:var(--raised);padding:12px 16px;border-radius:8px}
+.app .over{display:grid;grid-template-columns:minmax(0,1fr);gap:14px}
+@media (min-width:1000px){.app .over{grid-template-columns:minmax(0,1.6fr) minmax(0,1fr)}}
+.app .hero{background:var(--surface);border:1px solid var(--amethyst-deep);border-radius:12px;padding:26px;display:flex;flex-direction:column;gap:20px}
+.app .hero .k{font-size:14px;color:var(--muted)}
+.bignum{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.bignum strong{font-family:var(--head);font-size:clamp(56px,7vw,84px);line-height:1}
+.bignum span{color:var(--muted);font-size:18px}
+.capbar{height:10px;background:var(--raised);border-radius:5px;overflow:hidden}
+.capbar i,.app .meter i{display:block;height:100%;background:var(--amethyst-soft)}
+.tline{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px;border-top:1px solid var(--line);padding-top:14px}
+.tstep{font-size:14px;color:var(--muted)}
+.tstep b{display:block;font-size:16px;color:var(--text)}
+.tstep.done b{color:var(--muted);text-decoration:line-through;text-decoration-color:var(--amethyst)}
+.tstep.next b{color:var(--garnet-text)}
+.urgent,.attn li{display:grid;grid-template-columns:minmax(0,1fr) 128px;gap:16px;align-items:center}
+.urgent{border:1px solid var(--garnet);border-radius:8px;padding:14px 16px}
+.urgent small,.attn small{display:block;color:var(--muted);font-size:14px}
+.urgent .act,.attn .act{width:100%}
+.minis{display:grid;grid-template-columns:minmax(0,1fr);gap:14px}
+.mini{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px;color:var(--text);text-decoration:none;
+  display:flex;flex-direction:column;gap:4px;transition:border-color .15s}
+.mini:hover{border-color:var(--amethyst-soft)}
+.mini .k{font-size:14px;color:var(--muted)}
+.mini .v{font-family:var(--head);font-size:32px;line-height:1.1}
+.mini .v.money{font-size:26px}
+.mini .of{font-size:18px;color:var(--muted)}
+.mini .n{font-size:14px;color:var(--soft)}
+.mini .go{font-size:14px;color:var(--muted);margin-top:4px}
+.app .meter{display:block;height:6px;background:var(--raised);border-radius:3px;overflow:hidden;margin-top:6px}
+/* minmax(0,1fr): a one-column grid would otherwise grow to the chart's full width on a phone */
+.duo{display:grid;grid-template-columns:minmax(0,1fr);gap:14px}
+@media (min-width:1000px){.duo{grid-template-columns:minmax(0,1.4fr) minmax(0,1fr)}}
+.app .card h2{font-size:15px;color:var(--soft);margin-bottom:14px}
+.chart{display:flex;align-items:flex-end;gap:6px;height:160px;overflow-x:auto}
+.barbtn{flex:1;min-width:22px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:6px;height:100%;background:transparent;border:0;
+  color:var(--text);cursor:pointer;border-radius:6px;padding:0 2px}
+.barbtn i{display:block;width:100%;max-width:44px;background:var(--amethyst);border-radius:4px 4px 0 0;min-height:2px}
+.barbtn[aria-pressed="true"] i{background:var(--garnet)}
+.barbtn span{font-size:12px;color:var(--muted)}
+.barbtn b{font-size:13px}
+.readout{margin-top:12px;font-size:15px;color:var(--soft);border-top:1px solid var(--line);padding-top:12px}
+.attn{list-style:none}
+.attn li{padding:14px 0;border-top:1px solid var(--line)}
+.attn li:first-child{border-top:0;padding-top:0}
+.flag{color:var(--garnet-text)}
+
+.summary{display:flex;gap:18px;flex-wrap:wrap;align-items:center;font-size:15px;color:var(--soft)}
+.summary .meter{width:220px;margin:0}
+.toolbar{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end}
+.toolbar.wide{gap:24px}
+.toolbar .grow{flex:1;min-width:220px}
+.sortby{min-width:180px}
+.search,.select{min-height:44px;padding:8px 12px;background:var(--surface);border:1px solid var(--line);border-radius:8px;color:var(--text);font-size:15px;width:100%}
+.app .chips{gap:6px}
+/* relative: the hidden "Actions" header stays inside the scrolling box instead of widening the page */
+.tablewrap{position:relative;overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+.tablewrap table{width:100%;border-collapse:collapse;min-width:720px}
+.tablewrap th{text-align:left;font-size:13px;color:var(--muted);padding:12px 16px;border-bottom:1px solid var(--line)}
+.tablewrap td{padding:12px 16px;border-bottom:1px solid var(--line-soft);font-size:15px;vertical-align:middle}
+.tablewrap th.c,.tablewrap td.c{text-align:center}
+.tablewrap tr:last-child td{border-bottom:0}
+.tablewrap tbody tr:hover{background:var(--raised)}
+.tablewrap td small{display:block;color:var(--muted);font-size:13px}
+.empty,.error{padding:36px 20px;text-align:center;color:var(--muted)}
+.empty .act,.error .act{margin-top:10px}
+.error{color:var(--text)}
+.act.danger{border-color:var(--garnet-text);color:var(--garnet-text)}
+
+/* Detail panel: a native modal <dialog> on the right edge (focus kept inside, Escape and the backdrop close it). */
+.dlg.drawer{margin:0 0 0 auto;width:min(440px,100%);height:100%;max-height:none;border:0;border-left:1px solid var(--amethyst-deep);border-radius:0;padding:0}
+.dlg.drawer[open]{gap:0;overflow-y:auto}
+.dlg.drawer::backdrop{background:rgba(12,8,18,.7)}
+.dh{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;padding:22px;border-bottom:1px solid var(--line)}
+.dh .sub{margin-top:0}
+.dh h2{font-size:28px;line-height:1.15;overflow-wrap:anywhere}
+.db{padding:22px;display:flex;flex-direction:column;gap:18px}
+.tl{list-style:none;border-left:1px solid var(--amethyst);margin-left:4px}
+.tl li{padding:0 0 12px 16px;font-size:15px;position:relative}
+.tl li::before{content:"";position:absolute;left:-4px;top:8px;width:7px;height:7px;background:var(--amethyst-soft);clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%)}
+.drow{display:flex;gap:10px;flex-wrap:wrap}
+@media (prefers-reduced-motion:reduce){.mini{transition:none}}
 
 /* Admin Events */
 .evgrid{display:grid;grid-template-columns:1fr;gap:14px}

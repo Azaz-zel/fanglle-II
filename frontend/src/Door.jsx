@@ -2,11 +2,11 @@ import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { openDB } from 'idb';
 import { api, errorText } from './api.js';
-import { dayLabel } from './night.js';
+import { dayLabel, offsetOf, wallClock } from './night.js';
 import { SignOut, Staff } from './staff.jsx';
 import {
   applyResults, checkIn, codeHash, guestLine, HOW, importKey, judge, keyAction, kindLabel, mergePasses, nightOf, normalizeCode,
-  notOurs, offsetOf, pendingBy, readQr, remainingOf, search, sendQueue, shiftDate, syncLine, tally, typedCode, wallClock, within,
+  notOurs, pendingBy, readQr, remainingOf, search, sendQueue, shiftDate, syncLine, tally, typedCode, within,
   wrongCode, wrongNight,
 } from './door.js';
 

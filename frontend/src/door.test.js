@@ -3,9 +3,10 @@
 import { createHash } from 'node:crypto';
 import { describe, expect, test } from 'vitest';
 import {
-  applyResults, checkIn, codeHash, guestLine, importKey, judge, keyAction, kindLabel, mergePasses, nightOf, normalizeCode, offsetOf,
-  pendingBy, readQr, search, sendQueue, shiftDate, syncLine, tally, typedCode, wallClock, within, wrongCode, wrongNight,
+  applyResults, checkIn, codeHash, guestLine, importKey, judge, keyAction, kindLabel, mergePasses, nightOf, normalizeCode,
+  pendingBy, readQr, search, sendQueue, shiftDate, syncLine, tally, typedCode, within, wrongCode, wrongNight,
 } from './door.js';
+import { offsetOf, wallClock } from './night.js';
 
 const b64url = (buf) => Buffer.from(buf).toString('base64url');
 

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { api, errorText, weekQuery } from './api.js';
 import { clock, dayLabel, lineupWarnings, nightMinutes, ROLES } from './night.js';
@@ -40,7 +41,9 @@ export default function Events() {
   const opens = useQuery(weekQuery).data?.events[0]?.opens_at; // the admin detail has no opens_at; it is one value for every night (F3)
   const events = list.data?.events ?? [];
 
-  const [pick, setPick] = useState(null);
+  // The Overview and Guestlist send a night here to change its places or closing time.
+  const sent = useLocation().state?.date;
+  const [pick, setPick] = useState(sent ?? null);
   const [creating, setCreating] = useState(false);
   const [startFrom, setStartFrom] = useState('blank');
   const [draft, setDraft] = useState(null);

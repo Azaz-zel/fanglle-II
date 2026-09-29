@@ -40,12 +40,6 @@ export function wrongCode(times, now) {
   return recent.length >= 10 ? { times: [], lockedUntil: now + 60_000 } : { times: recent, lockedUntil: 0 };
 }
 
-// The club's wall clock. The offset comes from the server's synced_at ("…+08:00"), so the device's own zone never matters.
-export const offsetOf = (iso) => {
-  const m = /([+-])(\d\d):(\d\d)$/.exec(iso ?? '');
-  return m ? (m[1] === '-' ? -1 : 1) * (Number(m[2]) * 60 + Number(m[3])) : 0;
-};
-export const wallClock = (ms, offset) => new Date(ms + offset * 60_000).toISOString().slice(11, 16);
 // F2: the night a moment belongs to. Before 12:00 on the club's clock is still the night before.
 export const nightOf = (ms, offset) => new Date(ms + offset * 60_000 - 12 * 3_600_000).toISOString().slice(0, 10);
 export const shiftDate = (iso, days) => new Date(Date.parse(`${iso}T00:00:00Z`) + days * 86_400_000).toISOString().slice(0, 10);

@@ -29,6 +29,15 @@ export const dayLabel = (iso) => {
 
 export const idr = (n) => `IDR ${Number(n).toLocaleString('en-US')}`;
 
+// The club's wall clock. The offset comes from a server timestamp ("…+08:00"), so the device's own zone never matters.
+export const offsetOf = (iso) => {
+  const m = /([+-])(\d\d):(\d\d)$/.exec(iso ?? '');
+  return m ? (m[1] === '-' ? -1 : 1) * (Number(m[2]) * 60 + Number(m[3])) : 0;
+};
+export const wallClock = (ms, offset) => new Date(ms + offset * 60_000).toISOString().slice(11, 16);
+// "HH:MM" of a server timestamp, already on the club's clock.
+export const hhmm = (iso) => iso.slice(11, 16);
+
 export const ROLES = { headliner: 'Headliner', guest_star: 'Guest star', support: 'Support', warm_up: 'Warm-up', closing: 'Closing', b2b: 'B2B' };
 
 export const headliners = (lineup) => lineup.filter((s) => s.role === 'headliner');
