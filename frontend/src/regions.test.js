@@ -42,15 +42,23 @@ const QRCODE = 'too big to be stored in a QR Code';
 const IDB = 'upgradeneeded';
 const text = (k) => readFileSync(new URL(manifest[k].file, app), 'utf8');
 
-test('qrcode and idb load only with /p/:id, never with the entry or another region', () => {
-  const pass = [...graph(['src/Pass.jsx'])].map(text).join('');
-  expect(pass).toContain(QRCODE);
-  expect(pass).toContain(IDB);
+// idb is also the door's offline store (PRD 2.4); it stays out of the entry, the public site, login and admin.
+test('qrcode loads only with /p/:id; idb only with /p/:id and /door', () => {
+  const all = (region) => [...graph([region])].map(text).join('');
+  expect(all('src/Pass.jsx')).toContain(QRCODE);
+  expect(all('src/Pass.jsx')).toContain(IDB);
+  expect(all('src/Door.jsx')).toContain(IDB);
   for (const region of [entry, 'src/Public.jsx', 'src/Login.jsx', 'src/Door.jsx', 'src/Admin.jsx'])
-    for (const k of graph([region])) {
-      expect(text(k), manifest[k].file).not.toContain(QRCODE);
-      expect(text(k), manifest[k].file).not.toContain(IDB);
-    }
+    for (const k of graph([region])) expect(text(k), manifest[k].file).not.toContain(QRCODE);
+  for (const region of [entry, 'src/Public.jsx', 'src/Login.jsx', 'src/Admin.jsx'])
+    for (const k of graph([region])) expect(text(k), manifest[k].file).not.toContain(IDB);
+});
+
+test('the camera reader loads only when the door asks for it, never with /p/:id', () => {
+  const zxing = Object.keys(manifest).find((k) => k.includes('@zxing/browser'));
+  expect(zxing, 'a separate @zxing/browser chunk').toBeDefined();
+  expect(manifest['src/Door.jsx'].dynamicImports).toContain(zxing);
+  expect(graph([entry, 'src/Pass.jsx']).has(zxing)).toBe(false);
 });
 
 test('the service worker precaches the /p/:id shell and fonts, and no admin, door or login code', () => {

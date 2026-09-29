@@ -17,7 +17,9 @@ export function Staff({ roles, children }) {
     );
   if (me.error?.status === 401)
     return <Navigate replace to={`/login?next=${encodeURIComponent(loc.pathname + loc.search)}`} />;
-  if (me.error)
+  // A background refetch that got no answer (the door without signal) keeps the page it already knows; only a first
+  // load that failed stops here.
+  if (me.error && !me.data)
     return (
       <Solo>
         <p role="alert">{errorText(me.error)}</p>

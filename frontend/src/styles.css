@@ -398,14 +398,135 @@ html{scroll-behavior:smooth}
 @media (min-width:760px){.fs{grid-template-columns:repeat(3,1fr)}}
 .fs legend{font-size:14px;color:var(--soft);margin-bottom:8px}
 
-/* Door region, from fanglle-pemindai-pintu-mockup.jsx. Scanner result colours live only here. */
-.doorapp{min-height:100vh;font-size:17px;
-  --ok:#0F6B38; --ok-text:#F2FFF6; --bad:#A3162F; --bad-text:#FBF7FB; --warn:#C77A12; --warn-text:#140A00}
-/* Name sits under the brand so Sign out keeps its row at 360px instead of wrapping alone. */
+/* Shared page header (door and the guest QR page) */
 .top{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:14px 18px;border-bottom:1px solid var(--line)}
 .top .n{font-size:14px;color:var(--muted)}
 .top .out{margin:0}
-.doorapp main{padding:18px}
+
+/* Door region (/door): fanglle-pemindai-pintu-mockup.jsx on a phone, fanglle-pemindai-pintu-desktop-mockup.jsx under .wide.
+   The mockups' phone and window frames are preview chrome; the page is the device. Scanner result colours live only here.
+   Tone classes are r-ok/r-bad/r-warn: .ok is taken by the admin region. */
+.doorapp{min-height:100vh;display:flex;flex-direction:column;font-size:17px;line-height:1.5;
+  --ok:#0F6B38; --ok-text:#F2FFF6; --ok-sub:#D2F2DE; --bad:#A3162F; --bad-text:#FBF7FB; --bad-sub:#F6D9DE;
+  --warn:#C77A12; --warn-text:#140A00; --warn-sub:#2A1600}
+.doorapp:not(.wide){max-width:560px;margin:0 auto}
+.doorapp .ttl{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.doorapp .top .t{font-size:20px;letter-spacing:.06em}
+.sync{padding:8px 18px;font-size:14px;color:var(--muted);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:8px}
+.sync.off{color:var(--text);background:var(--raised)}
+.sync a{color:var(--text)}
+.dot{width:8px;height:8px;border-radius:50%;background:#3FA66B;flex:none}
+.sync.off .dot,.dot.amber{background:#C77A12}
+.nums{display:grid;grid-template-columns:repeat(3,1fr);border-bottom:1px solid var(--line)}
+.nums div{padding:12px 10px;text-align:center;border-right:1px solid var(--line)}
+.nums div:last-child{border-right:0}
+.nums strong{display:block;font-family:var(--head);font-size:26px}
+.nums span{font-size:13px;color:var(--muted)}
+
+.doorapp .btn{min-height:56px;padding:12px 18px;border-radius:4px;font-size:17px;white-space:normal;text-align:center}
+.doorapp:not(.wide) .btn{width:100%}
+.doorapp .btn.solid,.doorapp .btn.solid:enabled:hover,.doorapp a.btn.solid:hover{background:var(--text);color:var(--obsidian);border-color:var(--text)}
+.doorapp .btn:focus-visible,.cnt button:focus-visible,.doorapp input:focus-visible,.dlist button:focus-visible,.res:focus-visible{outline:3px solid #FFFFFF;outline-offset:3px}
+.doorapp kbd{font-family:var(--body);font-size:14px;border:1px solid currentColor;border-radius:4px;padding:1px 7px}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.startwrap{flex:1;display:flex;flex-direction:column;justify-content:center;gap:16px;padding:28px}
+.startwrap h1{font-size:32px;line-height:1.15}
+.startwrap p{color:var(--muted)}
+
+.dmain{flex:1;padding:18px;display:flex;flex-direction:column;gap:14px}
+.cam{position:relative;aspect-ratio:1;background:#000;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;overflow:hidden}
+.cam video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.frame{position:relative;width:62%;aspect-ratio:1;border:3px solid var(--text);border-radius:10px}
+/* The live picture can be bright; the shadow keeps the line readable over it. */
+.cam p{position:absolute;bottom:14px;left:0;right:0;padding:0 16px;text-align:center;font-size:15px;color:var(--soft);text-shadow:0 1px 3px #000}
+.doorapp .field input,.doorapp .panel input{min-height:56px;padding:10px 14px;background:var(--surface);border:1px solid var(--line);border-radius:4px;color:var(--text);font-size:18px}
+.codef{display:flex;flex-direction:column;gap:6px}
+.codef label{font-size:15px}
+.codef input{letter-spacing:.14em;text-transform:uppercase}
+.codef input::placeholder{letter-spacing:normal;text-transform:none}
+.codef input:disabled{opacity:.55}
+.codef .btn{margin-top:6px}
+.dlist{list-style:none;border-top:1px solid var(--line)}
+.dlist li{border-bottom:1px solid var(--line)}
+.dlist button{width:100%;text-align:left;background:transparent;border:0;color:var(--text);font-size:17px;padding:14px 4px;min-height:56px;
+  cursor:pointer;display:flex;justify-content:space-between;gap:10px;overflow-wrap:anywhere}
+.dlist button:hover{background:var(--surface)}
+.dlist small{color:var(--muted);font-size:14px;white-space:nowrap}
+.dlist span small{white-space:normal}
+.log{list-style:none;font-size:15px}
+.log li{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid var(--line)}
+.log .at,.log .how{color:var(--muted)}
+.log .how{font-size:14px}
+
+/* Result: over the whole phone screen, as in the mockup; in the left pane on a wide screen. */
+.res{display:flex;flex-direction:column;gap:16px;padding:28px 22px}
+.doorapp:not(.wide) .res{position:fixed;inset:0;z-index:10;overflow-y:auto}
+.res.r-ok{background:var(--ok);color:var(--ok-text)}
+.res.r-bad{background:var(--bad);color:var(--bad-text)}
+.res.r-warn{background:var(--warn);color:var(--warn-text)}
+.res .icon{font-family:var(--head);font-size:22px;letter-spacing:.14em}
+.res h2{font-size:42px;line-height:1.1;overflow-wrap:anywhere}
+.res .why{font-size:18px}
+.res.r-ok .gmeta{color:var(--ok-sub)}
+.res.r-bad .why{color:var(--bad-sub)}
+.res.r-warn .why{color:var(--warn-sub)}
+.gname{font-size:30px;line-height:1.2;overflow-wrap:anywhere}
+.gmeta{font-size:17px}
+.idcheck{border:2px solid currentColor;padding:12px 14px;font-size:18px}
+.cnt{display:flex;gap:8px;flex-wrap:wrap}
+.cnt button{min-width:56px;min-height:56px;font-size:22px;border-radius:4px;cursor:pointer;background:transparent;color:inherit;border:2px solid currentColor}
+.cnt button[aria-pressed="true"]{background:var(--ok-text);color:var(--ok)}
+.acts{display:flex;flex-direction:column;gap:12px;margin-top:auto}
+.res .btn.go{background:var(--ok-text);color:var(--ok);border:0}
+.res .btn.plain{background:transparent;color:inherit;border:2px solid currentColor}
+.res.r-bad .btn.next{background:var(--bad-text);color:var(--bad);border:0}
+.res.r-warn .btn.next{background:var(--warn-text);color:var(--warn);border:0}
+.blocked{background:rgba(0,0,0,.28);padding:12px 16px;font-size:18px}
+
+/* Wide: handheld scanner at a desk. */
+.wide .top{padding:14px 24px;gap:24px;justify-content:flex-start}
+.wide .top .t{font-size:24px}
+.wide .top .n{font-size:17px}
+.wide .top .out{margin-left:12px}
+.wide .sync{padding:8px 24px}
+.wide .dot{width:9px;height:9px}
+.wide .nums{display:flex;gap:28px;margin-left:auto;border:0}
+.wide .nums div{padding:0;border:0;text-align:right}
+.wide .nums strong{line-height:1.1}
+.wide .btn{min-height:60px;padding:12px 26px;font-size:19px}
+.wide .startwrap{gap:18px;padding:48px;max-width:640px}
+.wide .startwrap h1{font-size:52px;line-height:1.1}
+.wide .startwrap .btn{align-self:flex-start}
+.dbody{flex:1;display:grid;grid-template-columns:minmax(0,2fr) minmax(320px,1fr)}
+.stage{border-right:1px solid var(--line);display:flex;flex-direction:column}
+.idle{flex:1;display:flex;flex-direction:column;justify-content:center;gap:18px;padding:48px}
+.idle h1{font-size:56px;line-height:1.1}
+.idle p{color:var(--muted);max-width:52ch}
+.listen{display:flex;align-items:center;gap:12px;font-size:19px}
+.wide .listen .dot{width:14px;height:14px}
+.keys{display:flex;gap:18px;flex-wrap:wrap;font-size:15px;color:var(--muted)}
+.keys kbd{margin-right:6px}
+.wide .res{flex:1;gap:18px;padding:40px 48px}
+.wide .res .icon{font-size:26px;letter-spacing:.16em}
+.wide .res h2{font-size:64px;line-height:1.05}
+.wide .gname{font-size:40px;line-height:1.15}
+.wide .gmeta{font-size:20px}
+.wide .res .why{font-size:22px;max-width:40ch}
+.wide .idcheck{padding:12px 16px;font-size:20px;align-self:flex-start}
+.wide .cnt{gap:10px}
+.wide .cnt button{min-width:64px;min-height:64px;font-size:26px}
+.wide .acts{flex-direction:row;flex-wrap:wrap}
+.wide .btn kbd{margin-left:4px}
+.aside{display:flex;flex-direction:column;min-width:0}
+.doorapp .panel{padding:22px 24px;border-bottom:1px solid var(--line);display:flex;flex-direction:column;gap:10px}
+.doorapp .panel:last-child{border-bottom:0}
+.doorapp .ptitle{font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.doorapp .panel input{min-height:52px;font-size:17px}
+.wide .codef .btn{align-self:flex-start;min-height:48px;padding:8px 20px;font-size:16px}
+.wide .dlist{border-top:0}
+.wide .dlist li{border-top:1px solid var(--line);border-bottom:0}
+.wide .dlist button{font-size:16px;padding:12px 4px;min-height:52px}
+.wide .log li{display:grid;grid-template-columns:52px 1fr auto;padding:9px 0;border-top:1px solid var(--line);border-bottom:0}
 
 /* Guest QR page (/p/:id), from fanglle-qr-tamu-mockup.jsx. The mockup's phone frame is preview chrome; the page is the phone. */
 .pass{min-height:100vh;max-width:480px;margin:0 auto;display:flex;flex-direction:column;font-size:17px;line-height:1.55}

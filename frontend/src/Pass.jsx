@@ -7,7 +7,7 @@ import { api } from './api.js';
 import { dayLabel, entryCode, idr, PASS_KINDS, passOrCopy, passState, validUntil, ZONES } from './night.js';
 import { Button, Dialog, Mark } from './ui.jsx';
 
-// Guest QR page (/p/:id, S5), from fanglle-qr-tamu-mockup.jsx. Its own chunk, so qrcode and idb load only here.
+// Guest QR page (/p/:id, S5), from fanglle-qr-tamu-mockup.jsx. Its own chunk: qrcode loads only here, idb only here and at the door.
 
 // The build lives under /app/, the page under /p/. A worker at the site root has scope / without any server header.
 if (import.meta.env.PROD) navigator.serviceWorker?.register('/sw.js').catch(() => {});
