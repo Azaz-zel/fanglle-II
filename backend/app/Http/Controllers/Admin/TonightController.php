@@ -43,6 +43,7 @@ class TonightController extends Controller
         }, range(intdiv(Night::minutes($opensAt), 60), intdiv(Night::minutes($event->close_time), 60)));
 
         return response()->json([
+            'now' => now()->toIso8601String(), // the club's clock for the timeline, whatever zone the manager's device is in
             'event' => [
                 'date' => $event->date->toDateString(),
                 'name' => $event->name,

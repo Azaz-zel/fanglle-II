@@ -163,6 +163,7 @@ class AdminOperationsTest extends TestCase
             ->assertJsonPath('inside', 11)
             ->assertJsonPath('guestlist', ['signed' => 13, 'quota' => 200, 'arrived' => 5])
             ->assertJsonPath('tables', ['total' => 16, 'booked' => 2, 'to_arrive' => 1])
+            ->assertJsonPath('now', now()->toIso8601String())
             ->assertJsonPath('deposits', 24000000)
             ->assertJsonPath('held', [['code' => 'F2-4LWX', 'table_code' => 'S3', 'name' => 'Komang Adi', 'held_until' => now()->addMinutes(6)->toIso8601String()]])
             ->assertJsonPath('overrides', ['count' => 1, 'latest' => ['holder_name' => 'Ayu Pratiwi', 'count' => 2, 'scanned_at' => '2026-09-25T23:12:00+08:00']]);
