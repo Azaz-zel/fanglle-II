@@ -1,7 +1,13 @@
 <?php
 
+use App\Models\CheckIn;
+use App\Models\Event;
+use App\Models\GuestlistSignup;
+use App\Models\Pass;
 use App\Models\TableBooking;
+use Database\Seeders\DemoWeekSeeder;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Schedule;
 use Symfony\Component\Process\Process;
@@ -78,5 +84,31 @@ Artisan::command('fanglle:backup', function () {
     }
 })->purpose('Dump the database to storage/app/backups and delete old dumps');
 
+// PRD Backend 2.3: the demo stays alive long after it was built. Nights from before this week (F2: the week of tonight) go, with
+// every booking, signup, pass and check-in on them; then this week's Thursday to Sunday are put back where missing.
+// Staff and the floor plan stay. Running it twice changes nothing.
+Artisan::command('fanglle:demo-reset', function () {
+    $monday = DemoWeekSeeder::thursday()->subDays(3)->toDateString();
+    $old = Event::where('date', '<', $monday)->pluck('id');
+
+    DB::transaction(function () use ($old) {
+        $passes = Pass::whereIn('event_id', $old)->pluck('id');
+        $bookings = TableBooking::whereIn('event_id', $old);
+        CheckIn::whereIn('pass_id', $passes)->delete();
+        Pass::whereIn('id', $passes)->delete();
+        DB::table('webhook_events')->whereIn('invoice_id', (clone $bookings)->whereNotNull('xendit_invoice_id')->pluck('xendit_invoice_id'))->delete();
+        $bookings->delete();
+        GuestlistSignup::whereIn('event_id', $old)->delete();
+        Event::whereIn('id', $old)->delete(); // line-up slots cascade
+    });
+
+    (new DemoWeekSeeder)->run();
+
+    $week = Event::whereBetween('date', [DemoWeekSeeder::thursday()->toDateString(), DemoWeekSeeder::thursday()->addDays(3)->toDateString()])
+        ->orderBy('date')->get()->map(fn (Event $event) => $event->date->format('D j M').' '.$event->name)->join(', ');
+    $this->info("Removed {$old->count()} nights from before this week. This week: {$week}.");
+})->purpose('Remove past weeks and their orders, then put back this week\'s demo nights');
+
 Schedule::command('bookings:expire')->everyMinute()->withoutOverlapping();
 Schedule::command('fanglle:backup')->dailyAt('05:00');
+Schedule::command('fanglle:demo-reset')->dailyAt('12:00'); // noon: when a new night starts (F2)
