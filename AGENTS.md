@@ -13,7 +13,7 @@ Web nightclub fiktif untuk portofolio Ralph de Vinca Group. Reservasi meja denga
 ```
 backend/    Laravel, API + penyaji hasil build
 frontend/   React + Vite, build ke backend/public/app
-docs/       PRD, mockup, qa-log.md
+docs/       PRD, mockup, qa-log.md, progress.md (status terkini)
 tests/      fixtures/ (lintas bahasa), concurrency/ (beban bersamaan)
 ```
 
