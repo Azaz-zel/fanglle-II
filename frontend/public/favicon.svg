@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- The logo's II: garnet-text on obsidian (PRD 2.1). Solid bars, not the Poiret One glyph: its hairlines vanish at 16px. -->
+  <rect width="32" height="32" rx="6" fill="#0C0812"/>
+  <path fill="#E5566B" d="M7 7h18v3.5H21.5v11H25V25H7v-3.5h3.5v-11H7zM14 10.5v11h4v-11z"/>
+</svg>
