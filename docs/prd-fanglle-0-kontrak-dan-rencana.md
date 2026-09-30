@@ -61,7 +61,7 @@ Laravel (API + penyaji hasil build) · React + Vite · MySQL 8 · Sanctum sesi c
 
 **F13. QR dikirim lewat email,** diantrekan. Kirim ulang maksimal 3 kali per jam per pendaftaran. Tidak ada WhatsApp API. Tombol "Share on WhatsApp" di halaman sukses hanya tautan `wa.me` dari HP pemesan.
 
-**F14. Data pribadi minimum:** nama, HP, email. Endpoint daftar untuk pintu dan admin hanya mengirim **4 digit terakhir** HP. Nomor lengkap tidak pernah ada di respons daftar.
+**F14. Data pribadi minimum:** nama, HP, email. Endpoint daftar untuk pintu dan ringkasan admin (`/admin/tonight`, riwayat pintu) hanya mengirim **4 digit terakhir** HP. *Diubah pemilik 30 Sep 2026:* daftar booking meja dan guestlist admin (peran `manager`) juga mengirim `phone` lengkap untuk tombol "Message on WhatsApp"; layar tetap hanya menampilkan 4 digit terakhir.
 
 **F15. Peran staf:** `manager` dan `door`. Minimal satu manager aktif. Tidak bisa menonaktifkan atau menurunkan peran diri sendiri. Undangan berlaku 48 jam; kata sandi dibuat penerima dari tautan undangan.
 
@@ -77,7 +77,8 @@ $table->id(); $table->string('name'); $table->string('email')->unique();
 $table->string('password')->nullable();          // null sampai undangan diterima
 $table->string('role', 12);                        // manager | door
 $table->string('status', 12)->default('invited'); // invited | active | disabled
-$table->string('invite_token_hash')->nullable(); $table->timestamp('invite_expires_at')->nullable();
+$table->string('invite_token_hash')->nullable(); $table->text('invite_token')->nullable(); // terenkripsi, hanya undangan baru, untuk "Copy link" (30 Sep 2026)
+$table->timestamp('invite_expires_at')->nullable();
 $table->timestamp('last_active_at')->nullable(); $table->rememberToken(); $table->timestamps();
 
 // events
@@ -224,6 +225,7 @@ Manifest per pass: `{ public_id, kind, holder_name, people, inside_count, phone_
 | POST | `/admin/table-bookings/{code}/no-show` | Tandai tidak datang, cabut pass |
 | GET | `/admin/events/{date}/guestlist?qr_mode=&arrival=&q=` | Daftar guestlist |
 | DELETE | `/admin/guestlist/{id}` | Hapus pendaftar yang belum masuk |
+| POST | `/admin/guestlist/{id}/resend` | Kirim ulang email QR, batas 3 per jam sama dengan tamu (30 Sep 2026) |
 | GET | `/admin/events/{date}/check-ins?overrides=1` | Riwayat pintu |
 | GET, POST | `/admin/events` | Daftar, buat acara |
 | GET, PUT | `/admin/events/{date}` | Baca, ubah acara + line-up |

@@ -79,7 +79,7 @@ HTTP ke Xendit dan Turnstile di-*fake* dengan `Http::fake()` di tes otomatis. Xe
 **T-A4** Manager menonaktifkan diri sendiri → `422`.
 **T-A5** Undangan lewat 48 jam → `410`. Token dipakai dua kali → `410`.
 **T-A6** Akun `disabled` kehilangan semua sesi aktif saat itu juga.
-**T-A7** Endpoint daftar admin tidak pernah mengirim HP lengkap.
+**T-A7** HP lengkap hanya ada di daftar booking meja dan guestlist admin untuk `manager` (keputusan pemilik 30 Sep 2026); ringkasan malam ini, riwayat pintu, dan manifest pintu tidak pernah mengirimnya.
 **T-A8** Tidak ada rute akun tamu: `POST /api/register` → `404`; halaman publik tidak memuat formulir login.
 
 ### 3.6a Cakupan aturan

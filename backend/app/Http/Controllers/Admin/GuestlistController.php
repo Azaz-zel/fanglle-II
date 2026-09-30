@@ -58,6 +58,14 @@ class GuestlistController extends Controller
         ]);
     }
 
+    /** "Resend QR" in the guest panel: the same email and the same 3-an-hour limit as the guest's own resend (F13). */
+    public function resend(string $id): JsonResponse
+    {
+        GuestlistSignup::whereNull('removed_at')->findOrFail($id)->resend();
+
+        return response()->json(['message' => 'QR email sent again.']);
+    }
+
     /** Only a signup nobody has come in on yet. Its QRs stop working, and the number can sign up again (the F8 index skips removed rows). */
     public function destroy(string $id): Response
     {
@@ -74,12 +82,13 @@ class GuestlistController extends Controller
         return response()->noContent();
     }
 
-    /** F14: the last 4 phone digits only. */
+    /** The full phone is for the manager's "Message on WhatsApp" (owner's decision, 2026-09-30); the screen shows the last 4. */
     private function item(GuestlistSignup $signup): array
     {
         return [
             'id' => $signup->id,
             'name' => $signup->name,
+            'phone' => $signup->phone,
             'phone_last4' => substr($signup->phone, -4),
             'qr_mode' => $signup->qr_mode,
             'party_size' => $signup->party_size,

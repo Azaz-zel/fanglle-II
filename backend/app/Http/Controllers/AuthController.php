@@ -60,7 +60,7 @@ class AuthController extends Controller
                 ['password.confirmed' => "The two passwords don't match.", 'password' => 'Use at least 10 characters.'],
             );
 
-            $user->forceFill(['password' => $data['password'], 'status' => StaffStatus::Active, 'invite_expires_at' => now()])->save();
+            $user->forceFill(['password' => $data['password'], 'status' => StaffStatus::Active, 'invite_expires_at' => now(), 'invite_token' => null])->save();
 
             return response()->json(['email' => $user->email, 'role' => $user->role]);
         });

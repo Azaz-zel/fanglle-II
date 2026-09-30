@@ -60,7 +60,7 @@ class TableBookingController extends Controller
         return response()->json($this->item($booking->load('venueTable', 'pass.checkIns')));
     }
 
-    /** F14: the last 4 phone digits only. */
+    /** The full phone is for the manager's "Message on WhatsApp" (owner's decision, 2026-09-30); the screen shows the last 4. */
     private function item(TableBooking $booking): array
     {
         $inside = $booking->pass?->inside_count ?? 0;
@@ -71,6 +71,7 @@ class TableBookingController extends Controller
             'table_code' => $booking->venueTable->code,
             'zone' => $booking->venueTable->zone,
             'name' => $booking->name,
+            'phone' => $booking->phone,
             'phone_last4' => substr($booking->phone, -4),
             'party_size' => $booking->party_size,
             'inside_count' => $inside,

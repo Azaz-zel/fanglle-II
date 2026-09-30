@@ -29,13 +29,14 @@ final class GuestContact
     }
 
     /**
-     * One number, one form (F8): "0812-3456", "62 812 3456" and "+62 812 3456" are the same Indonesian number.
-     * Foreign numbers keep the + the guest typed.
+     * One number, one form (F8): "0812-3456", "62 812 3456", "812 3456" and "+62 812 3456" are the same Indonesian number.
+     * A bare 8 is an Indonesian mobile typed after the form's "+62" placeholder; without it the number would be stored
+     * with no country code, and WhatsApp couldn't open it. Foreign numbers keep the + the guest typed.
      */
     public static function phone(string $typed): string
     {
         $digits = preg_replace('/[\s-]+/', '', $typed);
 
-        return preg_replace('/^(?:0|62)(?=\d)/', '+62', $digits);
+        return preg_replace('/^(?:0|62|(?=8))(?=\d)/', '+62', $digits);
     }
 }

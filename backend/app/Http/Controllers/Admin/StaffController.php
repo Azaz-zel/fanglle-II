@@ -120,6 +120,7 @@ class StaffController extends Controller
             'status' => $user->status,
             'last_active_at' => $user->last_active_at?->toIso8601String(),
             'invite_expires_at' => $user->invite_expires_at?->toIso8601String(),
+            'invite_url' => $user->inviteUrl(), // "Copy link": managers only, pending invites only
             'you' => $user->is($me),
         ];
     }

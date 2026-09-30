@@ -7,6 +7,7 @@ use App\Enums\CheckInMethod;
 use App\Enums\PassKind;
 use App\Enums\QrMode;
 use App\Enums\StaffRole;
+use App\Mail\GuestlistPasses;
 use App\Models\CheckIn;
 use App\Models\Event;
 use App\Models\GuestlistSignup;
@@ -100,7 +101,7 @@ class AdminOperationsTest extends TestCase
     public function test_door_staff_are_refused_on_every_admin_route(): void
     {
         $routes = collect(Route::getRoutes()->getRoutes())->filter(fn ($route) => str_starts_with($route->uri(), 'api/admin/'));
-        $this->assertGreaterThanOrEqual(19, $routes->count()); // S7 operations and S8 team
+        $this->assertGreaterThanOrEqual(20, $routes->count()); // S7 operations and S8 team
 
         $this->actingAs(User::firstWhere('role', StaffRole::Door));
         foreach ($routes as $route) {
@@ -111,8 +112,9 @@ class AdminOperationsTest extends TestCase
         }
     }
 
-    // T-A7
-    public function test_no_admin_list_ever_carries_a_full_phone_number(): void
+    // T-A7, as changed by the owner on 2026-09-30: the manager's booking and guestlist lists carry the full phone, for
+    // "Message on WhatsApp". The overview and the door log still carry none, and door devices only ever get the last 4 (T-P5).
+    public function test_only_the_booking_and_guestlist_lists_carry_a_full_phone_and_only_for_managers(): void
     {
         $this->booking('F2-1CVB', 'S1', BookingStatus::Paid, ['phone' => self::phone('2291')]);
         $this->booking('F2-4LWX', 'S3', BookingStatus::Held, ['phone' => self::phone('1156')]);
@@ -123,14 +125,37 @@ class AdminOperationsTest extends TestCase
         $this->signup('Nengah Budi', '5170', 2, QrMode::Personal, ['Kadek Surya']);
 
         $this->asManager();
-        foreach (['tonight', 'events/'.self::NIGHT.'/table-bookings', 'events/'.self::NIGHT.'/guestlist', 'events/'.self::NIGHT.'/check-ins'] as $list) {
+        foreach (['tonight', 'events/'.self::NIGHT.'/check-ins'] as $list) {
             $raw = $this->getJson('/api/admin/'.$list)->assertOk()->getContent();
             $this->assertStringNotContainsString('812999', $raw, $list);
             $this->assertStringNotContainsString('+62', $raw, $list);
         }
-        $this->assertSame(['2291', '1156', '4410'], collect($this->getJson('/api/admin/events/'.self::NIGHT.'/table-bookings')->json('bookings'))
-            ->sortBy('code')->pluck('phone_last4')->all());
-        $this->assertSame(['1234', '5170'], $this->getJson('/api/admin/events/'.self::NIGHT.'/guestlist')->json('signups.*.phone_last4'));
+        $bookings = collect($this->getJson('/api/admin/events/'.self::NIGHT.'/table-bookings')->json('bookings'))->sortBy('code');
+        $this->assertSame(['2291', '1156', '4410'], $bookings->pluck('phone_last4')->all());
+        $this->assertSame([self::phone('2291'), self::phone('1156'), self::phone('4410')], $bookings->pluck('phone')->all());
+        $signups = $this->getJson('/api/admin/events/'.self::NIGHT.'/guestlist');
+        $this->assertSame(['1234', '5170'], $signups->json('signups.*.phone_last4'));
+        $this->assertSame([self::phone('1234'), self::phone('5170')], $signups->json('signups.*.phone'));
+
+        $door = User::factory()->create(['role' => StaffRole::Door]);
+        $this->actingAs($door)->getJson('/api/admin/events/'.self::NIGHT.'/guestlist')->assertForbidden();
+        $this->assertStringNotContainsString('+62', $this->getJson('/api/door/'.self::NIGHT.'/manifest')->assertOk()->getContent());
+    }
+
+    // "Resend QR" in the guest panel: the signup's own email again, under the same 3-an-hour limit (F13).
+    public function test_a_manager_can_resend_a_guests_qr_email_three_times_an_hour(): void
+    {
+        $ayu = $this->signup('Ayu Pratiwi', '1234', 4);
+        $this->asManager();
+
+        foreach (range(1, 3) as $i) {
+            $this->postJson("/api/admin/guestlist/{$ayu->id}/resend")->assertOk()->assertExactJson(['message' => 'QR email sent again.']);
+        }
+        $this->postJson("/api/admin/guestlist/{$ayu->id}/resend")->assertStatus(429);
+        Mail::assertQueued(GuestlistPasses::class, 3);
+
+        $this->deleteJson("/api/admin/guestlist/{$ayu->id}")->assertNoContent();
+        $this->postJson("/api/admin/guestlist/{$ayu->id}/resend")->assertNotFound();
     }
 
     public function test_tonight_counts_the_people_inside_tables_deposits_and_arrivals_in_night_order(): void
@@ -204,7 +229,7 @@ class AdminOperationsTest extends TestCase
         $all->assertJsonPath('bookings.4.status', 'released') // a hold that ran out is released on the spot
             ->assertJsonPath('counts', ['held' => 1, 'paid' => 2, 'arrived' => 1, 'released' => 2, 'no_show' => 1])
             ->assertJsonPath('bookings.3', [
-                'code' => 'F2-7K4Q', 'status' => 'arrived', 'table_code' => 'B5', 'zone' => 'booth', 'name' => 'Made Wirawan', 'phone_last4' => '4410',
+                'code' => 'F2-7K4Q', 'status' => 'arrived', 'table_code' => 'B5', 'zone' => 'booth', 'name' => 'Made Wirawan', 'phone' => self::phone('4410'), 'phone_last4' => '4410',
                 'party_size' => 7, 'inside_count' => 3, 'deposit' => 12000000, 'min_spend' => 24000000,
                 'held_until' => $made->held_until->toIso8601String(), 'paid_at' => $made->paid_at->toIso8601String(),
                 'created_at' => $made->created_at->toIso8601String(), 'updated_at' => $made->updated_at->toIso8601String(),
@@ -307,7 +332,7 @@ class AdminOperationsTest extends TestCase
             ->assertJsonPath('counts', ['group' => 3, 'personal' => 1, 'none' => 2, 'part' => 1, 'all' => 1])
             ->assertJsonPath('signups.*.name', ['Ayu Pratiwi', 'Dewi Lestari', 'Nengah Budi', 'Putu Ananda'])
             ->assertJsonPath('signups.0', [
-                'id' => $ayu->id, 'name' => 'Ayu Pratiwi', 'phone_last4' => '1234', 'qr_mode' => 'group', 'party_size' => 4, 'inside' => 2,
+                'id' => $ayu->id, 'name' => 'Ayu Pratiwi', 'phone' => self::phone('1234'), 'phone_last4' => '1234', 'qr_mode' => 'group', 'party_size' => 4, 'inside' => 2,
                 'created_at' => $ayu->created_at->toIso8601String(),
                 'passes' => [['holder_name' => 'Ayu Pratiwi', 'people' => 4, 'inside_count' => 2, 'revoked' => false]],
             ]);

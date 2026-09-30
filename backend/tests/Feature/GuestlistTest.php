@@ -111,7 +111,7 @@ class GuestlistTest extends TestCase
         $this->signUp()->assertCreated();
 
         // One Indonesian number, three ways of typing it.
-        foreach (['+62 812 1111 2222', '0812-1111-2222', '62 812 1111 2222'] as $same) {
+        foreach (['+62 812 1111 2222', '0812-1111-2222', '62 812 1111 2222', '812 1111 2222'] as $same) {
             $this->signUp(['phone' => $same, 'name' => 'Someone Else'])->assertStatus(409)
                 ->assertExactJson(['message' => 'This number is already on the list for that night.']);
         }

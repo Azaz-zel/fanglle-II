@@ -67,7 +67,8 @@ class StaffTest extends TestCase
 
         $this->assertSame(['Ari', 'Manager', 'Bram', 'Zoe'], array_column($response->json('staff'), 'name'));
         $this->assertSame([false, true, false, false], array_column($response->json('staff'), 'you'));
-        $this->assertSame(['id', 'name', 'email', 'role', 'status', 'last_active_at', 'invite_expires_at', 'you'], array_keys($response->json('staff.0')));
+        // invite_url: the one link the owner allowed on this page (2026-09-30), and only for a pending invite; see the copy-link test.
+        $this->assertSame(['id', 'name', 'email', 'role', 'status', 'last_active_at', 'invite_expires_at', 'invite_url', 'you'], array_keys($response->json('staff.0')));
         $this->assertSame('2026-09-26T14:00:00+08:00', $response->json('staff.0.last_active_at'));
         $this->assertStringNotContainsString(hash('sha256', 'x'), $response->getContent());
     }
@@ -154,6 +155,41 @@ class StaffTest extends TestCase
         $this->assertSame(StaffStatus::Invited, $staff->fresh()->status);
 
         $this->accept(Str::random(40))->assertNotFound()->assertExactJson(['message' => "This invite link isn't valid."]);
+    }
+
+    // "Copy link" (owner's decision, 2026-09-30): a pending invite's link is kept encrypted and shown to managers only
+    // while it still works. Accepting it, or letting it run out, takes it off the list; a reset link is never kept.
+    public function test_copy_link_shows_the_emailed_link_of_a_pending_invite_and_nothing_else(): void
+    {
+        [$staff, $token] = $this->invite();
+        $url = rtrim(config('app.url'), '/').'/invite/'.$token;
+        $row = fn () => collect($this->asManager()->getJson('/api/admin/staff')->assertOk()->json('staff'))->firstWhere('id', $staff->id);
+
+        $this->assertSame($url, $row()['invite_url']);
+        $this->assertNull(collect($this->getJson('/api/admin/staff')->json('staff'))->firstWhere('id', $this->manager->id)['invite_url']);
+        $this->assertStringNotContainsString($token, json_encode(DB::table('users')->get())); // encrypted at rest
+        $this->assertSame($token, $staff->fresh()->invite_token);
+
+        $this->travel(48 * 60 + 1)->minutes();
+        $this->assertNull($row()['invite_url']);
+        $this->travelBack();
+        $this->travelTo('2026-09-26 14:00');
+
+        $this->accept($token)->assertOk();
+        $this->assertNull($staff->fresh()->invite_token);
+        $this->assertNull($row()['invite_url']);
+
+        $this->asManager()->postJson("/api/admin/staff/{$staff->id}/reset-password")->assertOk();
+        $this->assertNull($staff->fresh()->invite_token);
+        $this->assertNull($row()['invite_url']);
+    }
+
+    public function test_door_staff_never_see_the_team_or_its_links(): void
+    {
+        $this->invite();
+        $door = User::factory()->create(['role' => StaffRole::Door]);
+
+        $this->actingAs($door)->getJson('/api/admin/staff')->assertForbidden();
     }
 
     public function test_resending_replaces_the_old_link(): void

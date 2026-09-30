@@ -59,6 +59,7 @@ Route::middleware(['auth:sanctum', EnsureActive::class])->group(function () {
         Route::post('/table-bookings/{booking:code}/no-show', [Admin\TableBookingController::class, 'noShow']);
         Route::get('/events/{event:date}/guestlist', [Admin\GuestlistController::class, 'index']);
         Route::delete('/guestlist/{id}', [Admin\GuestlistController::class, 'destroy']);
+        Route::post('/guestlist/{id}/resend', [Admin\GuestlistController::class, 'resend']);
         Route::get('/events/{event:date}/check-ins', Admin\CheckInController::class);
 
         Route::get('/staff', [Admin\StaffController::class, 'index']);
