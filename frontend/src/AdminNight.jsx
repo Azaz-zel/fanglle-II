@@ -5,7 +5,7 @@ import { api, errorText } from './api.js';
 import { dayLabel, headliners, hhmm, idr, nightMinutes, offsetOf, others, wallClock, ZONES } from './night.js';
 import { Badge, Chip, Confirm, Dialog } from './ui.jsx';
 import {
-  arrivalOf, attention, bookingLog, bookingRows, HOW, minsLeft, pickHour, readout, signupLine, signupRows, STATUS, timeline,
+  arrivalOf, attention, bookingLog, bookingRows, HOW, minsLeft, pickHour, readout, signupLine, signupRows, STATUS, timeline, whatsApp,
 } from './tonight.js';
 
 // Manager's night (S7): Overview, Table bookings, Guestlist, Door log and the detail panel, from fanglle-pengelola-mockup.jsx.
@@ -580,6 +580,16 @@ export function Drawer({ at, date, onClose, flash }) {
     onClose();
   }
 
+  // "Resend QR": the guest's own QR email again, under the same 3-an-hour limit; the server's refusal is shown as it is.
+  async function resend() {
+    try {
+      await api(`/api/admin/guestlist/${x.id}/resend`, { method: 'POST' });
+      flash(`${x.name}'s QR sent again to the email they signed up with.`);
+    } catch (e) {
+      flash(errorText(e));
+    }
+  }
+
   const names = x && !booking ? x.passes.map((p) => p.holder_name).filter((n) => n !== x.name) : [];
   return (
     <Dialog open onClose={onClose} className="drawer" aria-labelledby="dr-t">
@@ -662,6 +672,15 @@ export function Drawer({ at, date, onClose, flash }) {
               {!booking && x.inside === 0 && (
                 <button className="act danger" onClick={() => setAsk('remove')}>
                   Remove from list
+                </button>
+              )}
+              {/* The full number is only used by WhatsApp, not shown on this screen (the mockup's note). */}
+              <a className="act" href={whatsApp(x.phone)} target="_blank" rel="noreferrer">
+                Message on WhatsApp
+              </a>
+              {!booking && (
+                <button className="act" onClick={resend}>
+                  Resend QR
                 </button>
               )}
             </div>

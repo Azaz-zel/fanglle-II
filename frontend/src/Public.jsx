@@ -43,25 +43,28 @@ const Divider = () => (
   </div>
 );
 
-// The menus of fanglle-halaman-depan-mockup.jsx (Home: anchors to its own sections) and fanglle-event-gallery-about-mockup.jsx
-// (every other page). NavLink marks the page being shown with aria-current.
-const NavLinks = ({ home }) =>
-  home ? (
-    <>
-      <a href="#nights">This week</a>
-      <a href="#ways-in">Tables</a>
-      <a href="#ways-in">Guestlist</a>
-      <NavLink to="/gallery">Gallery</NavLink>
-      <NavLink to="/about">About</NavLink>
-      <a href="#visit">Visit</a>
-    </>
-  ) : (
-    <>
-      <Link to="/#nights">This week</Link>
-      <NavLink to="/gallery">Gallery</NavLink>
-      <NavLink to="/about">About</NavLink>
-    </>
-  );
+// "This week" opens the nearest night's own page, tonight or the next one; until the week has loaded, the list on Home.
+function ThisWeek() {
+  const next = useQuery(weekQuery).data?.events[0];
+  return next ? <NavLink to={`/events/${next.date}`}>This week</NavLink> : <Link to="/#nights">This week</Link>;
+}
+
+// The top menu is This week, Gallery and About everywhere (owner's call, 2026-09-30: Tables, Guestlist and Visit left the
+// top menu). Home's footer keeps its anchors to its own sections, as in fanglle-halaman-depan-mockup.jsx.
+const NavLinks = ({ home, footer }) => (
+  <>
+    <ThisWeek />
+    {home && footer && (
+      <>
+        <a href="#ways-in">Tables</a>
+        <a href="#ways-in">Guestlist</a>
+      </>
+    )}
+    <NavLink to="/gallery">Gallery</NavLink>
+    <NavLink to="/about">About</NavLink>
+    {home && footer && <a href="#visit">Visit</a>}
+  </>
+);
 
 // flow: the booking pages, which trade the menu and footer for one way back (fanglle-pilih-meja-mockup.jsx).
 // book: where "Book a table" goes; the event page sends it to that night, other pages to the two ways in on Home.
@@ -104,7 +107,7 @@ function Site({ home, flow, book = '/#ways-in', className = '', children }) {
                 <Mark />
               </span>
               <nav aria-label="Footer">
-                <NavLinks home={home} />
+                <NavLinks home={home} footer />
               </nav>
             </div>
             <p className="fine">A fictional venue. Portfolio concept by Ralph de Vinca Group.</p>

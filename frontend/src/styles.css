@@ -406,6 +406,7 @@ html{scroll-behavior:smooth}
 .act{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:6px 14px;border-radius:6px;border:1px solid var(--amethyst-soft);
   background:transparent;color:var(--text);font-size:14px;line-height:1.2;cursor:pointer;white-space:nowrap;transition:background .15s,border-color .15s}
 .act:hover{border-color:var(--text);background:var(--raised)}
+a.act{text-decoration:none}
 .ok{color:var(--paid);font-size:15px}
 .navgrp{display:contents}
 .navbtn{justify-content:space-between;gap:10px}

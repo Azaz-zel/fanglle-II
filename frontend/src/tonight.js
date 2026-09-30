@@ -148,3 +148,6 @@ function when(iso, now) {
   const p = dayParts(day);
   return `${p.date} ${p.month}, ${hhmm(iso)}`;
 }
+
+// "Message on WhatsApp": wa.me wants the number with its country code and no plus, "+6281234561234" as "6281234561234".
+export const whatsApp = (phone) => `https://wa.me/${phone.replace(/\D/g, '')}`;

@@ -7,7 +7,6 @@ import { Badge, Confirm } from './ui.jsx';
 
 // Team (S8), from the Team page of fanglle-pengelola-mockup.jsx. The server holds every rule (F15, StaffPolicy): not
 // yourself, always one active manager. A refusal comes back as a sentence and is shown as it is.
-// The mockup's "Copy link" is left out: only the invite token's hash is stored, so the link exists only in the email.
 
 const staffQuery = { queryKey: ['admin', 'staff'], queryFn: () => api('/api/admin/staff') };
 const blankInvite = { name: '', email: '', role: 'door' };
@@ -135,6 +134,13 @@ export default function Team({ flash }) {
     setBusy(null);
   }
 
+  // The mockup's "Copy link": the same link as in the email, sent by the server only while the invite still works.
+  function copyLink(s) {
+    const shown = () => flash(`Copy failed. The link is ${s.invite_url}`);
+    if (!navigator.clipboard?.writeText) return shown();
+    navigator.clipboard.writeText(s.invite_url).then(() => flash(`Invite link for ${s.name} copied.`), shown);
+  }
+
   const staff = list.data?.staff ?? [];
   return (
     <>
@@ -245,6 +251,11 @@ export default function Team({ flash }) {
                           >
                             Resend invite
                           </button>
+                          {s.invite_url && (
+                            <button className="act" onClick={() => copyLink(s)}>
+                              Copy link
+                            </button>
+                          )}
                           <button className="act danger" onClick={() => setAsk({ kind: 'uninvite', s })}>
                             Cancel invite
                           </button>

@@ -1,6 +1,6 @@
 // S7 manager's night: the logic behind the overview, the lists and the booking panel.
 import { expect, test } from 'vitest';
-import { attention, bookingLog, bookingRows, lastSeen, minsLeft, pickHour, readout, signupLine, signupRows, timeline } from './tonight.js';
+import { attention, bookingLog, bookingRows, lastSeen, minsLeft, pickHour, readout, signupLine, signupRows, timeline, whatsApp } from './tonight.js';
 
 const EVENT = {
   date: '2026-09-25', opens_at: '15:00', guestlist_cutoff: '23:00', close_time: '04:00',
@@ -98,4 +98,8 @@ test('team: last sign-in on the club clock, invites until their link runs out', 
   expect(lastSeen({ status: 'active', last_active_at: null }, now)).toBe('Never signed in');
   expect(lastSeen({ status: 'invited', invite_expires_at: '2026-10-01T20:00:00+08:00' }, now)).toBe('Invite link works until 1 Oct, 20:00');
   expect(lastSeen({ status: 'invited', invite_expires_at: '2026-09-29T20:00:00+08:00' }, now)).toBe('Invite link expired');
+});
+
+test('WhatsApp link: country code, digits only, no plus', () => {
+  expect(whatsApp('+6281234561234')).toBe('https://wa.me/6281234561234');
 });
