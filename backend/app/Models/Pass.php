@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
+use Symfony\Component\Uid\Ulid;
 
 #[Unguarded]
 class Pass extends Model
@@ -28,11 +29,20 @@ class Pass extends Model
     protected static function booted(): void
     {
         static::creating(function (Pass $pass) {
-            $pass->public_id = (string) Str::ulid();
+            $pass->public_id = self::newPublicId();
             do {
                 $pass->entry_code = EntryCode::generate();
             } while (static::where('entry_code', $pass->entry_code)->exists());
         });
+    }
+
+    /**
+     * The link is the credential. A plain ULID made in the same millisecond is the last one plus 1, so a guest with one QR of
+     * a group could count to a friend's: keep the time part, draw all 80 random bits fresh.
+     */
+    public static function newPublicId(): string
+    {
+        return (string) Ulid::fromBinary(substr(Str::ulid()->toBinary(), 0, 6).random_bytes(10));
     }
 
     public function event(): BelongsTo

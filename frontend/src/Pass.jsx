@@ -158,6 +158,11 @@ function Ticket({ p, savedAt }) {
             </p>
           )}
         </div>
+        {!stamp && (
+          <p className="hint">
+            Save this code. If you close this page, open {window.location.host}/qr and type it in to get this QR back.
+          </p>
+        )}
 
         <dl className="facts">
           <dt>Night</dt>

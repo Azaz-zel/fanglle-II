@@ -29,6 +29,7 @@ Route::withoutMiddleware(EnsureFrontendRequestsAreStateful::class)->group(functi
     Route::post('/guestlist/resend', [GuestlistController::class, 'resend'])->middleware('throttle:public-posts'); // plus 3 an hour per signup
 
     Route::get('/passes/{pass:public_id}', [PassController::class, 'show']);
+    Route::post('/passes/find', [PassController::class, 'find'])->middleware('throttle:public-posts');
 
     // No throttle here: see AppServiceProvider.
     Route::post('/webhooks/xendit', XenditWebhookController::class);

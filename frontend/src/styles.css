@@ -48,6 +48,7 @@ button,input,select,textarea{font:inherit;color:inherit}
 .btn.solid:enabled:hover,a.btn.solid:hover{background:var(--garnet-hover);border-color:var(--garnet-hover)}
 .btn.line{background:transparent;color:var(--text);border-color:var(--amethyst-soft)}
 .btn.line:enabled:hover,a.btn.line:hover{background:var(--raised);border-color:var(--text)}
+.btn:enabled:active,a.btn:active{transform:translateY(1px)}
 
 /* Mockup chips are 40px; raised to the 44px touch target. */
 .chip{min-height:44px;padding:6px 14px;border-radius:20px;border:1px solid var(--line);background:transparent;color:var(--soft);font-size:15px;cursor:pointer}
@@ -109,8 +110,8 @@ html{scroll-behavior:smooth}
 .shards polygon{animation:fall 1.4s cubic-bezier(.2,.7,.2,1) both}
 @keyframes fall{from{transform:translateY(-60px);opacity:0}to{transform:none;opacity:1}}
 @media (prefers-reduced-motion:reduce){.shards polygon{animation:none}}
-.heroin{position:relative;max-width:1240px;margin:0 auto;padding:120px 24px 56px}
-.home section.hero{min-height:92vh;display:flex;align-items:flex-end}
+.heroin{position:relative;max-width:1240px;margin:0 auto;padding:96px 24px 56px}
+.home section.hero{min-height:92vh;min-height:92svh;display:flex;align-items:flex-end}
 .home .shards{height:62%;opacity:1}
 .home .heroin{width:100%;padding:0 24px 72px}
 .home .kicker{margin-bottom:22px}
@@ -140,7 +141,7 @@ html{scroll-behavior:smooth}
 /* .cta, not the mockup's .act: that name is the admin action button. */
 .cta{grid-column:2}
 @media (min-width:860px){
-  .night{grid-template-columns:110px minmax(0,1.4fr) minmax(0,1fr) 180px;align-items:center}
+  .night{grid-template-columns:110px minmax(0,1.4fr) minmax(0,1fr) 200px;align-items:center}
   .status{grid-column:auto;flex-direction:column;gap:4px}
   .cta{grid-column:auto}
   .cta .btn{width:100%}
@@ -193,10 +194,10 @@ html{scroll-behavior:smooth}
 .zones{list-style:none;font-size:15px}
 .zones li{display:flex;justify-content:space-between;gap:12px;padding:6px 0;border-bottom:1px solid var(--line-soft)}
 .zones span{color:var(--muted)}
-.others{display:grid;grid-template-columns:1fr;gap:10px;margin-top:28px}
-@media (min-width:760px){.others{grid-template-columns:repeat(3,1fr)}}
-.other{border:1px solid var(--line);padding:20px;display:flex;flex-direction:column;gap:4px;min-height:120px;text-decoration:none}
-.other:hover{border-color:var(--amethyst-soft)}
+.others{margin-top:28px;border-top:1px solid var(--line)}
+.other{display:grid;grid-template-columns:minmax(0,1fr);gap:4px;padding:20px 0;border-bottom:1px solid var(--line);text-decoration:none}
+@media (min-width:760px){.other{grid-template-columns:150px minmax(0,1fr) minmax(0,1.2fr) 200px;gap:24px;align-items:baseline}}
+.other:hover .nm{text-decoration:underline;text-decoration-color:var(--garnet-text);text-underline-offset:6px}
 .other .d{font-size:14px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase}
 .other .nm{font-family:var(--head);font-size:26px;line-height:1.15}
 .other .s{font-size:14px;color:var(--soft)}
@@ -206,17 +207,40 @@ html{scroll-behavior:smooth}
 .nav .btn{margin-left:auto;min-height:44px;padding:10px 18px;font-size:15px;letter-spacing:0}
 @media (min-width:860px){.nav .btn{margin-left:0}}
 @media (max-width:420px){.navin{gap:12px;padding:12px 16px}.navin .mark{font-size:17px}}
+.menu summary{display:flex;align-items:center;min-height:44px;padding:0 6px;list-style:none;color:var(--soft);font-size:15px;cursor:pointer}
+.menu summary::-webkit-details-marker{display:none}
+.menu[open] summary{color:var(--text)}
+.menu nav{position:absolute;left:0;right:0;top:100%;display:flex;flex-direction:column;padding:6px 24px 14px;background:var(--obsidian);border-bottom:1px solid var(--line-soft)}
+.menu nav a{display:flex;align-items:center;min-height:48px;font-size:18px;text-decoration:none;color:var(--muted)}
+.menu nav a:hover,.menu nav a[aria-current="page"]{color:var(--text)}
+@media (max-width:420px){.menu nav{padding:6px 16px 14px}}
+/* Under the 360px the site is built for: mark, button and Menu still share one line. */
+@media (max-width:359px){.navin{gap:8px}.navin .mark{font-size:15px;letter-spacing:.08em}.nav .btn{padding:10px 12px}}
+@media (min-width:860px){.menu{display:none}}
 .links a[aria-current="page"],.foot nav a[aria-current="page"]{color:var(--text)}
 .site footer{border-top:1px solid var(--line-soft);padding:40px 0 56px;color:var(--muted);font-size:15px}
 .foot{display:flex;flex-wrap:wrap;gap:14px 28px;align-items:baseline}
 .foot .mark{font-size:18px;color:var(--text)}
 .foot nav{display:flex;gap:22px;flex-wrap:wrap}
 .fine{margin-top:22px}
+.site .loading{display:flex;flex-direction:column;gap:14px;margin-top:28px;max-width:640px}
+.site .loading .skel{margin:0;height:18px}
+.site .loading .skel:last-child{width:60%}
+.heroin.loading{margin-top:0;max-width:1240px;gap:0}
+.heroin .skel.k{height:14px;width:min(240px,50%)}
+.heroin .skel.t{height:clamp(48px,9vw,120px);width:70%;margin-top:18px}
+.heroin.loading .skel.m{height:18px;width:min(420px,80%);margin-top:28px}
+/* Find my QR (/qr) */
+.find{display:flex;flex-direction:column;align-items:flex-start;gap:18px;margin-top:28px}
+.find .field{align-self:stretch}
+.find input{letter-spacing:.14em;text-transform:uppercase}
+.find input::placeholder{letter-spacing:normal;text-transform:none}
 
 /* About and Gallery (S9), from fanglle-event-gallery-about-mockup.jsx. .prose, .house: .story and .rules are taken. */
 .prose{max-width:760px}
 .prose p{color:var(--soft);font-size:clamp(18px,2vw,20px);margin-top:18px}
 .about .sub a{color:var(--text)}
+.about .name,.gal .name{font-size:clamp(44px,7vw,88px)}
 .run{list-style:none;margin-top:28px;border-left:1px solid var(--amethyst);margin-left:6px}
 .run li{position:relative;padding:0 0 22px 26px}
 .run li::before{content:"";position:absolute;left:-5px;top:10px;width:9px;height:9px;background:var(--amethyst-soft);clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%)}
@@ -262,6 +286,7 @@ html{scroll-behavior:smooth}
 .bkin{padding-top:40px;padding-bottom:96px}
 .alone{max-width:560px}
 .bk .btn{white-space:normal;text-align:center}
+.bk .nav .btn{white-space:nowrap} /* Find my QR is a .bk page with the full menu */
 .bk .btn.slim{min-height:44px;padding:8px 16px;font-size:15px}
 .h1{font-size:clamp(34px,5vw,56px);line-height:1.1;letter-spacing:.02em}
 .h1 em{color:var(--soft)}

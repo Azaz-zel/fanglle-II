@@ -80,6 +80,33 @@ class PassEndpointTest extends TestCase
         }
     }
 
+    public function test_passes_made_together_have_links_that_cannot_be_counted(): void
+    {
+        $this->assertMatchesRegularExpression('/^[0-9A-HJKMNP-TV-Z]{26}$/', $this->pass()->public_id);
+
+        // Back to back, as a group's passes are made: a monotonic ULID would repeat the first 15 of its 16 random characters.
+        [$a, $b, $c] = [Pass::newPublicId(), Pass::newPublicId(), Pass::newPublicId()];
+        $this->assertCount(3, array_unique([substr($a, 10, 15), substr($b, 10, 15), substr($c, 10, 15)]));
+    }
+
+    public function test_find_my_qr_turns_the_entry_code_into_the_pass_link(): void
+    {
+        $pass = tap($this->pass())->update(['entry_code' => 'K70M4TXP']);
+
+        $this->postJson('/api/passes/find', ['code' => ' k7om - 4txp '])->assertOk()->assertExactJson(['pass_url' => "/p/{$pass->public_id}"]);
+        $this->postJson('/api/passes/find', ['code' => 'K70M4TXQ'])->assertNotFound()
+            ->assertJsonPath('message', 'No QR with this code. Check the letters, or open the link in the email we sent.');
+        $this->postJson('/api/passes/find', [])->assertUnprocessable()->assertJsonValidationErrors(['code' => 'Enter the code under your QR.']);
+    }
+
+    public function test_find_my_qr_allows_ten_tries_a_minute_per_ip(): void
+    {
+        foreach (range(1, 10) as $_) {
+            $this->postJson('/api/passes/find', ['code' => 'AAAAAAAA'])->assertNotFound();
+        }
+        $this->postJson('/api/passes/find', ['code' => 'AAAAAAAA'])->assertTooManyRequests();
+    }
+
     public function test_only_staff_get_the_public_key(): void
     {
         $this->getJson('/api/door/public-key')->assertUnauthorized();

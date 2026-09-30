@@ -14,6 +14,7 @@ const Booking = publicPage('Booking');
 const Guestlist = publicPage('Guestlist');
 const About = publicPage('About');
 const Gallery = publicPage('Gallery');
+const FindQr = publicPage('FindQr');
 // The guest's QR page is its own region: qrcode and idb stay out of every other page.
 const Pass = lazy(() => import('./Pass.jsx'));
 const Login = lazy(() => import('./Login.jsx'));
@@ -64,6 +65,7 @@ createRoot(document.getElementById('root')).render(
               <Route path="/guestlist/:date" element={<Guestlist />} />
               <Route path="/gallery" element={<Gallery />} />
               <Route path="/about" element={<About />} />
+              <Route path="/qr" element={<FindQr />} />
               <Route path="/p/:id" element={<Pass />} />
               <Route path="/login" element={<Login />} />
               <Route path="/invite/:token" element={<Invite />} />

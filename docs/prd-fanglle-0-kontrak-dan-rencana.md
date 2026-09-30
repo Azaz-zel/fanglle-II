@@ -162,6 +162,7 @@ Prefix `/api`. Tanggal `YYYY-MM-DD`, jam `HH:MM`, uang dalam rupiah bulat.
 | POST | `/guestlist` | Daftar guestlist |
 | POST | `/guestlist/resend` | Kirim ulang email QR |
 | GET | `/passes/{public_id}` | Isi halaman QR |
+| POST | `/passes/find` | Find my QR: kode masuk → link halaman QR; rate limit 10 per menit per IP (30 Sep 2026) |
 | POST | `/webhooks/xendit` | Webhook invoice |
 
 `GET /events/{date}`:
@@ -201,6 +202,8 @@ Meja tidak bebas → `409`. Kapasitas < party → `422`.
 Kuota kurang → `422` dengan `places_left`. HP sudah terdaftar malam itu → `409`. Lewat cutoff → `422`.
 
 `GET /passes/{public_id}` → `{ "kind", "holder_name", "people", "inside_count", "event": {…}, "qr": "FNG2.…", "entry_code": "K7QM-4TXP", "status": "ready|partial|used|expired|revoked" }`.
+
+`POST /passes/find` `{ "code": "k7qm 4txp" }` → `{ "pass_url": "/p/01J…" }`. Kode dinormalkan seperti di pintu (F17). Tidak ada → `404`.
 
 **Pintu** (login, peran `door` atau `manager`)
 

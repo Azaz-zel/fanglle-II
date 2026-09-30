@@ -60,3 +60,17 @@ Data uji: acara malam ini lewat admin, guestlist lewat `POST /api/guestlist`, sa
 | Regresi S6 | Pindai meja hijau, QR palsu merah, Enter menutup |
 | Regresi S7 | Panel detail, konfirmasi Keep it dan hapus sukses lewat `Confirm` bersama |
 | **Belum** | Escape di penampil Gallery tidak bisa diuji: tab uji tersembunyi, peramban tidak mengirim event `close`. Komponen `Dialog` yang sama lulus uji Escape di S7 |
+
+## Setelah S10 · Audit taste-skill dan Find my QR
+
+2026-09-30, Chrome desktop di `https://thefanglle.test` (build produksi), lebar 360 dan 320 px lewat iframe dari server dev.
+
+| Langkah | Hasil |
+|---|---|
+| `/qr` kosong, kode salah, `wh9v 3jkm` | "Enter the code under your QR.", "No QR with this code...", lalu pindah ke `/p/...` yang menampilkan `WH9V-3JKM` |
+| Halaman QR | Pesan simpan kode dan alamat `/qr` di bawah tiket selama QR masih berlaku |
+| Menu HP (`<details>`) | Bisa difokus dengan keyboard, tautan 48 px, About `aria-current`, klik tautan menutup menu |
+| 360 dan 320 px, `/`, `/qr`, event, About, Gallery | Tanpa gulir mendatar; logo, Book a table, dan Menu satu baris |
+| Skeleton event | Bentuk hero tampil selama data malam dimuat (fetch diperlambat 4 detik) |
+| Preload Poiret One | Dimuat lewat `link` di 152 ms, sebelum CSS |
+| Penyimpangan mockup | Menu HP (mockup tanpa menu di HP), label satu per tujuan (Reserve dan Choose a table jadi Book a table), Other nights jadi baris, judul About dan Gallery maks 88 px, hero halaman dalam 96 px di atas |

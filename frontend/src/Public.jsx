@@ -49,8 +49,8 @@ function ThisWeek() {
   return next ? <NavLink to={`/events/${next.date}`}>This week</NavLink> : <Link to="/#nights">This week</Link>;
 }
 
-// The top menu is This week, Gallery and About everywhere (owner's call, 2026-09-30: Tables, Guestlist and Visit left the
-// top menu). Home's footer keeps its anchors to its own sections, as in fanglle-halaman-depan-mockup.jsx.
+// The top menu is This week, Gallery, About and Find my QR everywhere (owner's calls, 2026-09-30: Tables, Guestlist and Visit
+// left the top menu, Find my QR joined it). Home's footer keeps its anchors to its own sections, as in fanglle-halaman-depan-mockup.jsx.
 const NavLinks = ({ home, footer }) => (
   <>
     <ThisWeek />
@@ -62,6 +62,7 @@ const NavLinks = ({ home, footer }) => (
     )}
     <NavLink to="/gallery">Gallery</NavLink>
     <NavLink to="/about">About</NavLink>
+    <NavLink to="/qr">Find my QR</NavLink>
     {home && footer && <a href="#visit">Visit</a>}
   </>
 );
@@ -94,6 +95,13 @@ function Site({ home, flow, book = '/#ways-in', className = '', children }) {
                   Book a table
                 </Link>
               )}
+              {/* Below 860px the links fold in here. A link to the page already open would leave it open, so any link closes it. */}
+              <details className="menu" onClick={(x) => x.target.closest('a') && (x.currentTarget.open = false)}>
+                <summary>Menu</summary>
+                <nav aria-label="Main">
+                  <NavLinks home={home} />
+                </nav>
+              </details>
             </>
           )}
         </div>
@@ -122,9 +130,12 @@ function Site({ home, flow, book = '/#ways-in', className = '', children }) {
 function Wait({ q, loading, fail, children }) {
   if (q.isPending)
     return (
-      <p className="sub" role="status">
-        {loading}
-      </p>
+      <div className="loading" role="status">
+        <span className="vh">{loading}</span>
+        <div className="skel" />
+        <div className="skel" />
+        <div className="skel" />
+      </div>
     );
   if (q.isError)
     return (
@@ -140,8 +151,11 @@ function Wait({ q, loading, fail, children }) {
 
 const eventQuery = (date) => ({ queryKey: ['event', date], queryFn: () => api(`/api/events/${encodeURIComponent(date)}`) });
 const tablesQuery = (date) => ({ queryKey: ['tables', date], queryFn: () => api(`/api/events/${encodeURIComponent(date)}/tables`) });
-// Where "Choose a table" goes without a night of its own: the first night with tables left, else the first night.
+// Where "Book a table" goes without a night of its own: the first night with tables left, else the first night.
 const firstOpen = (events = []) => (events.find((x) => x.tables.status !== 'sold_out') ?? events[0])?.date;
+
+// A page when there is one, else the two ways in on Home.
+const Go = ({ to, ...rest }) => (to ? <Link to={to} {...rest} /> : <a href="#ways-in" {...rest} />);
 
 const who = (e) => headliners(e.lineup).map((s) => s.performer).join(' and ') || 'Line-up to come';
 const cheapest = (e) => idr(Math.min(...Object.values(e.min_spend)));
@@ -178,12 +192,12 @@ function Night({ e }) {
       </div>
       <div className="cta">
         {t !== 'sold_out' ? (
-          <Link className="btn line" to={`/book/${e.date}`} aria-label={`Reserve a table for ${e.name}`}>
-            Reserve
+          <Link className="btn line" to={`/book/${e.date}`} aria-label={`Book a table for ${e.name}`}>
+            Book a table
           </Link>
         ) : g === 'open' ? (
           <Link className="btn line" to={`/guestlist/${e.date}`} aria-label={`Join the guestlist for ${e.name}`}>
-            Guestlist only
+            Join the guestlist
           </Link>
         ) : (
           <button type="button" className="btn line" disabled>
@@ -225,12 +239,12 @@ export function Home() {
           </h1>
           <p className="lede">Named for the second fall: not the one that ends the night, the one that starts it.</p>
           <div className="ctas">
-            <a className="btn solid" href="#ways-in">
+            <Go className="btn solid" to={firstOpen(events) && `/book/${firstOpen(events)}`}>
               Book a table
-            </a>
-            <a className="btn line" href="#ways-in">
+            </Go>
+            <Go className="btn line" to={firstList && `/guestlist/${firstList}`}>
               Join the guestlist
-            </a>
+            </Go>
           </div>
         </div>
       </section>
@@ -280,7 +294,7 @@ export function Home() {
               </ul>
               {firstOpen(events) && (
                 <Link className="btn solid" to={`/book/${firstOpen(events)}`}>
-                  Choose a table
+                  Book a table
                 </Link>
               )}
             </article>
@@ -443,7 +457,7 @@ function Details({ e }) {
                 </button>
               ) : (
                 <Link className="btn solid" to={`/book/${e.date}`}>
-                  Choose a table
+                  Book a table
                 </Link>
               )}
             </div>
@@ -522,6 +536,16 @@ export function EventPage() {
         </section>
       ) : ev.isSuccess ? (
         <Details e={ev.data} />
+      ) : ev.isPending ? (
+        <section className="hero">
+          <Shards list={EVENT_SHARDS} />
+          <div className="heroin loading" role="status">
+            <span className="vh">Loading the night...</span>
+            <div className="skel k" />
+            <div className="skel t" />
+            <div className="skel m" />
+          </div>
+        </section>
       ) : (
         <section>
           <div className="wrap">
@@ -1967,6 +1991,64 @@ export function Gallery() {
           </div>
         </Dialog>
       )}
+    </Site>
+  );
+}
+
+// Find my QR (/qr): a guest who closed their QR types the entry code printed under it and lands on that QR again.
+export function FindQr() {
+  const navigate = useNavigate();
+  const [code, setCode] = useState('');
+  const [err, setErr] = useState(null);
+  const [alert, setAlert] = useState(null);
+  const [busy, setBusy] = useState(false);
+  useFirstError(err);
+
+  async function submit(x) {
+    x.preventDefault();
+    setBusy(true);
+    setAlert(null);
+    try {
+      const r = await api('/api/passes/find', { method: 'POST', guest: true, body: { code } });
+      navigate(r.pass_url);
+    } catch (e) {
+      // A wrong code belongs under the field; too many tries or no signal is about the whole form.
+      setErr(e.status === 422 ? fieldErrors(e).code : e.status === 404 ? e.message : null);
+      if (e.status !== 422 && e.status !== 404) setAlert(errorText(e));
+    }
+    setBusy(false);
+  }
+
+  return (
+    <Site className="bk">
+      <div className="wrap bkin alone">
+        <h1 className="h1 head">
+          Find your <em>QR</em>
+        </h1>
+        <p className="sub">Closed your QR by mistake? Type the entry code printed under it. The code is also in the email we sent.</p>
+        <form className="find" onSubmit={submit} noValidate>
+          <Input
+            id="fc"
+            label="Entry code"
+            type="text"
+            autoComplete="off"
+            autoCapitalize="characters"
+            spellCheck={false}
+            placeholder="K7QM-4TXP"
+            value={code}
+            onChange={(x) => setCode(x.target.value)}
+            err={err}
+          />
+          {alert && (
+            <p className="alert" role="alert">
+              {alert}
+            </p>
+          )}
+          <button type="submit" className="btn solid" disabled={busy}>
+            {busy ? 'Finding your QR...' : 'Show my QR'}
+          </button>
+        </form>
+      </div>
     </Site>
   );
 }

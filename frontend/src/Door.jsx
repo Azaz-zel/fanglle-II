@@ -700,7 +700,7 @@ function Scanner({ me }) {
               <p>The handheld scanner types the code and presses Enter by itself. Nothing needs to be clicked first.</p>
               <div className="keys">
                 <span>
-                  <kbd>1–9</kbd>people coming in
+                  <kbd>1-9</kbd>people coming in
                 </span>
                 <span>
                   <kbd>Enter</kbd>let in

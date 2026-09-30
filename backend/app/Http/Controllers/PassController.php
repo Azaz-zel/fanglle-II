@@ -7,6 +7,7 @@ use App\Models\Pass;
 use App\Support\EntryCode;
 use App\Support\PassSigner;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class PassController extends Controller
 {
@@ -41,5 +42,18 @@ class PassController extends Controller
             // "Guest of Ayu Pratiwi" on a personal pass that isn't the organiser's own.
             'organiser' => $pass->kind === PassKind::Personal && $organiser !== $pass->holder_name ? $organiser : null,
         ])->header('Cache-Control', 'no-store'); // the page keeps its own offline copy
+    }
+
+    /**
+     * "Find my QR": a guest who closed the page types the entry code printed under the QR. The code already gets them in at
+     * the door, so it may open the page too. 32^8 codes against the per-IP limit on the route leaves nothing to guess.
+     */
+    public function find(Request $request): JsonResponse
+    {
+        $code = $request->validate(['code' => ['required', 'string', 'max:20']], ['code' => 'Enter the code under your QR.'])['code'];
+        $pass = Pass::withEntryCode($code)->first();
+        abort_unless($pass, 404, 'No QR with this code. Check the letters, or open the link in the email we sent.');
+
+        return response()->json(['pass_url' => $pass->url()]);
     }
 }
