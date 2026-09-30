@@ -19,7 +19,7 @@ tests/      fixtures/ (lintas bahasa), concurrency/ (beban bersamaan)
 
 ## Cara kerja
 
-- Satu sesi utama memimpin; sub-agent `backend`, `frontend`, `qa` di `.claude/agents/` mengerjakan bagiannya
+- Satu sesi utama memimpin; sub-agent `backend`, `frontend`, `qa` di `.Codex/agents/` mengerjakan bagiannya
 - Urutan: potongan vertikal S1 sampai S10, tiap potongan backend → frontend → qa
 - Berhenti di checkpoint A, B, C, D dan tunggu "lanjut"
 - `/spec` tidak dipakai: spesifikasi sudah ada di PRD
@@ -39,7 +39,7 @@ Kontrak (Dokumen 0) → PRD + mockup → skill. Bila skill menyarankan sesuatu y
 - Tidak ada jam, harga, atau nama yang ditulis mati; semua dari API
 - Poiret One dan Didact Gothic: `font-weight` maksimal 400, tanpa italic
 - Tanpa em dash di teks antarmuka
-- HP lengkap hanya di daftar booking dan guestlist admin, tidak pernah di pintu atau ringkasan (F14, diubah 30 Sep 2026)
+- HP lengkap tidak pernah ada di endpoint daftar (F14)
 - Webhook tidak pernah membuat record (F7)
 
 ## Berhenti dan tanya sebelum
