@@ -829,7 +829,7 @@ function Scanner({ me }) {
         </div>
       )}
       {!wide && nums}
-      {body}
+      <main className="dpage">{body}</main>
     </div>
   );
 }

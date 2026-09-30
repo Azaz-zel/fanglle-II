@@ -147,7 +147,7 @@ function Ticket({ p, savedAt }) {
             </div>
           )}
           <div className="who">
-            <div className="nm">{p.holder_name}</div>
+            <h1 className="nm">{p.holder_name}</h1>
             {who && <div className="ct">{who}</div>}
           </div>
           {/* A dead code at the door only starts an argument, so it goes with the QR. */}

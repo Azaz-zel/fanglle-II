@@ -26,3 +26,37 @@ Data uji: acara malam ini lewat admin, guestlist lewat `POST /api/guestlist`, sa
 | Lepas meja ditahan, tandai no-show, hapus pendaftar | Panel detail + konfirmasi | Database `released`, `no_show` (pass dicabut), `removed_at` (pass dicabut) |
 | Riwayat pintu | `/admin/door` | Semua check-in, filter override, check-in melebihi batas pass tampil (T-P8) |
 | Lebar 360 px | iframe | `/admin`, tables, guestlist, door, events tanpa gulir mendatar; tabel bergulir di dalam kotaknya |
+
+## S8 · Tim dan undangan
+
+2026-09-30, Chrome desktop, database dev, akun manager dari seeder.
+
+| Langkah | Hasil |
+|---|---|
+| Undang tanpa isi, lalu email yang sudah ada | "Add their name.", "Enter a valid email...", "That email already has an account." di bawah kolom, fokus ke kolom pertama yang salah |
+| Undang Manager B (manager) | Flash "Invite sent to ... 48 hours", baris "Invite pending", mail antre, link `/invite/{token}` di log mail |
+| `/invite/token-salah` | "This link doesn't work" (404) |
+| `/invite/{token}` kata sandi pendek, lalu tidak cocok, lalu benar | "Use at least 10 characters.", "The two passwords don't match.", "Password set"; tombol Sign in mengisi email di halaman login |
+| Link yang sama dipakai lagi | "This link has run out" (410) |
+| Ganti peran, disable (konfirmasi), enable, reset password (konfirmasi, Keep it), resend, cancel invite | Semua flash sesuai; database: peran, status, dan baris undangan terhapus sesuai |
+
+## S9 · About dan Gallery
+
+| Langkah | Hasil |
+|---|---|
+| `/about` | Jam "How a night runs" dari malam pertama minggu ini (F3), urut malam (F2); tanpa "Last entry" karena tidak ada datanya |
+| `/gallery` | 12 bingkai "Photo to come" dengan brief, bentuk, alt text; filter kategori; penampil dengan Previous, Next, Close |
+| Menu dan kaki halaman | This week, Gallery, About di semua halaman publik (Home juga Tables, Guestlist, Visit); "Book a table" di menu |
+
+## S10 · Audit akhir
+
+| Pemeriksaan | Hasil |
+|---|---|
+| 360 px, 12 rute publik, staf, dan 404 | Tanpa gulir mendatar |
+| Console dan error runtime, 15 rute | Nol |
+| h1 dan landmark `main` | Satu h1 dan satu `main` di setiap halaman (diperbaiki: `/p/:id` tanpa h1, `/door` tanpa `main`) |
+| Kontrol tanpa nama, input tanpa label | Nol |
+| Otorisasi | Tanpa login: `/api/door/*` 401, `/door` ke login. Akun pintu: `/api/admin/*` 403, `/admin/*` ke `/door` |
+| Regresi S6 | Pindai meja hijau, QR palsu merah, Enter menutup |
+| Regresi S7 | Panel detail, konfirmasi Keep it dan hapus sukses lewat `Confirm` bersama |
+| **Belum** | Escape di penampil Gallery tidak bisa diuji: tab uji tersembunyi, peramban tidak mengirim event `close`. Komponen `Dialog` yang sama lulus uji Escape di S7 |

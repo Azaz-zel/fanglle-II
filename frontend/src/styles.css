@@ -558,6 +558,7 @@ html{scroll-behavior:smooth}
   --ok:#0F6B38; --ok-text:#F2FFF6; --ok-sub:#D2F2DE; --bad:#A3162F; --bad-text:#FBF7FB; --bad-sub:#F6D9DE;
   --warn:#C77A12; --warn-text:#140A00; --warn-sub:#2A1600}
 .doorapp:not(.wide){max-width:560px;margin:0 auto}
+.dpage{flex:1;display:flex;flex-direction:column}
 .doorapp .ttl{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
 .doorapp .top .t{font-size:20px;letter-spacing:.06em}
 .sync{padding:8px 18px;font-size:14px;color:var(--muted);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:8px}
