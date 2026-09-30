@@ -1,7 +1,7 @@
 import { expect, test } from 'vitest';
 import {
-  clock, dayLabel, dayParts, entryCode, guestNames, lineupWarnings, mmss, nightMinutes, passOrCopy, passState, secondsLeft, tableState,
-  validUntil, waShare,
+  clock, dayLabel, dayParts, entryCode, guestNames, lineupWarnings, mmss, nightMinutes, nightRun, passOrCopy, passState, secondsLeft,
+  tableState, validUntil, waShare,
 } from './night.js';
 
 test('nightMinutes: before 12:00 belongs to the night before (F2)', () => {
@@ -163,4 +163,26 @@ test('passOrCopy: a real answer is never hidden, and offline with nothing saved 
   const broken = { get: () => Promise.reject(new Error('no idb')), put: () => Promise.reject(new Error('no idb')) };
   expect((await passOrCopy('01J', { fetchPass: async () => pass(), store: broken })).savedAt).toBeNull();
   await expect(passOrCopy('01J', { fetchPass: offline, store: broken })).rejects.toThrow('Failed to fetch');
+});
+
+test('About: how a night runs, from the night itself, in night order (F2, F3)', () => {
+  const e = {
+    opens_at: '15:00', guestlist_cutoff: '23:00', close_time: '04:00',
+    lineup: [
+      { performer: 'Ilse Varga', role: 'headliner', starts_at: '00:00', ends_at: '03:00' },
+      { performer: 'Rafi Hartono', role: 'warm_up', starts_at: '22:00', ends_at: '00:00' },
+      { performer: 'Rafi Hartono', role: 'closing', starts_at: '03:00', ends_at: '04:00' },
+    ],
+  };
+  expect(nightRun(e).map((s) => [s.at, s.text, !!s.key])).toEqual([
+    ['15:00', 'Doors open.', false],
+    ['22:00', 'Rafi Hartono opens the night.', false],
+    ['23:00', 'Guestlist closes. After this, entry is at the door.', true],
+    ['00:00', 'Ilse Varga plays until 3 am.', true],
+    ['04:00', 'Lights up.', false],
+  ]);
+  // A cutoff after midnight sorts after the headliner; a night with no line-up yet still has its hours.
+  const late = nightRun({ ...e, guestlist_cutoff: '00:30' }).map((s) => s.at);
+  expect(late).toEqual(['15:00', '22:00', '00:00', '00:30', '04:00']);
+  expect(nightRun({ ...e, lineup: [] }).map((s) => s.at)).toEqual(['15:00', '23:00', '04:00']);
 });

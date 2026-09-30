@@ -1,15 +1,15 @@
 import { useEffect, useRef, useState } from 'react';
-import { Link, useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { Link, NavLink, useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { api, errorText, weekQuery } from './api.js';
 import {
-  clock, dayLabel, dayParts, earliest, guestNames, headliners, idr, latest, mmss, nightMinutes, others, ROLES, secondsLeft, tableState,
-  waShare, ZONES,
+  clock, dayLabel, dayParts, earliest, guestNames, headliners, idr, latest, mmss, nightMinutes, nightRun, others, ROLES, secondsLeft,
+  tableState, waShare, ZONES,
 } from './night.js';
-import { Button, Mark } from './ui.jsx';
+import { Button, Dialog, Mark } from './ui.jsx';
 
 // Public region: Home (/), event detail (/events/:date), table booking (/book/:date, /booking/:code), guestlist (/guestlist/:date).
-// The QR page (/p/:id) is its own chunk, Pass.jsx. Gallery and About links arrive with S9; nothing links to them yet.
+// Gallery (/gallery) and About (/about) from fanglle-event-gallery-about-mockup.jsx. The QR page (/p/:id) is its own chunk, Pass.jsx.
 
 const SHARDS = [
   { p: '120,-40 210,-40 180,90', f: '#2A1D3D', d: 0 },
@@ -43,21 +43,29 @@ const Divider = () => (
   </div>
 );
 
-// Home links are anchors to its own sections; elsewhere only "This week" (back to Home) exists so far.
+// The menus of fanglle-halaman-depan-mockup.jsx (Home: anchors to its own sections) and fanglle-event-gallery-about-mockup.jsx
+// (every other page). NavLink marks the page being shown with aria-current.
 const NavLinks = ({ home }) =>
   home ? (
     <>
       <a href="#nights">This week</a>
       <a href="#ways-in">Tables</a>
       <a href="#ways-in">Guestlist</a>
+      <NavLink to="/gallery">Gallery</NavLink>
+      <NavLink to="/about">About</NavLink>
       <a href="#visit">Visit</a>
     </>
   ) : (
-    <Link to="/#nights">This week</Link>
+    <>
+      <Link to="/#nights">This week</Link>
+      <NavLink to="/gallery">Gallery</NavLink>
+      <NavLink to="/about">About</NavLink>
+    </>
   );
 
 // flow: the booking pages, which trade the menu and footer for one way back (fanglle-pilih-meja-mockup.jsx).
-function Site({ home, flow, className = '', children }) {
+// book: where "Book a table" goes; the event page sends it to that night, other pages to the two ways in on Home.
+function Site({ home, flow, book = '/#ways-in', className = '', children }) {
   return (
     <div className={`site ${className}`}>
       <header className="nav">
@@ -70,9 +78,20 @@ function Site({ home, flow, className = '', children }) {
               Back to home
             </Link>
           ) : (
-            <nav className="links" aria-label="Main">
-              <NavLinks home={home} />
-            </nav>
+            <>
+              <nav className="links" aria-label="Main">
+                <NavLinks home={home} />
+              </nav>
+              {home ? (
+                <a className="btn solid" href="#ways-in">
+                  Book a table
+                </a>
+              ) : (
+                <Link className="btn solid" to={book}>
+                  Book a table
+                </Link>
+              )}
+            </>
           )}
         </div>
       </header>
@@ -488,7 +507,7 @@ export function EventPage() {
   }, [date]);
 
   return (
-    <Site className="ev">
+    <Site className="ev" book={ev.data?.tables.status === 'sold_out' ? undefined : `/book/${date}`}>
       {ev.error?.status === 404 ? (
         <section>
           <div className="wrap fail" role="alert">
@@ -1719,6 +1738,232 @@ export function Guestlist() {
           </Wait>
         )}
       </div>
+    </Site>
+  );
+}
+
+// About (S9), from fanglle-event-gallery-about-mockup.jsx. Every hour on it comes from this week's first night (F3).
+export function About() {
+  const week = useQuery(weekQuery);
+  const next = week.data?.events[0];
+
+  return (
+    <Site className="about">
+      <section className="hero">
+        <Shards list={EVENT_SHARDS} />
+        <div className="heroin">
+          <p className="kicker">Canggu, Bali · Thursday to Sunday</p>
+          <h1 className="name head">About</h1>
+        </div>
+      </section>
+
+      <section>
+        <div className="wrap prose">
+          <h2 className="h2 head">
+            Why the <em>second fall</em>
+          </h2>
+          <p>
+            Everyone knows the first fall. It happens to you. The second one you choose: you walk in, the doors close behind you, and the
+            night takes over from there.
+          </p>
+          <p>
+            The Fanglle II is built around that choice. One room, one sound system, four nights a week, and a door that opens
+            {next ? ` at ${clock(next.opens_at)}` : ' every night'} whether the street outside is ready or not.
+          </p>
+        </div>
+      </section>
+
+      <Divider />
+
+      <section>
+        <div className="wrap">
+          <h2 className="h2 head">
+            How a night <em>runs</em>
+          </h2>
+          <Wait q={week} loading="Loading this week's nights..." fail="The hours didn't load. Check the connection, then try again.">
+            {() =>
+              next ? (
+                <>
+                  <p className="sub">
+                    <Link to={`/events/${next.date}`}>
+                      {next.name}, {dayLabel(next.date)}
+                    </Link>
+                    . Hours can change from night to night; each night's page has its own.
+                  </p>
+                  <ol className="run">
+                    {nightRun(next).map((step) => (
+                      <li key={step.at + step.text} className={step.key ? 'key' : undefined}>
+                        <b className="head">{clock(step.at)}</b>
+                        <span>{step.text}</span>
+                      </li>
+                    ))}
+                  </ol>
+                </>
+              ) : (
+                <p className="sub">No nights on the calendar this week yet.</p>
+              )
+            }
+          </Wait>
+        </div>
+      </section>
+
+      <Divider />
+
+      <section>
+        <div className="wrap">
+          <h2 className="h2 head">
+            House <em>rules</em>
+          </h2>
+          <ul className="house">
+            <li>
+              <b>21 and over</b>
+              <span>Valid ID for everyone, every night. No exceptions for tables.</span>
+            </li>
+            <li>
+              <b>Smart dress</b>
+              <span>No sportswear, no flip-flops, no swimwear.</span>
+            </li>
+            <li>
+              <b>One QR, one entry</b>
+              <span>Each QR works once. Screenshots shared with friends won't get them in.</span>
+            </li>
+            <li>
+              <b>Tables have a minimum spend</b>
+              <span>Your deposit counts toward it. The rest is spent on the night.</span>
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      <Divider />
+
+      <section>
+        <div className="wrap prose">
+          <h2 className="h2 head">
+            Private <em>events</em>
+          </h2>
+          <p>The room can be booked for private nights from Monday to Wednesday. Tell us the date, the number of guests, and what you have in mind.</p>
+          <div className="contact">
+            <a className="btn line" href="mailto:events@thefanglle.example">
+              events@thefanglle.example
+            </a>
+          </div>
+        </div>
+      </section>
+    </Site>
+  );
+}
+
+// Gallery (S9): PRD 2.1, F9.1. No photos yet: each frame is the brief for the real photo, its shape and its alt text,
+// labelled as a placeholder so it is never mistaken for the real thing. Replace a frame and the layout stays.
+const SHOTS = [
+  { cat: 'room', ratio: '16 / 9', shot: 'Main room from the DJ booth, full crowd, lights low', alt: 'The main room seen from the DJ booth, packed dance floor under low violet light' },
+  { cat: 'night', ratio: '3 / 4', shot: 'Ilse Varga behind the decks at Descent', alt: 'Ilse Varga playing at Descent, lit from behind' },
+  { cat: 'room', ratio: '3 / 2', shot: 'Dance floor from above, laser lines across the room', alt: 'Dance floor from above with laser lines crossing the room' },
+  { cat: 'tables', ratio: '3 / 2', shot: 'Booth set for ten, before doors open', alt: 'An empty booth laid out for ten guests before opening' },
+  { cat: 'night', ratio: '3 / 2', shot: 'Hands up at midnight, Second Wave', alt: 'Crowd with hands raised as the headliner starts at Second Wave' },
+  { cat: 'detail', ratio: '3 / 4', shot: 'Faceted glass above the bar, close up', alt: 'Close up of the faceted glass installation above the bar' },
+  { cat: 'tables', ratio: '3 / 4', shot: 'Bottle service arriving at a booth', alt: 'Staff carrying bottle service to a booth' },
+  { cat: 'room', ratio: '3 / 2', shot: 'The bar at 1 am, bartenders mid-pour', alt: 'Bartenders pouring drinks at the bar late at night' },
+  { cat: 'night', ratio: '3 / 4', shot: 'Nadia Sorrel, close up, Fall Line', alt: 'Nadia Sorrel at the decks during Fall Line' },
+  { cat: 'detail', ratio: '3 / 2', shot: 'Entrance at 10 pm, door staff scanning a QR', alt: "Door staff scanning a guest's QR at the entrance" },
+  { cat: 'tables', ratio: '3 / 2', shot: 'Stage front tables, looking toward the DJ', alt: 'Stage front tables with a clear view of the DJ booth' },
+  { cat: 'night', ratio: '3 / 2', shot: 'Afterglow, softer Sunday light at the bar', alt: 'A quieter Sunday night at the bar during Afterglow' },
+];
+const CATS = [['all', 'All'], ['room', 'The room'], ['night', 'Nights'], ['tables', 'Tables and booths'], ['detail', 'Details']];
+const shape = (s) => s.ratio.replace(' / ', ':');
+
+export function Gallery() {
+  const [cat, setCat] = useState('all');
+  const [view, setView] = useState(null);
+  const shots = SHOTS.filter((s) => cat === 'all' || s.cat === cat);
+  const v = view !== null && shots[view];
+
+  return (
+    <Site className="gal">
+      <section className="hero">
+        <Shards list={EVENT_SHARDS} />
+        <div className="heroin">
+          <p className="kicker">The room, the nights, the details</p>
+          <h1 className="name head">Gallery</h1>
+        </div>
+      </section>
+      <section>
+        <div className="wrap">
+          <div className="chips" role="group" aria-label="Show photos of">
+            {CATS.map(([k, l]) => (
+              <button
+                key={k}
+                type="button"
+                className="chip"
+                aria-pressed={cat === k}
+                onClick={() => {
+                  setCat(k);
+                  setView(null);
+                }}
+              >
+                {l}
+                <em>{k === 'all' ? SHOTS.length : SHOTS.filter((s) => s.cat === k).length}</em>
+              </button>
+            ))}
+          </div>
+          <div className="masonry">
+            {shots.map((s, i) => (
+              <button
+                key={s.shot}
+                type="button"
+                className="slot"
+                style={{ aspectRatio: s.ratio }}
+                onClick={() => setView(i)}
+                aria-label={`Photo to come: ${s.shot}. Open details.`}
+              >
+                <span className="in">
+                  <span className="tag">Photo to come</span>
+                  <span className="shot">{s.shot}</span>
+                  <span className="spec">
+                    {shape(s)} · {CATS.find((c) => c[0] === s.cat)[1]}
+                  </span>
+                </span>
+              </button>
+            ))}
+          </div>
+          <p className="brief">
+            Every frame above is a brief for the real photo: what to shoot, the shape it needs, and the alt text it ships with. Replace a
+            frame and the layout stays the same.
+          </p>
+        </div>
+      </section>
+      {v && (
+        <Dialog open onClose={() => setView(null)} className="viewer" aria-labelledby="vw-t">
+          <div className="vframe">
+            <p id="vw-t" className="shot head">
+              {v.shot}
+            </p>
+          </div>
+          <dl className="vmeta">
+            <dt>Status</dt>
+            <dd>Photo to come</dd>
+            <dt>Shape</dt>
+            <dd>{shape(v)}</dd>
+            <dt>Alt text</dt>
+            <dd>{v.alt}</dd>
+          </dl>
+          <div className="vbar">
+            <button type="button" className="btn line" onClick={() => setView((view - 1 + shots.length) % shots.length)} aria-label="Previous photo">
+              Previous
+            </button>
+            <span className="vcount" aria-live="polite">
+              {view + 1} of {shots.length}
+            </span>
+            <button type="button" className="btn line" onClick={() => setView((view + 1) % shots.length)} aria-label="Next photo">
+              Next
+            </button>
+            <button type="button" className="btn solid" onClick={() => setView(null)}>
+              Close
+            </button>
+          </div>
+        </Dialog>
+      )}
     </Site>
   );
 }

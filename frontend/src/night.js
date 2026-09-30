@@ -134,3 +134,21 @@ export const waShare = (holder, e, url) =>
   `https://wa.me/?text=${encodeURIComponent(
     `${holder}, here is your entry QR for The Fanglle II, ${e.name}, ${dayLabel(e.date)}. Valid until ${clock(e.guestlist_cutoff)} with your ID: ${url}`,
   )}`;
+
+// About (S9), "How a night runs" for one night, in night order (F2). The mockup's fixed hours become this night's data (F3);
+// its "Last entry" line has no field behind it, so it is left out. key: the moments the mockup marks in garnet.
+export function nightRun(e) {
+  const sets = [...e.lineup].sort((a, b) => nightMinutes(a.starts_at) - nightMinutes(b.starts_at));
+  const heads = headliners(sets);
+  const names = heads.map((s) => s.performer).join(' and ');
+  const steps = [
+    { at: e.opens_at, text: 'Doors open.' },
+    ...(sets[0] && sets[0].role !== 'headliner' ? [{ at: sets[0].starts_at, text: `${sets[0].performer} opens the night.` }] : []),
+    { at: e.guestlist_cutoff, text: 'Guestlist closes. After this, entry is at the door.', key: true },
+    ...(heads.length
+      ? [{ at: heads[0].starts_at, text: `${names} ${heads.length > 1 ? 'play' : 'plays'} until ${clock(latest(heads.map((s) => s.ends_at)))}.`, key: true }]
+      : []),
+    { at: e.close_time, text: 'Lights up.' },
+  ];
+  return steps.sort((a, b) => nightMinutes(a.at) - nightMinutes(b.at));
+}

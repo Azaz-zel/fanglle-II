@@ -202,11 +202,59 @@ html{scroll-behavior:smooth}
 .other .s{font-size:14px;color:var(--soft)}
 .other .s:last-child{color:var(--muted)}
 
+/* "Book a table" in the menu, from both public mockups: right-aligned alone on a phone, after the links on a wide screen. */
+.nav .btn{margin-left:auto;min-height:44px;padding:10px 18px;font-size:15px;letter-spacing:0}
+@media (min-width:860px){.nav .btn{margin-left:0}}
+@media (max-width:420px){.navin{gap:12px;padding:12px 16px}.navin .mark{font-size:17px}}
+.links a[aria-current="page"],.foot nav a[aria-current="page"]{color:var(--text)}
 .site footer{border-top:1px solid var(--line-soft);padding:40px 0 56px;color:var(--muted);font-size:15px}
 .foot{display:flex;flex-wrap:wrap;gap:14px 28px;align-items:baseline}
 .foot .mark{font-size:18px;color:var(--text)}
 .foot nav{display:flex;gap:22px;flex-wrap:wrap}
 .fine{margin-top:22px}
+
+/* About and Gallery (S9), from fanglle-event-gallery-about-mockup.jsx. .prose, .house: .story and .rules are taken. */
+.prose{max-width:760px}
+.prose p{color:var(--soft);font-size:clamp(18px,2vw,20px);margin-top:18px}
+.about .sub a{color:var(--text)}
+.run{list-style:none;margin-top:28px;border-left:1px solid var(--amethyst);margin-left:6px}
+.run li{position:relative;padding:0 0 22px 26px}
+.run li::before{content:"";position:absolute;left:-5px;top:10px;width:9px;height:9px;background:var(--amethyst-soft);clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%)}
+.run li.key::before{background:var(--garnet-text)}
+.run b{display:block;font-size:26px;line-height:1.2}
+.run span{color:var(--muted)}
+.house{list-style:none;margin-top:24px;display:grid;grid-template-columns:minmax(0,1fr);border-top:1px solid var(--line)}
+@media (min-width:760px){.house{grid-template-columns:1fr 1fr}}
+.house li{padding:18px 24px 18px 0;border-bottom:1px solid var(--line)}
+.house b{display:block;font-size:19px}
+.house span{color:var(--muted);font-size:15px}
+.contact{display:flex;flex-wrap:wrap;gap:12px;margin-top:22px}
+.contact .btn{white-space:normal;overflow-wrap:anywhere}
+.gal .chips{margin-top:0}
+.gal .chip{padding:8px 16px;border-radius:2px}
+.gal .chip[aria-pressed="true"]{border-color:var(--garnet);background:var(--surface)}
+.masonry{columns:1;column-gap:14px;margin-top:28px}
+@media (min-width:640px){.masonry{columns:2}}
+@media (min-width:1000px){.masonry{columns:3}}
+.slot{display:block;width:100%;break-inside:avoid;margin-bottom:14px;position:relative;overflow:hidden;cursor:pointer;text-align:left;
+  background:var(--surface);border:1px dashed var(--amethyst);color:var(--text);padding:0;transition:border-color .2s}
+.slot:hover{border-color:var(--text);border-style:solid}
+.slot::before{content:"";position:absolute;right:-24px;top:-18px;width:110px;height:110px;background:var(--raised);clip-path:polygon(30% 0,100% 20%,70% 100%,0 60%)}
+.slot .in{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:flex-end;gap:6px;padding:18px}
+.slot .tag{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--garnet-text)}
+.slot .shot{font-size:16px;line-height:1.35}
+.slot .spec{font-size:13px;color:var(--muted)}
+.brief{border:1px solid var(--line);padding:18px 20px;margin-top:28px;color:var(--soft);font-size:15px;max-width:760px}
+/* The photo viewer is a full-screen native <dialog>: focus stays inside, Escape closes it, focus returns to the frame. */
+.dlg.viewer{width:100%;max-width:none;height:100%;max-height:none;margin:0;border:0;border-radius:0;background:rgba(12,8,18,.95);padding:24px}
+.dlg.viewer[open]{align-items:center;justify-content:center;gap:18px;overflow-y:auto}
+.vframe{width:min(900px,100%);min-height:200px;max-height:62vh;background:var(--surface);border:1px dashed var(--amethyst-soft);display:flex;align-items:center;
+  justify-content:center;text-align:center;padding:24px}
+.vframe .shot{font-size:clamp(22px,3vw,32px);line-height:1.25;max-width:26ch;color:var(--text)}
+.vmeta{width:min(900px,100%);display:grid;grid-template-columns:auto 1fr;gap:6px 16px;font-size:15px}
+.vmeta dt{color:var(--muted)}
+.vbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:center}
+.vcount{color:var(--muted);min-width:64px;text-align:center}
 
 /* Table booking (/book/:date, /booking/:code), from fanglle-pilih-meja-mockup.jsx */
 .back{margin-left:auto;display:inline-flex;align-items:center;min-height:44px;font-size:15px;color:var(--muted);text-decoration:none}
@@ -449,6 +497,16 @@ html{scroll-behavior:smooth}
 .tl li::before{content:"";position:absolute;left:-4px;top:8px;width:7px;height:7px;background:var(--amethyst-soft);clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%)}
 .drow{display:flex;gap:10px;flex-wrap:wrap}
 @media (prefers-reduced-motion:reduce){.mini{transition:none}}
+
+/* Team (S8) */
+.roles{display:grid;grid-template-columns:minmax(0,1fr);gap:14px}
+@media (min-width:760px){.roles{grid-template-columns:1fr 1fr}}
+.roles b{display:block;font-size:18px}
+.roles p{color:var(--muted);font-size:15px;margin-top:4px}
+.rowacts{display:flex;gap:6px;justify-content:center;flex-wrap:wrap}
+.select.role{min-width:150px;width:auto}
+.invite .err.full{grid-column:1/-1}
+.act:disabled{opacity:.45;cursor:not-allowed}
 
 /* Admin Events */
 .evgrid{display:grid;grid-template-columns:1fr;gap:14px}
