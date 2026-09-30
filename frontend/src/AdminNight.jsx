@@ -3,7 +3,7 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { api, errorText } from './api.js';
 import { dayLabel, headliners, hhmm, idr, nightMinutes, offsetOf, others, wallClock, ZONES } from './night.js';
-import { Badge, Chip, Dialog } from './ui.jsx';
+import { Badge, Chip, Confirm, Dialog } from './ui.jsx';
 import {
   arrivalOf, attention, bookingLog, bookingRows, HOW, minsLeft, pickHour, readout, signupLine, signupRows, STATUS, timeline,
 } from './tonight.js';
@@ -22,7 +22,7 @@ const listQuery = (date, what) => ({
 const eventsQuery = { queryKey: ['admin-events'], queryFn: () => api('/api/admin/events') }; // shared with Events
 export const clubNow = (t) => wallClock(Date.now(), offsetOf(t.now));
 
-const Skel = ({ label }) => (
+export const Skel = ({ label }) => (
   <div role="status" aria-label={label}>
     {[0, 1, 2, 3].map((i) => (
       <div key={i} className="skel" />
@@ -30,7 +30,7 @@ const Skel = ({ label }) => (
   </div>
 );
 
-const Failed = ({ q, what }) => (
+export const Failed = ({ q, what }) => (
   <div className="error" role="alert">
     {what} didn't load. {errorText(q.error)}
     <br />
@@ -571,29 +571,16 @@ export function Drawer({ at, date, onClose, flash }) {
   const list = useQuery(listQuery(date, booking ? 'table-bookings' : 'guestlist'));
   const x = booking ? list.data?.bookings.find((b) => b.code === at.id) : list.data?.signups.find((g) => g.id === at.id);
   const [ask, setAsk] = useState(null);
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState('');
   const c = ask && CONFIRM[ask];
 
   async function run() {
-    setBusy(true);
-    setError('');
-    try {
-      await c.call(x);
-      await Promise.all([qc.invalidateQueries({ queryKey: ['admin'] }), qc.invalidateQueries({ queryKey: ['admin-events'] })]);
-      flash(c.done(x));
-      onClose();
-    } catch (e) {
-      setError(errorText(e));
-      setBusy(false);
-    }
+    await c.call(x);
+    await Promise.all([qc.invalidateQueries({ queryKey: ['admin'] }), qc.invalidateQueries({ queryKey: ['admin-events'] })]);
+    flash(c.done(x));
+    onClose();
   }
 
   const names = x && !booking ? x.passes.map((p) => p.holder_name).filter((n) => n !== x.name) : [];
-  const cancel = () => {
-    setAsk(null);
-    setError('');
-  };
   return (
     <Dialog open onClose={onClose} className="drawer" aria-labelledby="dr-t">
       <div className="dh">
@@ -681,27 +668,7 @@ export function Drawer({ at, date, onClose, flash }) {
           </>
         )}
       </div>
-      {c && (
-        <Dialog open onClose={cancel} role="alertdialog" aria-labelledby="cf-t" aria-describedby="cf-d">
-          <h2 id="cf-t" className="head">
-            {c.title(x)}
-          </h2>
-          <p id="cf-d">{c.text(x)}</p>
-          {error && (
-            <p className="err" role="alert">
-              {error}
-            </p>
-          )}
-          <div className="drow">
-            <button className="btn solid" disabled={busy} onClick={run}>
-              {busy ? 'Working...' : c.button}
-            </button>
-            <button className="btn line" onClick={cancel}>
-              Keep it
-            </button>
-          </div>
-        </Dialog>
-      )}
+      {c && <Confirm title={c.title(x)} text={c.text(x)} button={c.button} run={run} onClose={() => setAsk(null)} />}
     </Dialog>
   );
 }

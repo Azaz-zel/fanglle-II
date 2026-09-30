@@ -1,4 +1,5 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { errorText } from './api.js';
 
 export const Mark = () => (
   <>
@@ -57,5 +58,46 @@ export function Dialog({ open, onClose, className = '', children, ...rest }) {
     <dialog ref={ref} className={`dlg ${className}`} onClose={onClose} onClick={onClick} {...rest}>
       {children}
     </dialog>
+  );
+}
+
+// Yes or no before an action that can't be taken back, from the admin mockup. run: the action. Its error stays in the
+// dialog; success closes it.
+export function Confirm({ title, text, button, run, onClose }) {
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState('');
+
+  async function yes() {
+    setBusy(true);
+    setError('');
+    try {
+      await run();
+      onClose();
+    } catch (e) {
+      setError(errorText(e));
+      setBusy(false);
+    }
+  }
+
+  return (
+    <Dialog open onClose={onClose} role="alertdialog" aria-labelledby="cf-t" aria-describedby="cf-d">
+      <h2 id="cf-t" className="head">
+        {title}
+      </h2>
+      <p id="cf-d">{text}</p>
+      {error && (
+        <p className="err" role="alert">
+          {error}
+        </p>
+      )}
+      <div className="drow">
+        <button className="btn solid" disabled={busy} onClick={yes}>
+          {busy ? 'Working...' : button}
+        </button>
+        <button className="btn line" onClick={onClose}>
+          Keep it
+        </button>
+      </div>
+    </Dialog>
   );
 }

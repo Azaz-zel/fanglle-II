@@ -1,6 +1,6 @@
 // S7 manager's night: the logic behind the overview, the lists and the booking panel.
 import { expect, test } from 'vitest';
-import { attention, bookingLog, bookingRows, minsLeft, pickHour, readout, signupLine, signupRows, timeline } from './tonight.js';
+import { attention, bookingLog, bookingRows, lastSeen, minsLeft, pickHour, readout, signupLine, signupRows, timeline } from './tonight.js';
 
 const EVENT = {
   date: '2026-09-25', opens_at: '15:00', guestlist_cutoff: '23:00', close_time: '04:00',
@@ -88,4 +88,14 @@ test('list filters and search: status, table order, QR type, arrival, a guest na
   ];
   expect(signupRows(signups, { mode: 'all', arrival: 'part', q: '' }).map((g) => g.name)).toEqual(['Ayu Pratiwi']);
   expect(signupRows(signups, { mode: 'personal', arrival: 'any', q: 'luh' }).map((g) => g.name)).toEqual(['Nengah Budi']);
+});
+
+test('team: last sign-in on the club clock, invites until their link runs out', () => {
+  const now = Date.parse('2026-09-30T02:00:00+08:00');
+  expect(lastSeen({ you: true }, now)).toBe('Now');
+  expect(lastSeen({ status: 'active', last_active_at: '2026-09-30T01:31:00+08:00' }, now)).toBe('Today, 01:31');
+  expect(lastSeen({ status: 'disabled', last_active_at: '2026-09-12T22:58:00+08:00' }, now)).toBe('12 Sep, 22:58');
+  expect(lastSeen({ status: 'active', last_active_at: null }, now)).toBe('Never signed in');
+  expect(lastSeen({ status: 'invited', invite_expires_at: '2026-10-01T20:00:00+08:00' }, now)).toBe('Invite link works until 1 Oct, 20:00');
+  expect(lastSeen({ status: 'invited', invite_expires_at: '2026-09-29T20:00:00+08:00' }, now)).toBe('Invite link expired');
 });

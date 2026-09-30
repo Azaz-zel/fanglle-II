@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
+import { Link, useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { api, errorText } from './api.js';
 import { Button, Solo } from './ui.jsx';
@@ -12,7 +12,7 @@ export default function Login() {
   const qc = useQueryClient();
   const [params] = useSearchParams();
   const out = useLocation().state?.out; // role that just signed out, if any
-  const [form, setForm] = useState({ email: '', password: '' });
+  const [form, setForm] = useState({ email: useLocation().state?.email ?? '', password: '' }); // email: from the invite page
   const [fail, setFail] = useState(null);
   const [busy, setBusy] = useState(false);
   const formRef = useRef(null);
@@ -71,6 +71,101 @@ export default function Login() {
           </p>
         )}
         <Button type="submit">{busy ? 'Signing in...' : out ? 'Sign in again' : 'Sign in'}</Button>
+      </form>
+    </Solo>
+  );
+}
+
+// /invite/:token (S8, F15): a new team member, or someone a manager reset, sets a password. The link only says whether it
+// works once it is used: the server keeps the token's hash and answers on accept (404 unknown, 410 used or expired).
+export function Invite() {
+  const { token } = useParams();
+  const [form, setForm] = useState({ password: '', password_confirmation: '' });
+  const [fail, setFail] = useState(null);
+  const [done, setDone] = useState(null);
+  const [busy, setBusy] = useState(false);
+  const formRef = useRef(null);
+
+  useEffect(() => {
+    if (fail) formRef.current?.querySelector('[aria-invalid="true"], [role="alert"]')?.focus();
+  }, [fail]);
+
+  async function submit(e) {
+    e.preventDefault();
+    if (busy) return;
+    setBusy(true);
+    setFail(null);
+    try {
+      setDone(await api(`/api/invites/${encodeURIComponent(token)}/accept`, { method: 'POST', body: form, guest: true }));
+    } catch (err) {
+      setFail({ status: err.status, errors: err.errors || {}, message: err.errors?.password ? '' : errorText(err) });
+      setBusy(false);
+    }
+  }
+
+  if (done)
+    return (
+      <Solo>
+        <h1 className="head">Password set</h1>
+        <p className="sub">
+          Sign in with {done.email} to open {done.role === 'manager' ? 'the manager panel' : 'the door scanner'}.
+        </p>
+        <Link className="btn solid" to="/login" state={{ email: done.email }}>
+          Sign in
+        </Link>
+      </Solo>
+    );
+
+  // A link that is unknown, used or expired won't work however often it is tried.
+  if (fail?.status === 404 || fail?.status === 410)
+    return (
+      <Solo>
+        <h1 className="head">{fail.status === 410 ? 'This link has run out' : "This link doesn't work"}</h1>
+        <p className="sub" role="alert">
+          {fail.message}
+        </p>
+        <p className="sub">A manager can send a new one from the Team page.</p>
+      </Solo>
+    );
+
+  const errs = fail?.errors || {};
+  const field = (key, label) => (
+    <div className="field">
+      <label htmlFor={`v-${key}`}>{label}</label>
+      <input
+        id={`v-${key}`}
+        type="password"
+        autoComplete="new-password"
+        autoFocus={key === 'password'}
+        value={form[key]}
+        aria-invalid={!!errs[key]}
+        aria-describedby={errs[key] ? `ve-${key}` : key === 'password' ? 'v-hint' : undefined}
+        onChange={(e) => setForm({ ...form, [key]: e.target.value })}
+      />
+      {errs[key] && (
+        <span id={`ve-${key}`} className="err">
+          {errs[key].join(' ')}
+        </span>
+      )}
+    </div>
+  );
+
+  return (
+    <Solo>
+      <h1 className="head">Set your password</h1>
+      <p className="sub">You'll use it to sign in to The Fanglle II.</p>
+      <form ref={formRef} onSubmit={submit} noValidate>
+        {field('password', 'New password')}
+        <p id="v-hint" className="hintline">
+          At least 10 characters.
+        </p>
+        {field('password_confirmation', 'Type it again')}
+        {fail?.message && (
+          <p className="err" role="alert" tabIndex={-1}>
+            {fail.message}
+          </p>
+        )}
+        <Button type="submit">{busy ? 'Saving...' : 'Set password'}</Button>
       </form>
     </Solo>
   );

@@ -12,9 +12,12 @@ const EventPage = publicPage('EventPage');
 const Book = publicPage('Book');
 const Booking = publicPage('Booking');
 const Guestlist = publicPage('Guestlist');
+const About = publicPage('About');
+const Gallery = publicPage('Gallery');
 // The guest's QR page is its own region: qrcode and idb stay out of every other page.
 const Pass = lazy(() => import('./Pass.jsx'));
 const Login = lazy(() => import('./Login.jsx'));
+const Invite = lazy(() => import('./Login.jsx').then((m) => ({ default: m.Invite })));
 const Door = lazy(() => import('./Door.jsx'));
 const Admin = lazy(() => import('./Admin.jsx'));
 
@@ -59,8 +62,11 @@ createRoot(document.getElementById('root')).render(
               <Route path="/book/:date" element={<Book />} />
               <Route path="/booking/:code" element={<Booking />} />
               <Route path="/guestlist/:date" element={<Guestlist />} />
+              <Route path="/gallery" element={<Gallery />} />
+              <Route path="/about" element={<About />} />
               <Route path="/p/:id" element={<Pass />} />
               <Route path="/login" element={<Login />} />
+              <Route path="/invite/:token" element={<Invite />} />
               <Route path="/door" element={<Door />} />
               <Route path="/admin/*" element={<Admin />} />
               <Route path="*" element={<NotFound />} />

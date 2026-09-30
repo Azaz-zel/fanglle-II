@@ -1,18 +1,19 @@
 import { useEffect, useState } from 'react';
-import { NavLink, Route, Routes } from 'react-router-dom';
+import { Link, NavLink, Route, Routes } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import Events from './AdminEvents.jsx';
 import { Bookings, clubNow, DoorLog, Drawer, Guestlist, Overview, tonightQuery } from './AdminNight.jsx';
+import Team from './AdminTeam.jsx';
 import { dayLabel } from './night.js';
 import { SignOut, Staff } from './staff.jsx';
 import { Mark } from './ui.jsx';
 
 // Manager region: /admin/*. Door staff are sent to /door by Staff.
-// The side menu lists only pages that exist; Team joins in S8.
+// The side menu lists only pages that exist.
 const NAV = [
   ['Tonight', [['/admin', 'Overview']]],
   ['Operations', [['/admin/tables', 'Table bookings'], ['/admin/guestlist', 'Guestlist'], ['/admin/door', 'Door log']]],
-  ['Setup', [['/admin/events', 'Events']]],
+  ['Setup', [['/admin/events', 'Events'], ['/admin/team', 'Team']]],
 ];
 
 // Re-render now and then, so the club's clock and the held-table minutes keep moving between refreshes.
@@ -81,7 +82,18 @@ function Shell({ me }) {
             <Route path="guestlist" element={<Guestlist {...page} />} />
             <Route path="door" element={<DoorLog {...page} />} />
             <Route path="events" element={<Events />} />
-            <Route path="*" element={<p className="sub">This page isn't available yet.</p>} />
+            <Route path="team" element={<Team flash={setFlash} />} />
+            <Route
+              path="*"
+              element={
+                <div className="fail">
+                  <h1 className="title head">Page not found</h1>
+                  <Link className="btn line" to="/admin">
+                    Go to the overview
+                  </Link>
+                </div>
+              }
+            />
           </Routes>
         </main>
       </div>

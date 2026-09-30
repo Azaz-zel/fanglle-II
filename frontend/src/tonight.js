@@ -1,5 +1,5 @@
 // Manager's night (S7), from fanglle-pengelola-mockup.jsx: Overview, Table bookings, Guestlist, Door log. No React here.
-import { clock, dayParts, earliest, headliners, hhmm, nightMinutes } from './night.js';
+import { clock, dayParts, earliest, headliners, hhmm, nightMinutes, offsetOf } from './night.js';
 
 // API status -> [label, badge tone]. "arrived" is a paid table with someone inside; no_show is the mockup's released look.
 export const STATUS = {
@@ -127,4 +127,24 @@ export function signupRows(list, { mode, arrival, q }) {
       (arrival === 'any' || arrivalOf(g) === arrival) &&
       has(s, g.name, g.phone_last4, ...g.passes.map((p) => p.holder_name)),
   );
+}
+
+// Team (S8), from the Team page of the admin mockup.
+export const ROLE_LABEL = { manager: 'Manager', door: 'Door staff' };
+export const STAFF_STATUS = { active: ['Active', 'paid'], invited: ['Invite pending', 'held'], disabled: ['Disabled', 'off'] };
+
+// "Last sign-in" column. Server times carry the club's offset, so "today" is the club's date, not the device's.
+export function lastSeen(s, now = Date.now()) {
+  if (s.you) return 'Now';
+  if (s.status === 'invited')
+    return Date.parse(s.invite_expires_at) <= now ? 'Invite link expired' : `Invite link works until ${when(s.invite_expires_at, now)}`;
+  return s.last_active_at ? when(s.last_active_at, now) : 'Never signed in';
+}
+
+function when(iso, now) {
+  const today = new Date(now + offsetOf(iso) * 60_000).toISOString().slice(0, 10);
+  const day = iso.slice(0, 10);
+  if (day === today) return `Today, ${hhmm(iso)}`;
+  const p = dayParts(day);
+  return `${p.date} ${p.month}, ${hhmm(iso)}`;
 }
