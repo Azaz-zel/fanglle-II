@@ -189,6 +189,7 @@ class AdminOperationsTest extends TestCase
             ->assertJsonPath('guestlist', ['signed' => 13, 'quota' => 200, 'arrived' => 5])
             ->assertJsonPath('tables', ['total' => 16, 'booked' => 2, 'to_arrive' => 1])
             ->assertJsonPath('now', now()->toIso8601String())
+            ->assertJsonPath('tonight', self::NIGHT)
             ->assertJsonPath('deposits', 24000000)
             ->assertJsonPath('held', [['code' => 'F2-4LWX', 'table_code' => 'S3', 'name' => 'Komang Adi', 'held_until' => now()->addMinutes(6)->toIso8601String()]])
             ->assertJsonPath('overrides', ['count' => 1, 'latest' => ['holder_name' => 'Ayu Pratiwi', 'count' => 2, 'scanned_at' => '2026-09-25T23:12:00+08:00']]);
@@ -201,11 +202,19 @@ class AdminOperationsTest extends TestCase
         $this->assertSame(11, $arrivals->sum('total'));
     }
 
-    public function test_tonight_without_an_event_is_null(): void
+    public function test_between_nights_it_shows_the_next_night_else_the_last_and_any_night_can_be_picked(): void
     {
-        $this->travelTo('2026-09-29 20:00'); // a Tuesday
+        $this->travelTo('2026-09-29 20:00'); // a Tuesday, after the seeded Thursday 24 to Sunday 27
+        $this->asManager();
 
-        $this->asManager()->getJson('/api/admin/tonight')->assertOk()->assertExactJson(['event' => null]);
+        $this->getJson('/api/admin/tonight')->assertOk()->assertJsonPath('event.date', '2026-09-27')->assertJsonPath('tonight', '2026-09-29');
+
+        Event::create(['date' => '2026-10-01'] + Event::firstWhere('date', '2026-09-24')->only(['name', 'guestlist_quota', 'guestlist_cutoff', 'close_time', 'min_spend_stage', 'min_spend_booth', 'min_spend_bar']));
+        $this->getJson('/api/admin/tonight')->assertJsonPath('event.date', '2026-10-01')->assertJsonPath('arrivals.0.total', 0);
+
+        $this->getJson('/api/admin/tonight?date='.self::NIGHT)->assertJsonPath('event.name', 'Second Wave')->assertJsonPath('tonight', '2026-09-29');
+        $this->getJson('/api/admin/tonight?date=2026-09-30')->assertOk()->assertExactJson(['event' => null]);
+        $this->getJson('/api/admin/tonight?date=friday')->assertUnprocessable();
     }
 
     public function test_table_bookings_most_urgent_first_with_status_and_search_filters(): void

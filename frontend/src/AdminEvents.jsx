@@ -166,9 +166,9 @@ export default function Events() {
   let pane;
   if (!creating && detail.isError)
     pane = (
-      <div className="card fail" role="alert">
+      <div className="box error" role="alert">
         <p>{detail.error.status ? detail.error.message : "This event didn't load. Check the connection, then try again."}</p>
-        <button className="act" onClick={() => detail.refetch()}>
+        <button className="btn line sm" onClick={() => detail.refetch()}>
           Try again
         </button>
       </div>
@@ -176,7 +176,7 @@ export default function Events() {
 
   else if (!draft || (!creating && draft.date !== detail.data?.date))
     pane = (
-      <div className="card" role="status" aria-label="Loading the event">
+      <div className="box" role="status" aria-label="Loading the event">
         {[0, 1, 2].map((i) => (
           <div key={i} className="skel" />
         ))}
@@ -185,8 +185,8 @@ export default function Events() {
   else {
     const warns = lineupWarnings(draft.lineup, draft.close_time, opens);
     pane = (
-      <form ref={formRef} className="card form" onSubmit={save} noValidate>
-        <h2 className="head">{creating ? 'New event' : `Edit ${detail.data?.name}`}</h2>
+      <form ref={formRef} className="box form" onSubmit={save} noValidate>
+        <h2 className="d">{creating ? 'New event' : `Edit ${detail.data?.name}`}</h2>
         {creating && (
           <>
             <div className="field">
@@ -225,12 +225,12 @@ export default function Events() {
           </label>
           <textarea id="f-blurb" rows={2} value={draft.blurb} aria-invalid={has('blurb') || draft.blurb.length > 220} aria-describedby="c-blurb"
             onChange={(e) => set({ blurb: e.target.value })} />
-          <span id="c-blurb" className={has('blurb') || draft.blurb.length > 220 ? 'err' : 'hintline'}>
+          <span id="c-blurb" className={`tnum ${has('blurb') || draft.blurb.length > 220 ? 'err' : 'help'}`}>
             {errors.blurb?.join(' ') || `${draft.blurb.length} of 220 characters`}
           </span>
         </div>
 
-        <fieldset className="lineup" aria-describedby={has('lineup') ? 'e-lineup' : undefined}>
+        <fieldset className="sets" aria-describedby={has('lineup') ? 'e-lineup' : undefined}>
           <legend>
             Line-up{' '}
             <span>
@@ -247,7 +247,7 @@ export default function Events() {
             const timeErr = [...new Set([...(errors[`${k}-starts_at`] ?? []), ...(errors[`${k}-ends_at`] ?? [])])];
             const timeProps = { 'aria-invalid': timeErr.length > 0, 'aria-describedby': timeErr.length ? `e-${k}-time` : undefined };
             return (
-              <div className="lrow" key={r.id}>
+              <div className="set" key={r.id}>
                 <div className="field">
                   <label htmlFor={`f-${k}-performer`}>Performer {i + 1}</label>
                   <input value={r.performer} onChange={(e) => setRow(r.id, 'performer', e.target.value)} {...ids(`${k}-performer`)} />
@@ -272,7 +272,7 @@ export default function Events() {
                   <label htmlFor={`f-${k}-end`}>End</label>
                   <input id={`f-${k}-end`} type="time" value={r.ends_at} onChange={(e) => setRow(r.id, 'ends_at', e.target.value)} {...timeProps} />
                 </div>
-                <button type="button" className="act" disabled={draft.lineup.length === 1} aria-label={`Remove ${r.performer || `performer ${i + 1}`}`}
+                <button type="button" className="btn line sm" disabled={draft.lineup.length === 1} aria-label={`Remove ${r.performer || `performer ${i + 1}`}`}
                   onClick={() => set({ lineup: draft.lineup.filter((x) => x.id !== r.id) })}>
                   Remove
                 </button>
@@ -294,7 +294,7 @@ export default function Events() {
               ))}
             </ul>
           )}
-          <p className="hintline">Sets are sorted by start time when you save. Times after midnight belong to the same night.</p>
+          <p className="help">Sets are sorted by start time when you save. Times after midnight belong to the same night.</p>
         </fieldset>
 
         <div className="field">
@@ -353,15 +353,13 @@ export default function Events() {
 
   return (
     <>
-      <div>
-        <h1 className="title head">
-          <span className="two">Events</span>
-        </h1>
+      <div className="ph">
+        <h1 className="d title">Events</h1>
         <p className="sub">Line-up, guestlist places and minimum spend for each night.</p>
       </div>
       <div className="evgrid">
         <div>
-          <button className="newbtn" onClick={startCreate} aria-pressed={creating}>
+          <button className="btn line wide newbtn" onClick={startCreate} aria-pressed={creating}>
             + New event
           </button>
           {list.isPending ? (
@@ -371,9 +369,9 @@ export default function Events() {
               ))}
             </div>
           ) : list.isError ? (
-            <div className="fail" role="alert">
+            <div className="error" role="alert">
               <p>{list.error.status ? list.error.message : "Events didn't load. Check the connection, then try again."}</p>
-              <button className="act" onClick={() => list.refetch()}>
+              <button className="btn line sm" onClick={() => list.refetch()}>
                 Try again
               </button>
             </div>
@@ -383,7 +381,7 @@ export default function Events() {
                 <li key={x.date}>
                   <button className="evitem" aria-current={!creating && x.date === editKey} onClick={() => openEvent(x.date)}>
                     {x.name}
-                    <small>
+                    <small className="tnum">
                       {dayLabel(x.date)} · {x.signed}/{x.guestlist_quota} on list
                     </small>
                   </button>

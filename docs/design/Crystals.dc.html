@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Crystals</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="fanglle.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div aria-hidden="true" style="{{rootStyle}}">
+  <sc-for list="{{shards}}" as="s" hint-placeholder-count="14">
+    <div class="shard-in" style="{{s.enter}}">
+      <div class="shard-pan {{s.pan}}" style="{{s.panVars}}">
+        <div class="shard-float" style="{{s.float}}">
+          <div class="shard-sway" style="{{s.sway}}">
+            <div class="shard-cut {{s.glint}}" style="{{s.cut}}"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </sc-for>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"night":{"editor":"int","min":0,"max":3,"default":0},"count":{"editor":"int","min":4,"max":14,"default":14},"reach":{"editor":"range","min":0.3,"max":1,"step":0.05,"default":0.62},"solid":{"editor":"boolean","default":true},"$preview":{"width":1440,"height":720}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { shown: this.nightOf(props), phase: null, dir: 1 };
+  }
+  nightOf(p) {
+    const n = Number(p && p.night);
+    return Number.isFinite(n) && p.night !== '' && p.night !== null ? Math.max(0, Math.min(3, Math.round(n))) : 0;
+  }
+  componentDidUpdate(prev) {
+    const now = this.nightOf(this.props);
+    const was = this.nightOf(prev);
+    if (now === was) return;
+    // Change of night: this night's crystals slide far out, then the next night's slide in from the other side.
+    clearTimeout(this.t);
+    this.setState({ phase: 'out', dir: now > was ? 1 : -1 });
+    this.t = setTimeout(() => this.setState({ shown: now, phase: 'in' }), 560);
+  }
+  componentWillUnmount() { clearTimeout(this.t); }
+  renderVals() {
+    const num = (v, d) => { const n = Number(v); return v !== '' && v !== null && v !== undefined && Number.isFinite(n) ? n : d; };
+    const count = Math.max(4, Math.min(14, Math.round(num(this.props.count, 14))));
+    const sy = num(this.props.reach, 0.62) / 0.62;
+    const solid = this.props.solid === undefined ? true : this.props.solid === true || this.props.solid === 'true';
+    const r = (a) => { let t = (a * 2654435761 + 0x6D2B79F5) | 0; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+    const f = (v) => +v.toFixed(2);
+
+    // One composition per night, in % of the hero, each ordered left to right. Layer: 0 back, 1 mid, 2 front.
+    // Thursday, Descent: long shards hanging deep from the rig, like the room getting darker as it gets louder.
+    const descent = [
+      [0, 'back', -4, -6, 16, -6, 7, 58], [2, 'bright', 12, -2, 15, -2, 13.5, 24], [1, 'deep', 20, -4, 30, -4, 25, 48],
+      [2, 'bright', 28, 30, 30, 30, 29, 42], [1, 'mid', 33, -6, 44, -6, 38, 22], [2, 'work', 37, -4, 38.2, -4, 37.6, 34],
+      [2, 'dark', 45, -4, 53, -4, 49, 30], [0, 'back', 54, -8, 76, -8, 66, 56], [2, 'bright', 62, -2, 65, -2, 63.5, 40],
+      [1, 'deep', 72, -4, 78, -4, 75, 26], [1, 'mid', 80, -6, 92, -6, 86, 44], [2, 'work', 88, -2, 89, -2, 88.5, 20],
+      [0, 'back', 92, -8, 108, -8, 100, 52], [1, 'deep', 96, -4, 103, -4, 99.5, 30],
+    ];
+    // Friday, Second Wave: shards pointing up and down in turn along a swell, a rhythm across the room.
+    const wave = Array.from({ length: 14 }, (_, j) => {
+      const cx = -2 + j * 8, cy = 20 + 12 * Math.sin(j * 0.9), w = 9 + (j % 3) * 3, h = 22 + (j % 2) * 8, up = j % 2 === 0;
+      const layer = [1, 2, 0][j % 3];
+      const tone = layer === 0 ? 'back' : layer === 1 ? (j % 4 === 1 ? 'mid' : 'deep') : (j === 8 ? 'work' : j % 6 === 2 ? 'dark' : 'bright');
+      return up ? [layer, tone, cx - w / 2, cy + h / 2, cx + w / 2, cy + h / 2, cx, cy - h / 2] : [layer, tone, cx - w / 2, cy - h / 2, cx + w / 2, cy - h / 2, cx, cy + h / 2];
+    });
+    // Saturday, Fall Line: one steep diagonal band from the top right. Big slanted shards give it mass, sharp ones cut across it,
+    // and a single long white line is the fall line itself. Every shard leans the same way, about 30 degrees off vertical.
+    const fall = [
+      [0, 'back', 8, -6, 24, -6, -2, 44], [2, 'work', 14, -4, 15, -4, 4, 30], [2, 'bright', 20, 16, 23, 16, 14, 36],
+      [1, 'deep', 28, 4, 36, 4, 18, 40], [0, 'back', 40, -8, 62, -8, 26, 48], [2, 'dark', 46, 12, 52, 12, 40, 32],
+      [2, 'work', 55, -4, 56.2, -4, 40, 38], [1, 'mid', 60, 0, 70, 0, 50, 34], [2, 'bright', 72, 8, 75, 8, 64, 34],
+      [0, 'back', 78, -10, 104, -10, 66, 40], [2, 'dark', 82, -4, 88, -4, 76, 20], [2, 'bright', 86, 26, 88, 26, 83, 36],
+      [1, 'deep', 90, -6, 98, -6, 80, 30], [1, 'mid', 96, 10, 100, 8, 90, 30],
+    ];
+    // Sunday, Afterglow: long low beams converging on a sun just set off the right edge, wide and calm, with one white
+    // horizon line. Where the beams meet on the right the bright ones overlap and glow.
+    const glow = [
+      [0, 'back', -10, -12, -10, 14, 110, 24], [0, 'back', -10, 30, -10, 50, 108, 30], [2, 'work', -6, 22, -6, 23.4, 104, 27.5],
+      [1, 'deep', 0, 16, 0, 26, 106, 27], [2, 'bright', 8, 4, 8, 7, 60, 16], [1, 'mid', 10, 36, 10, 42, 106, 30],
+      [2, 'dark', 18, 26, 18, 32, 70, 28], [0, 'back', 20, -14, 60, -14, 112, 22], [1, 'deep', 30, 2, 30, 10, 108, 25],
+      [2, 'bright', 40, 12, 40, 16, 102, 25], [2, 'work', 50, 40, 50, 41, 104, 31], [1, 'mid', 55, -6, 55, 2, 110, 23],
+      [2, 'bright', 60, 32, 60, 35, 104, 29], [2, 'bright', 76, 18, 76, 21, 98, 25],
+    ];
+    const COMP = [descent, wave, fall, glow];
+
+    const TONE = {
+      back: 'color-mix(in oklab, var(--gel-deep) 40%, #0C0A0E)',
+      mid: 'color-mix(in oklab, var(--gel-deep) 70%, #0C0A0E)',
+      deep: 'var(--gel-deep)',
+      bright: 'var(--gel-bright)',
+      work: 'rgba(241, 236, 228, .82)',
+      dark: '#16131A',
+    };
+    // Idle motion per layer, in the hero's own units so a phone moves in proportion: bob (cqh), sway (cqw), tilt on the shard's centre.
+    // po and pi: how far (% of the hero's width) the layer slides out and in on a change of night.
+    const LAYER = [
+      { op: 0.8, amp: 1.1, ax: 0.9, rot: 1.4, fd: 15, fs: 21, po: 22, pi: 16 },
+      { op: 0.92, amp: 1.8, ax: 1.5, rot: 2.4, fd: 10, fs: 14, po: 40, pi: 30 },
+      { op: 1, amp: 2.8, ax: 2.3, rot: 3.8, fd: 7, fs: 9, po: 64, pi: 48 },
+    ];
+    const s = this.state;
+    const comp = COMP[s.shown];
+    // Fewer shards on a phone: pick evenly across the composition so it still spans the whole width.
+    const pick = Array.from({ length: count }, (_, k) => comp[Math.round(k * (comp.length - 1) / Math.max(1, count - 1))]);
+    const shards = pick.map(([layer, tone, x1, y1, x2, y2, x3, y3], i) => {
+      const L = LAYER[layer];
+      const pts = [[x1, y1], [x2, y2], [x3, y3]].map(([x, y]) => [x, y * sy]);
+      const cx = (pts[0][0] + pts[1][0] + pts[2][0]) / 3;
+      const cy = (pts[0][1] + pts[1][1] + pts[2][1]) / 3;
+      // Long shards tilt less, like heavier pieces: the hero is wider than tall, so a y step counts about 0.65 of an x step.
+      const span = Math.max(...[[0, 1], [1, 2], [0, 2]].map(([u, w]) => Math.hypot(pts[u][0] - pts[w][0], (pts[u][1] - pts[w][1]) * 0.65)));
+      const tilt = Math.min(1, 30 / span);
+      const glint = tone === 'bright' || tone === 'work';
+      const seed = s.shown * 31 + i;
+      return {
+        enter: `animation-delay: ${260 + i * 50}ms; z-index: ${layer + 1}`,
+        pan: s.phase === 'out' ? 'pan-out' : s.phase === 'in' ? 'pan-in' : '',
+        panVars: `--dir: ${s.dir}; --po: ${f(L.po + r(seed * 3 + 1) * 8)}; --pi: ${f(L.pi + r(seed * 5 + 2) * 8)}; --pod: ${(2 - layer) * 40}ms; --pid: ${layer * 90 + Math.round(r(seed * 7 + 3) * 120)}ms`,
+        float: `--fd: ${f(L.fd + r(seed * 53 + 12) * 4)}s; --fdl: -${f(r(seed * 59 + 13) * 10)}s; --amp: ${f(L.amp * (0.8 + r(seed * 61 + 4) * 0.4))}`,
+        sway: `transform-origin: ${f(cx)}% ${f(cy)}%; --fs: ${f(L.fs + r(seed * 67 + 14) * 5)}s; --fsl: -${f(r(seed * 71 + 15) * 12)}s; --ax: ${f(L.ax * (0.8 + r(seed * 73 + 5) * 0.4))}; --rot: ${f(L.rot * tilt * (r(seed * 79 + 6) < 0.5 ? -1 : 1))}`,
+        glint: glint ? 'glint' : '',
+        cut: `clip-path: polygon(${pts.map(([x, y]) => `${f(x)}% ${f(y)}%`).join(', ')}); background: ${TONE[tone]}; opacity: ${L.op}; --op: ${L.op}; --op-lo: ${f(L.op * 0.62)}; --fp: ${f(5 + r(seed * 83 + 7) * 4)}s; --fpl: -${f(r(seed * 89 + 8) * 6)}s; ${glint ? 'mix-blend-mode: screen;' : ''}`,
+      };
+    });
+    return {
+      shards,
+      rootStyle: `position: absolute; inset: 0; overflow: hidden; pointer-events: none; container-type: size; -webkit-mask-image: linear-gradient(180deg, #000 0%, #000 46%, transparent 92%); mask-image: linear-gradient(180deg, #000 0%, #000 46%, transparent 92%); ${solid ? 'background: #0C0A0E;' : ''}`,
+    };
+  }
+}
+</script>
+</body>
+</html>

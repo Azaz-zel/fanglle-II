@@ -1,6 +1,6 @@
 import { expect, test } from 'vitest';
 import {
-  clock, dayLabel, dayParts, entryCode, guestNames, lineupWarnings, mmss, nightMinutes, nightRun, passOrCopy, passState, secondsLeft,
+  clock, dayLabel, dayParts, entryCode, gelOf, guestNames, lineupWarnings, mmss, nightMinutes, nightRun, passOrCopy, passState, secondsLeft,
   tableState, validUntil, waShare,
 } from './night.js';
 
@@ -185,4 +185,10 @@ test('About: how a night runs, from the night itself, in night order (F2, F3)', 
   const late = nightRun({ ...e, guestlist_cutoff: '00:30' }).map((s) => s.at);
   expect(late).toEqual(['15:00', '22:00', '00:00', '00:30', '04:00']);
   expect(nightRun({ ...e, lineup: [] }).map((s) => s.at)).toEqual(['15:00', '23:00', '04:00']);
+});
+
+test('gelOf lights each club night by its weekday, Thursday for any other day', () => {
+  expect(['2026-10-08', '2026-10-09', '2026-10-10', '2026-10-11'].map(gelOf)).toEqual(['thu', 'fri', 'sat', 'sun']);
+  expect(gelOf('2026-10-12')).toBe('thu'); // a Monday private night
+  expect(gelOf('2026-10-14')).toBe('thu'); // Wednesday
 });

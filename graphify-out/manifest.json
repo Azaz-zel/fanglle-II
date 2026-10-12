@@ -558,9 +558,9 @@
     "semantic_hash": ""
   },
   "CLAUDE.md": {
-    "mtime": 1790745754.8506393,
-    "seen": 1790775751.8230546,
-    "ast_hash": "8a8d2960c30038704dcf460d86771220",
+    "mtime": 1790776115.080918,
+    "seen": 1790776123.9999266,
+    "ast_hash": "f7a9448d13b0182c8bc08c5549da6e28",
     "semantic_hash": ""
   },
   "backend/README.md": {
@@ -852,10 +852,10 @@
     "semantic_hash": ""
   },
   "AGENTS.md": {
-    "mtime": 1790420179.23458,
-    "seen": 1790676161.527367,
-    "ast_hash": "b11564ad58b05b1c6326d659380dd289",
-    "semantic_hash": "b11564ad58b05b1c6326d659380dd289"
+    "mtime": 1790776115.101012,
+    "seen": 1790776123.9999266,
+    "ast_hash": "1bd635348bededff7495454b123f1e2a",
+    "semantic_hash": ""
   },
   "backend/database/migrations/2026_09_30_000000_add_invite_token_to_users.php": {
     "mtime": 1790745271.2743907,
@@ -927,6 +927,12 @@
     "mtime": 1790747188.3541093,
     "seen": 1790775751.8230546,
     "ast_hash": "d0573d03ccd399e5ebd7b7b65feaa34f",
+    "semantic_hash": ""
+  },
+  "docs/progress.md": {
+    "mtime": 1790776103.6004262,
+    "seen": 1790776123.9999266,
+    "ast_hash": "f93f0852f733ecc25b42d41c07b7da00",
     "semantic_hash": ""
   }
 }

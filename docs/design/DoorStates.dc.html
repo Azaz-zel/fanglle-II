@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Door scanner, every state</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="fanglle.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Albert+Sans:wght@400;500&amp;family=Big+Shoulders+Display:wght@100;200;300;400;600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#0C0A0E}
+a{color:#F1ECE4}a:hover{color:#FFFDF8}
+</style>
+</helmet>
+<div style="width: 2030px; height: 844px; display: flex; gap: 20px; background: #0C0A0E">
+  <dc-import name="DoorPhone" screen="start" hint-size="390px,844px"></dc-import>
+  <dc-import name="DoorPhone" screen="scan" hint-size="390px,844px"></dc-import>
+  <dc-import name="DoorPhone" screen="ok" hint-size="390px,844px"></dc-import>
+  <dc-import name="DoorPhone" screen="bad" hint-size="390px,844px"></dc-import>
+  <dc-import name="DoorPhone" screen="warn" hint-size="390px,844px"></dc-import>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":2030,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Your QR for Descent</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="fanglle.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Albert+Sans:wght@400;500&amp;family=Big+Shoulders+Display:wght@100;200;300;400;600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#0C0A0E}
+a{color:#F1ECE4}a:hover{color:#FFFDF8}
+</style>
+</helmet>
+<div class="stage gel-thu" style="width: 390px; height: 844px; background: var(--blackout); color: var(--tungsten); font-family: var(--body); overflow: hidden; display: flex; flex-direction: column">
+  <header style="padding: 16px 20px 12px; display: flex; align-items: baseline; justify-content: space-between; gap: 10px">
+    <span class="mark" style="font-size: 16px; letter-spacing: .12em">The Fanglle <span class="ii">II</span></span>
+    <span class="label">Guestlist pass</span>
+  </header>
+  <sc-if value="{{offline}}" hint-placeholder-val="{{ false }}">
+    <p role="status" style="margin: 0; padding: 12px 20px; background: var(--raised); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); font-size: 15px">No signal. Showing the copy saved on this phone.</p>
+  </sc-if>
+
+  <div class="wash" style="position: relative; overflow: hidden; padding: 30px 20px 16px">
+    <div style="position: absolute; inset: 0; pointer-events: none"><dc-import name="Crystals" night="0" solid="" count="7" reach="0.95" hint-size="100%,100%"></dc-import></div>
+    <div class="beam" style="width: 560px; animation: none; opacity: .4"></div>
+    <p class="night" style="position: relative; font-size: 54px">Descent</p>
+    <p style="position: relative; margin: 8px 0 0; font-size: 15px; color: var(--soft)">Thursday 8 October · Doors 3 pm</p>
+  </div>
+
+  <main style="flex: 1; padding: 16px 20px 20px; display: flex; flex-direction: column; gap: 14px">
+    <div style="position: relative; background: var(--work); color: var(--ink); border-radius: 4px; padding: 18px 18px 16px">
+      <div style="position: relative; width: 86%; margin: 0 auto; aspect-ratio: 1; opacity: {{qrOpacity}}">
+        <span style="position: absolute; left: 0; top: 0; width: 24%; aspect-ratio: 1; border: 9px solid #0C0A0E; box-sizing: border-box"></span>
+        <span style="position: absolute; right: 0; top: 0; width: 24%; aspect-ratio: 1; border: 9px solid #0C0A0E; box-sizing: border-box"></span>
+        <span style="position: absolute; left: 0; bottom: 0; width: 24%; aspect-ratio: 1; border: 9px solid #0C0A0E; box-sizing: border-box"></span>
+        <span style="position: absolute; inset: 30%; display: flex; align-items: center; justify-content: center; text-align: center; font: 500 13px/1.4 var(--body); color: #3B3346">[QR, drawn on the phone from the signed pass]</span>
+      </div>
+      <sc-if value="{{used}}" hint-placeholder-val="{{ false }}">
+        <div style="position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 24px">
+          <strong class="d" style="font-size: 52px; font-weight: 400; letter-spacing: .06em; color: #0C0A0E">Used</strong>
+          <span style="font-size: 16px; color: #3B3346">Checked in at 10:42 pm</span>
+        </div>
+      </sc-if>
+      <div style="margin-top: 12px; text-align: center">
+        <p class="d" style="font-size: 30px; color: #0C0A0E">Ayu Prameswari</p>
+        <p style="margin: 2px 0 0; font-size: 14px; color: #3B3346">1 person</p>
+      </div>
+      <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #DDD6CB; text-align: center">
+        <p style="margin: 0; font-size: 13px; color: #3B3346">Can't scan? Give the door this code</p>
+        <p class="tnum" style="margin: 4px -0.16em 0 0; font: 500 30px/1.2 var(--body); letter-spacing: .16em; color: #0C0A0E">K7QM-4TXP</p>
+      </div>
+    </div>
+
+    <sc-if value="{{awake}}" hint-placeholder-val="{{ false }}">
+      <p role="status" style="margin: 0; font-size: 15px; color: var(--paid); text-align: center">Screen stays on while this page is open</p>
+    </sc-if>
+    <sc-if value="{{asleep}}" hint-placeholder-val="{{ true }}">
+      <button class="btn btn-work btn-wide" onClick="{{keepOn}}">Keep screen on</button>
+    </sc-if>
+    <p class="help" style="text-align: center">Opened once with signal, this page keeps working without it.</p>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"offline":{"editor":"boolean","default":false},"used":{"editor":"boolean","default":false},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { awake: false }; }
+  renderVals() {
+    const used = this.props.used ?? false;
+    return {
+      offline: this.props.offline ?? false, used, awake: this.state.awake, asleep: !this.state.awake,
+      qrOpacity: used ? '.12' : '1',
+      keepOn: () => this.setState({ awake: true }),
+    };
+  }
+}
+</script>
+</body>
+</html>

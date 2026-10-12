@@ -1,0 +1,352 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>The Fanglle II, home</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="fanglle.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Albert+Sans:wght@400;500&amp;family=Big+Shoulders+Display:wght@100;200;300;400;600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#0C0A0E}
+a{color:#F1ECE4}a:hover{color:#FFFDF8}
+</style>
+</helmet>
+<div class="stage {{gelClass}}" style="background: var(--blackout); color: var(--tungsten); font-family: var(--body); overflow-x: clip; width: 100%">
+
+  <section class="wash" style="position: relative; min-height: 940px; overflow: hidden; display: flex; flex-direction: column">
+    <div style="position: absolute; inset: 0; pointer-events: none"><dc-import name="Crystals" night="{{i}}" solid="" reach="0.62" hint-size="100%,100%"></dc-import></div>
+    <div class="beam"></div>
+    <div class="haze"></div>
+    <div class="house"></div>
+
+    <header style="position: relative; z-index: 2; max-width: 1312px; width: 100%; margin: 0 auto; padding: 0 64px; box-sizing: border-box; height: 76px; display: flex; align-items: center; gap: 40px; flex-wrap: wrap">
+      <a class="mark" href="Main.dc.html">The Fanglle <span class="ii">II</span></a>
+      <nav aria-label="Main" style="display: flex; gap: 32px; margin-left: auto; flex-wrap: wrap">
+        <a class="navlink" href="#week">This week</a>
+        <a class="navlink" href="Gallery.dc.html">Gallery</a>
+        <a class="navlink" href="About.dc.html">About</a>
+        <a class="navlink" href="FindQrDesk.dc.html">Find my QR</a>
+      </nav>
+      <a class="btn btn-work btn-sm" href="Book.dc.html">Book a table</a>
+    </header>
+
+    <div class="{{outCls}}" style="position: relative; z-index: 2; flex: 1; max-width: 1312px; width: 100%; margin: 0 auto; padding: 0 64px 56px; box-sizing: border-box; display: flex; flex-direction: column; justify-content: flex-end">
+      <sc-for list="{{nights}}" as="h" hint-placeholder-count="4">
+        <sc-if value="{{h.show}}" hint-placeholder-val="{{ false }}">
+          <div aria-live="polite">
+            <p class="label swap-in" style="--d: {{h.dKicker}}; color: var(--soft)">{{h.day}} {{h.date}} October · Doors 3 pm</p>
+            <h1 class="night" style="font-size: clamp(96px, 18.4vw, 264px); margin-top: 18px">
+              <a href="Event.dc.html" aria-label="{{h.name}}" style="color: inherit; text-decoration: none">
+                <sc-for list="{{h.words}}" as="w" hint-placeholder-count="2">
+                  <span aria-hidden="true" style="display: inline-block; white-space: nowrap; margin-right: .2em"><sc-for list="{{w.letters}}" as="l" hint-placeholder-count="6"><span class="letter" style="--d: {{l.d}}">{{l.c}}</span></sc-for></span>
+                </sc-for>
+              </a>
+            </h1>
+            <p class="swap-in" style="--d: {{h.dLine}}; margin: 22px 0 0; font-size: 22px; line-height: 1.45; color: var(--soft)">{{h.head}}, with {{h.support}} · {{h.genre}}</p>
+            <div class="swap-in" style="--d: {{h.dCta}}; display: flex; gap: 14px; flex-wrap: wrap; margin-top: 34px">
+              <sc-if value="{{h.open}}" hint-placeholder-val="{{ true }}">
+                <a class="btn btn-work" href="Book.dc.html">Book a table</a>
+                <a class="btn btn-line" href="Guestlist.dc.html">Join the guestlist</a>
+              </sc-if>
+              <sc-if value="{{h.soldOut}}" hint-placeholder-val="{{ false }}">
+                <button class="btn btn-work" disabled="{{yes}}">Fully booked</button>
+              </sc-if>
+            </div>
+          </div>
+        </sc-if>
+      </sc-for>
+    </div>
+
+    <div id="week" style="position: relative; z-index: 2; max-width: 1312px; width: 100%; margin: 0 auto; padding: 0 64px; box-sizing: border-box">
+      <div role="group" aria-label="This week" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0 2px">
+        <sc-for list="{{nights}}" as="n" hint-placeholder-count="4">
+          <button class="swatch" aria-pressed="{{n.pressed}}" onClick="{{n.pick}}" style="--sw: {{n.sw}}">
+            <span class="day">{{n.short}} {{n.date}}</span>
+            <span class="nm">{{n.name}}</span>
+            <span class="st {{n.tablesClass}}">{{n.tablesShort}}</span>
+          </button>
+        </sc-for>
+      </div>
+    </div>
+  </section>
+
+  <section style="max-width: 1312px; margin: 0 auto; padding: 140px 64px 120px; box-sizing: border-box">
+    <div style="display: flex; align-items: flex-end; gap: 24px 40px; flex-wrap: wrap">
+      <div class="{{outCls}}" style="flex: 1 1 520px; min-width: 0">
+        <sc-for list="{{nights}}" as="h" hint-placeholder-count="4">
+          <sc-if value="{{h.show}}" hint-placeholder-val="{{ false }}">
+            <h2 class="d swap-in" style="--d: 60; font-size: 72px">{{h.name}}, hour by hour</h2>
+            <p class="swap-in" style="--d: 140; margin: 18px 0 0; font-size: 19px; line-height: 1.55; color: var(--muted)">Doors 3 pm. Music from 10 pm, the headliner at {{h.headAt}}, close at {{h.close}}.</p>
+          </sc-if>
+        </sc-for>
+      </div>
+      <div role="group" aria-label="Night" style="display: flex; gap: 2px">
+        <sc-for list="{{nights}}" as="n" hint-placeholder-count="4">
+          <button class="swatch" aria-pressed="{{n.pressed}}" aria-label="{{n.name}}, {{n.day}} {{n.date}}" onClick="{{n.pick}}" style="--sw: {{n.sw}}; padding: 12px 18px 14px; min-width: 76px">
+            <span class="day">{{n.short}}</span>
+            <span class="d tnum" style="font-size: 26px">{{n.date}}</span>
+          </button>
+        </sc-for>
+      </div>
+    </div>
+
+    <div class="{{outCls}}">
+      <sc-for list="{{nights}}" as="h" hint-placeholder-count="4">
+        <sc-if value="{{h.show}}" hint-placeholder-val="{{ false }}">
+          <div style="margin-top: 56px">
+            <div aria-hidden="true" style="display: grid; grid-template-columns: 300px minmax(0, 1fr); padding-bottom: 12px">
+              <span></span>
+              <div class="swap-in" style="--d: 40; position: relative; height: 18px">
+                <sc-for list="{{h.ticks}}" as="k" hint-placeholder-count="7">
+                  <span class="tnum" style="position: absolute; left: {{k.left}}%; transform: translateX({{k.shift}}); font-size: 13px; color: var(--muted); white-space: nowrap">{{k.label}}</span>
+                </sc-for>
+              </div>
+            </div>
+            <ol style="list-style: none; margin: 0; padding: 0; border-bottom: 1px solid var(--line-soft)">
+              <sc-for list="{{h.rows}}" as="s" hint-placeholder-count="3">
+                <li style="display: grid; grid-template-columns: 300px minmax(0, 1fr); align-items: center; min-height: 88px; border-top: 1px solid var(--line-soft)">
+                  <div class="swap-in" style="--d: {{s.d}}; padding: 14px 24px 14px 0">
+                    <span class="d" style="display: block; font-size: 34px; font-weight: 200; line-height: 1.05">{{s.dj}}</span>
+                    <span class="tnum" style="display: block; margin-top: 6px; font-size: 14px; color: var(--muted)"><span style="color: {{s.roleColor}}">{{s.role}}</span> · {{s.t}} to {{s.end}}</span>
+                  </div>
+                  <div style="position: relative; align-self: stretch">
+                    <sc-for list="{{h.ticks}}" as="k" hint-placeholder-count="7"><span aria-hidden="true" style="position: absolute; top: 0; bottom: 0; left: {{k.left}}%; width: 1px; background: var(--line-soft)"></span></sc-for>
+                    <span class="grow" aria-hidden="true" style="--d: {{s.dBar}}; position: absolute; {{s.pos}} border-radius: 2px; background: {{s.bg}}"></span>
+                  </div>
+                </li>
+              </sc-for>
+            </ol>
+            <div style="display: grid; grid-template-columns: 300px minmax(0, 1fr); padding-top: 14px">
+              <span style="font-size: 14px; color: var(--muted)">Doors 3 pm</span>
+              <div class="swap-in" style="--d: 520; position: relative; height: 24px; font-size: 14px">
+                <span class="tnum" style="position: absolute; left: {{h.cutLeft}}%; top: 0; padding-left: 10px; border-left: 1px solid var(--gel-bright); color: var(--soft); white-space: nowrap">Guestlist closes {{h.cutoff}}</span>
+                <span class="tnum" style="position: absolute; left: {{h.closeLeft}}%; top: 0; transform: translateX(-100%); padding-right: 10px; border-right: 1px solid var(--tungsten); color: var(--soft); white-space: nowrap">Close {{h.close}}</span>
+              </div>
+            </div>
+          </div>
+        </sc-if>
+      </sc-for>
+    </div>
+  </section>
+
+  <section style="max-width: 1312px; margin: 0 auto; padding: 60px 64px 140px; box-sizing: border-box">
+    <h2 class="d" style="font-size: 72px">Two ways in</h2>
+    <div style="display: flex; flex-wrap: wrap; gap: 24px; margin-top: 48px; align-items: stretch">
+
+      <article style="flex: 7 1 560px; min-width: 0; background: var(--surface); border: 1px solid var(--line-soft); padding: 40px; box-sizing: border-box; display: flex; flex-direction: column; gap: 26px">
+        <div class="plan" aria-hidden="true">
+          <div class="zone" style="left: 40%; width: 20%; top: 0; height: 11%; background: var(--gel-deep); color: var(--tungsten)">DJ</div>
+          <div class="zone" style="left: 29%; width: 42%; top: 15%; height: 51%; border: 1px dashed var(--line)">DANCE FLOOR</div>
+          <div class="zone" style="left: 26%; width: 48%; top: 87%; height: 8%; background: var(--raised)">BAR</div>
+          <sc-for list="{{plan}}" as="t" hint-placeholder-count="16">
+            <span class="tbl {{t.shape}}" data-s="{{t.st}}" style="{{t.box}}">
+              <sc-for list="{{t.seats}}" as="c" hint-placeholder-count="6"><span class="seat" style="{{c.s}}"></span></sc-for>
+              <span class="top" style="{{t.top}}"><b>{{t.id}}</b><small>{{t.cap}}</small></span>
+            </span>
+          </sc-for>
+        </div>
+        <div style="display: flex; gap: 22px; flex-wrap: wrap; font-size: 14px; color: var(--muted)">
+          <span style="display: inline-flex; align-items: center; gap: 8px"><i style="display: inline-block; width: 14px; height: 14px; border: 1px solid rgba(241,236,228,.6); background: rgba(241,236,228,.08)"></i>Free</span>
+          <span style="display: inline-flex; align-items: center; gap: 8px"><i style="display: inline-block; width: 14px; height: 14px; border: 1px dashed var(--muted)"></i>On hold</span>
+          <span style="display: inline-flex; align-items: center; gap: 8px"><i style="display: inline-block; width: 14px; height: 14px; border: 1px solid var(--line-soft); background: var(--blackout)"></i>Taken</span>
+          <span class="tnum" style="margin-left: auto">{{night.freeCount}} of 16 tables free</span>
+        </div>
+        <div>
+          <h3 class="d" style="font-size: 44px">A table for the night</h3>
+          <p style="margin: 14px 0 0; font-size: 17px; line-height: 1.6; color: var(--soft); max-width: 50ch">Pick your table on the floor plan. Half the minimum spend holds it as a deposit, and all of it goes toward your bill on the night.</p>
+        </div>
+        <div style="display: flex; align-items: center; gap: 24px; flex-wrap: wrap; margin-top: auto">
+          <sc-if value="{{open}}" hint-placeholder-val="{{ true }}">
+            <a class="btn btn-work" href="Book.dc.html">Book a table</a>
+          </sc-if>
+          <span class="{{night.tablesClass}}" style="font-size: 15px; color: var(--muted)">{{night.tablesLong}}</span>
+        </div>
+      </article>
+
+      <article style="flex: 5 1 380px; min-width: 0; border: 1px solid var(--line); padding: 40px; box-sizing: border-box; display: flex; flex-direction: column; gap: 22px">
+        <sc-for list="{{nights}}" as="h" hint-placeholder-count="4">
+          <sc-if value="{{h.show}}" hint-placeholder-val="{{ false }}">
+            <sc-if value="{{h.hasPlaces}}" hint-placeholder-val="{{ true }}">
+              <div style="display: flex; align-items: baseline; gap: 16px; flex-wrap: wrap; overflow: hidden">
+                <span class="d tnum roll" style="--d: 80; font-size: 132px; font-weight: 200; line-height: .85; color: var(--gel-bright)">{{h.places}}</span>
+                <span style="font-size: 17px; color: var(--soft)">places left on the list</span>
+              </div>
+            </sc-if>
+            <sc-if value="{{h.noPlaces}}" hint-placeholder-val="{{ false }}">
+              <span class="d roll" style="--d: 80; font-size: 96px; font-weight: 200; line-height: .85; color: var(--muted)">Full</span>
+            </sc-if>
+          </sc-if>
+        </sc-for>
+        <div>
+          <h3 class="d" style="font-size: 44px">The guestlist</h3>
+          <p style="margin: 14px 0 0; font-size: 17px; line-height: 1.6; color: var(--soft)">Free entry before {{night.cutoff}}. Add up to ten names, then take one QR for the group or one for each person.</p>
+        </div>
+        <ul style="list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; font-size: 15px; color: var(--muted)">
+          <li>Limited places each night</li>
+          <li>Names checked against ID at the door</li>
+        </ul>
+        <div style="margin-top: auto">
+          <sc-if value="{{hasPlaces}}" hint-placeholder-val="{{ true }}">
+            <a class="btn btn-line" href="Guestlist.dc.html">Join the guestlist</a>
+          </sc-if>
+          <sc-if value="{{noPlaces}}" hint-placeholder-val="{{ false }}">
+            <button class="btn btn-line" disabled="{{yes}}">Guestlist full</button>
+          </sc-if>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <section style="max-width: 1312px; margin: 0 auto; padding: 0 64px 160px; box-sizing: border-box">
+    <h2 class="d" style="font-size: 72px">Before you come</h2>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); margin-top: 48px; border-top: 1px solid var(--line)">
+      <div style="padding: 30px 28px 0 0; border-right: 1px solid var(--line-soft)">
+        <p class="label">Age</p>
+        <p class="d" style="font-size: 64px; margin-top: 14px">21+</p>
+        <p style="margin: 10px 0 0; font-size: 15px; color: var(--muted)">Valid ID, every night</p>
+      </div>
+      <div style="padding: 30px 28px 0; border-right: 1px solid var(--line-soft)">
+        <p class="label">Dress</p>
+        <p class="d" style="font-size: 64px; margin-top: 14px">Smart</p>
+        <p style="margin: 10px 0 0; font-size: 15px; color: var(--muted)">No sportswear, no flip-flops</p>
+      </div>
+      <div style="padding: 30px 28px 0; border-right: 1px solid var(--line-soft)">
+        <p class="label">Doors</p>
+        <p class="d tnum" style="font-size: 64px; margin-top: 14px">From 3 pm</p>
+        <p style="margin: 10px 0 0; font-size: 15px; color: var(--muted)">Thursday to Sunday. Closing time is on each night's page</p>
+      </div>
+      <div style="padding: 30px 0 0 28px">
+        <p class="label">Where</p>
+        <p class="d" style="font-size: 64px; margin-top: 14px">Canggu</p>
+        <p style="margin: 10px 0 0; font-size: 15px; color: var(--muted)">Exact location sent with your booking</p>
+      </div>
+    </div>
+  </section>
+
+  <section style="position: relative; overflow: hidden; padding: 200px 64px 220px; text-align: center">
+    <div class="beam narrow"></div>
+    <p class="d" style="position: relative; font-size: 68px; font-weight: 200; line-height: 1.12; max-width: 17ch; margin: 0 auto">Some fall once. The second time, you choose to.</p>
+  </section>
+
+  <footer style="border-top: 1px solid var(--line-soft)">
+    <div style="max-width: 1312px; margin: 0 auto; padding: 48px 64px 64px; box-sizing: border-box">
+      <div style="display: flex; align-items: center; gap: 16px 40px; flex-wrap: wrap">
+        <a class="mark" href="Main.dc.html">The Fanglle <span class="ii">II</span></a>
+        <nav aria-label="Footer" style="display: flex; gap: 28px; flex-wrap: wrap">
+          <a class="navlink" href="#week">This week</a>
+          <a class="navlink" href="Gallery.dc.html">Gallery</a>
+          <a class="navlink" href="About.dc.html">About</a>
+          <a class="navlink" href="FindQrDesk.dc.html">Find my QR</a>
+        </nav>
+      </div>
+      <p style="margin: 28px 0 0; font-size: 14px; color: var(--muted)">A fictional venue. Portfolio concept by Ralph de Vinca Group.</p>
+    </div>
+  </footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"startNight":{"editor":"enum","options":["thu","fri","sat","sun"],"default":"thu"},"$preview":{"width":1440,"height":3600}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    const keys = ['thu', 'fri', 'sat', 'sun'];
+    this.state = { i: Math.max(0, keys.indexOf(props.startNight ?? 'thu')), out: false, moved: false };
+  }
+  componentWillUnmount() { clearTimeout(this.t); }
+  go(k) {
+    if (k === this.state.i || this.state.out) return;
+    // The cue: text leaves, then the light and crystals move to the new night, then the new text arrives.
+    this.setState({ out: true });
+    clearTimeout(this.t);
+    this.t = setTimeout(() => this.setState({ i: k, out: false, moved: true }), 260);
+  }
+  renderVals() {
+    const nm = (t) => { const [h, m] = t.split(':').map(Number); return (h < 12 ? h + 24 : h) * 60 + m; };
+    const ROLE = { 'Warm-up': 'var(--muted)', 'Guest star': 'var(--soft)', Headliner: 'var(--gel-bright)', Closing: 'var(--muted)' };
+    const BG = {
+      'Warm-up': 'color-mix(in oklab, var(--gel-deep) 34%, var(--surface))',
+      'Guest star': 'color-mix(in oklab, var(--gel-deep) 62%, var(--surface))',
+      Headliner: 'linear-gradient(180deg, color-mix(in oklab, var(--gel-bright) 45%, var(--gel-deep)) 0%, var(--gel-deep) 100%)',
+      Closing: 'color-mix(in oklab, var(--gel-deep) 50%, var(--surface))',
+    };
+    // venue_tables (DatabaseSeeder): code, zone, shape, capacity, x, y on a 1000 x 620 plan.
+    const TABLES = [['S1','stage','round',6,185,150],['S2','stage','round',6,185,285],['S3','stage','round',6,815,150],['S4','stage','round',6,815,285],
+      ['B1','booth','booth',12,72,135],['B2','booth','booth',12,72,265],['B3','booth','booth',8,72,395],['B4','booth','booth',12,928,135],['B5','booth','booth',12,928,265],['B6','booth','booth',8,928,395],
+      ['T1','bar','high',4,300,462],['T2','bar','high',4,380,462],['T3','bar','high',4,460,462],['T4','bar','high',4,540,462],['T5','bar','high',4,620,462],['T6','bar','high',4,700,462]];
+    const furniture = (shape, cap, x) => {
+      const at = (dx, dy, w, h, extra) => ({ s: `left: calc(50% + ${dx}cqw); top: calc(50% + ${dy}cqw); width: ${w}cqw; height: ${h}cqw; ${extra || ''}` });
+      if (shape === 'round') return { box: 'width: 10cqw; height: 10cqw', top: 'width: 5.4cqw; height: 5.4cqw; border-radius: 50%',
+        seats: [0, 1, 2, 3, 4, 5].map((k) => { const a = k * Math.PI / 3 + Math.PI / 6; return at(+(Math.cos(a) * 3.95).toFixed(2), +(Math.sin(a) * 3.95).toFixed(2), 1.5, 1.5, 'border-radius: 50%'); }) };
+      if (shape === 'booth') { const h = cap > 8 ? 11.5 : 9; const left = x < 500;
+        return { box: `width: 8.4cqw; height: ${h}cqw`, top: `width: 3.4cqw; height: ${(h - 4.6).toFixed(1)}cqw; border-radius: .5cqw; margin-left: ${left ? '.8cqw' : '-.8cqw'}`,
+          seats: [{ s: `left: 0; top: 0; right: 0; bottom: 0; transform: none; background: transparent; border: 1.4cqw solid var(--seat); ${left ? 'border-right-color: transparent; border-radius: 1.6cqw 0 0 1.6cqw' : 'border-left-color: transparent; border-radius: 0 1.6cqw 1.6cqw 0'}` }] }; }
+      return { box: 'width: 7cqw; height: 7cqw', top: 'width: 3.2cqw; height: 3.2cqw; border-radius: .4cqw', seats: [[-1, -1], [1, -1], [1, 1], [-1, 1]].map(([a, b]) => at(a * 2.5, b * 2.5, 1.3, 1.3, 'border-radius: 50%')) };
+    };
+    const N = [
+      { key: 'thu', day: 'Thursday', short: 'Thu', date: '8', name: 'Descent', head: 'Ilse Varga', support: 'Rafi Hartono', genre: 'Melodic techno', sw: '#9A93FF', cutoff: '11 pm', close: '4 am', cutoffT: '23:00', closeT: '04:00',
+        tablesShort: 'From IDR 5,000,000', tablesLong: 'Tables from IDR 5,000,000', tablesClass: '', places: 42, booked: ['S1', 'B4', 'T2'], held: ['B2'],
+        sets: [['Rafi Hartono', 'Warm-up', '22:00', '00:00'], ['Ilse Varga', 'Headliner', '00:00', '03:00'], ['Rafi Hartono', 'Closing', '03:00', '04:00']] },
+      { key: 'fri', day: 'Friday', short: 'Fri', date: '9', name: 'Second Wave', head: 'Marcel Oduya', support: 'Kirana, Bayu Kencana and Lintang', genre: 'Afro house', sw: '#F5AE4E', cutoff: '11 pm', close: '4 am', cutoffT: '23:00', closeT: '04:00',
+        tablesShort: 'Last tables', tablesLong: 'Last tables, from IDR 8,000,000', tablesClass: 'st-last', places: 6, booked: ['S1', 'S2', 'S3', 'B1', 'B2', 'B4', 'B5', 'T1', 'T2', 'T3', 'T5'], held: ['S4'],
+        sets: [['Kirana', 'Warm-up', '22:00', '23:30'], ['Bayu Kencana', 'Guest star', '23:30', '00:30'], ['Marcel Oduya', 'Headliner', '00:30', '02:30'], ['Lintang', 'Guest star', '02:30', '03:30'], ['Kirana', 'Closing', '03:30', '04:00']] },
+      { key: 'sat', day: 'Saturday', short: 'Sat', date: '10', name: 'Fall Line', head: 'Nadia Sorrel', support: 'Dewa Anom', genre: 'Tech house', sw: '#FF6676', cutoff: '11 pm', close: '4 am', cutoffT: '23:00', closeT: '04:00',
+        tablesShort: 'Sold out', tablesLong: 'Tables sold out', tablesClass: 'st-gone', places: 0, soldOut: true, booked: TABLES.map((t) => t[0]), held: [],
+        sets: [['Dewa Anom', 'Warm-up', '22:00', '00:00'], ['Nadia Sorrel', 'Headliner', '00:00', '03:00'], ['Dewa Anom', 'Closing', '03:00', '04:00']] },
+      { key: 'sun', day: 'Sunday', short: 'Sun', date: '11', name: 'Afterglow', head: 'Theo Brandt', support: 'Saka', genre: 'Deep house', sw: '#F4A3C0', cutoff: '11:30 pm', close: '3 am', cutoffT: '23:30', closeT: '03:00',
+        tablesShort: 'From IDR 4,000,000', tablesLong: 'Tables from IDR 4,000,000', tablesClass: '', places: 60, booked: ['T1'], held: [],
+        sets: [['Saka', 'Warm-up', '22:00', '00:00'], ['Theo Brandt', 'Headliner', '00:00', '03:00'], ['Saka', 'Closing', '03:00', '04:00']] },
+    ];
+    const s = this.state;
+    const night = N[s.i];
+    const base = s.moved ? 0 : 760;
+    const clock = (t) => { const [h, m] = t.split(':').map(Number); const hh = h % 12 || 12; return `${hh}${m ? ':' + String(m).padStart(2, '0') : ''} ${h < 12 ? 'am' : 'pm'}`; };
+    const nights = N.map((n, k) => {
+      let at = 0;
+      const words = n.name.split(' ').map((w) => ({ letters: [...w].map((c) => ({ c, d: base + 120 + (at++) * 32 })) }));
+      const headSet = n.sets.find((x) => x[1] === 'Headliner');
+      const a0 = nm('22:00');
+      const a1 = Math.max(nm(n.closeT), ...n.sets.map((x) => nm(x[3])));
+      const pc = (t) => +((nm(t) - a0) / (a1 - a0) * 100).toFixed(2);
+      const lab = (m) => { const h = Math.floor(m / 60) % 24; return `${h % 12 || 12} ${h < 12 ? 'am' : 'pm'}`; };
+      const hours = [];
+      for (let m = a0; m <= a1; m += 60) hours.push(m);
+      const tick = (list) => list.map((m, j) => ({ left: +((m - a0) / (a1 - a0) * 100).toFixed(2), label: lab(m), shift: j === 0 ? '0' : j === list.length - 1 ? '-100%' : '-50%' }));
+      const rows = n.sets.map(([dj, role, a, b], j) => {
+        const big = role === 'Headliner';
+        return { dj, role, t: a, end: b, roleColor: ROLE[role], bg: BG[role], d: 60 + j * 70, dBar: 160 + j * 70,
+          pos: `left: ${pc(a)}%; width: ${+(pc(b) - pc(a)).toFixed(2)}%; top: calc(50% - ${big ? 16 : 10}px); height: ${big ? 32 : 20}px;` };
+      });
+      return {
+        ...n, show: k === s.i, pressed: k === s.i, pick: () => this.go(k), open: !n.soldOut, soldOut: !!n.soldOut, hasPlaces: n.places > 0, noPlaces: n.places === 0,
+        words, dKicker: base + 40, dLine: base + 160 + at * 32, dCta: base + 260 + at * 32, headAt: clock(headSet[2]), ticks: tick(hours), rows, cutLeft: pc(n.cutoffT), closeLeft: pc(n.closeT),
+        sets: n.sets.map(([dj, role, a, b], j) => ({
+          dj, role, t: a, grow: nm(b) - nm(a), bg: BG[role], roleColor: ROLE[role], size: n.sets.length > 3 ? '30px' : '38px',
+          d: 80 + j * 90, d2: 160 + j * 90, d3: 260 + j * 90,
+        })),
+      };
+    });
+    const plan = TABLES.map(([id, zone, shape, cap, x, y]) => {
+      const st = night.booked.includes(id) ? 'dark' : night.held.includes(id) ? 'held' : 'lit';
+      const fz = furniture(shape, cap, x);
+      return { id, cap, shape: shape === 'high' ? 'high' : '', st, box: `left: ${x / 10}%; top: ${(y / 6.2).toFixed(2)}%; ${fz.box}`, top: fz.top, seats: fz.seats };
+    });
+    return {
+      yes: true,
+      i: s.i,
+      gelClass: 'gel-' + night.key,
+      outCls: s.out ? 'swap-out' : '',
+      night: { ...night, freeCount: plan.filter((t) => t.st === 'lit').length },
+      plan,
+      nights,
+      open: !night.soldOut,
+      hasPlaces: night.places > 0,
+      noPlaces: night.places === 0,
+    };
+  }
+}
+</script>
+</body>
+</html>

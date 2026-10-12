@@ -1,738 +1,144 @@
-/* Poiret One and Didact Gothic, self-hosted from public/fonts (SIL OFL 1.1, licences beside the files).
-   Latin and latin-ext subsets. Both faces have one weight and one upright style. */
-@font-face{font-family:'Poiret One';font-style:normal;font-weight:400;font-display:swap;src:url(/fonts/poiret-one-latin-ext.woff2) format('woff2');
+/* The Fanglle II, "Gel dan Kabut" (docs/design/). Global base: faces, tokens, reset, and the pieces every region shares.
+   Region styles load with their chunk: stage.css (lit room and crystals), public.css, pass.css, door.css, admin.css. */
+
+/* Big Shoulders Display and Albert Sans, self-hosted from public/fonts (SIL OFL 1.1, licences beside the files) so the QR page and
+   the door scanner keep their type without signal. Both are variable: one file per subset covers every weight used. */
+@font-face{font-family:'Big Shoulders Display';font-style:normal;font-weight:100 600;font-display:swap;src:url(/fonts/big-shoulders-display-latin-ext.woff2) format('woff2');
   unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
-@font-face{font-family:'Poiret One';font-style:normal;font-weight:400;font-display:swap;src:url(/fonts/poiret-one-latin.woff2) format('woff2');
+@font-face{font-family:'Big Shoulders Display';font-style:normal;font-weight:100 600;font-display:swap;src:url(/fonts/big-shoulders-display-latin.woff2) format('woff2');
   unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
-@font-face{font-family:'Didact Gothic';font-style:normal;font-weight:400;font-display:swap;src:url(/fonts/didact-gothic-latin-ext.woff2) format('woff2');
+@font-face{font-family:'Albert Sans';font-style:normal;font-weight:400 500;font-display:swap;src:url(/fonts/albert-sans-latin-ext.woff2) format('woff2');
   unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
-@font-face{font-family:'Didact Gothic';font-style:normal;font-weight:400;font-display:swap;src:url(/fonts/didact-gothic-latin.woff2) format('woff2');
+@font-face{font-family:'Albert Sans';font-style:normal;font-weight:400 500;font-display:swap;src:url(/fonts/albert-sans-latin.woff2) format('woff2');
   unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
 
-/* Tokens: PRD Frontend 2.1, exactly. */
+/* Gel colours are registered so a change of night cross-fades the light instead of snapping. */
+@property --gel-deep{syntax:'<color>';inherits:true;initial-value:#2B21B0}
+@property --gel-bright{syntax:'<color>';inherits:true;initial-value:#9A93FF}
+@property --gel-haze{syntax:'<color>';inherits:true;initial-value:#120F2B}
+
 :root{
-  --obsidian:#0C0812; --surface:#150E1F; --raised:#1E1530; --line:#2E2342; --line-soft:#221931;
-  --amethyst:#563C7A; --amethyst-deep:#3D2A58; --amethyst-soft:#7A5BA6;
-  --text:#EEE9F3; --soft:#C9BDD9; --muted:#A99DB8;
-  --garnet:#A3162F; --garnet-hover:#B91C38; --garnet-text:#E5566B; --on-garnet:#FBF7FB;
-  --held:#F0B55A; --paid:#6FD49A;
-  --head:'Poiret One','Helvetica Neue',Arial,sans-serif; --body:'Didact Gothic','Helvetica Neue',Arial,sans-serif;
+  --blackout:#0C0A0E;--surface:#16131A;--raised:#211D26;--line:#3A3441;--line-soft:#26212C;
+  --tungsten:#F1ECE4;--soft:#CFC7BD;--muted:#9E968C;--work:#F7F3EC;--ink:#0C0A0E;
+  --held:#F0B55A;--paid:#6FD49A;--error:#FF8F8F;
+  --display:'Big Shoulders Display','Arial Narrow',sans-serif;
+  --body:'Albert Sans','Helvetica Neue',Arial,sans-serif;
+  --ease-out:cubic-bezier(.23,1,.32,1);
+  --ease-cue:cubic-bezier(.65,0,.35,1);
+  --cue:900ms;
   color-scheme:dark;
+
 }
+/* One gel per night of the week (gelOf in night.js). Only one is on stage at a time. */
+.gel-thu{--gel-deep:#2B21B0;--gel-bright:#9A93FF;--gel-haze:#120F2B}
+.gel-fri{--gel-deep:#B4600E;--gel-bright:#F5AE4E;--gel-haze:#22140A}
+.gel-sat{--gel-deep:#A30F25;--gel-bright:#FF6676;--gel-haze:#210A0F}
+.gel-sun{--gel-deep:#9C3F66;--gel-bright:#F4A3C0;--gel-haze:#1F0F17}
+/* Only the logo cross-fades its gel here. The lit room cross-fades layers of light instead (stage.css), and the rest of the page
+   swaps its gel under its own fade (the timeline) or a reload (the floor plan). */
+.stage .mark{transition:--gel-bright var(--cue) var(--ease-cue)}
+
 *{box-sizing:border-box;margin:0;padding:0}
-/* One weight, upright only: the browser may not fake bold or slanted faces. Emphasis is colour. */
-html{font-synthesis:none}
-h1,h2,h3,h4,h5,h6,b,strong,th,legend,optgroup{font-weight:400}
+html{font-synthesis:none;-webkit-text-size-adjust:100%;scrollbar-color:var(--line) var(--blackout)}
+::selection{background:color-mix(in srgb,var(--gel-deep) 70%,var(--blackout));color:var(--tungsten)}
+input,textarea{caret-color:var(--tungsten)}
 em,i,cite,dfn,var,address{font-style:normal}
-body{min-height:100vh;background:var(--obsidian);color:var(--text);font-family:var(--body);font-size:16px;line-height:1.5}
+body{min-height:100vh;min-height:100dvh;background:var(--blackout);color:var(--tungsten);font-family:var(--body);font-size:16px;line-height:1.5}
 a{color:inherit}
 button,input,select,textarea{font:inherit;color:inherit}
-:focus-visible{outline:2px solid var(--text);outline-offset:3px}
-@media (prefers-reduced-motion:reduce){
-  *,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}
-}
-
-/* Shared pieces, from fanglle-pengelola-mockup.jsx */
-.head{font-family:var(--head);font-weight:400}
-.two{color:var(--garnet-text)}
-.brand{font-size:18px;letter-spacing:.12em;white-space:nowrap}
-.sub{color:var(--muted);margin-top:4px}
-.lab{display:block;font-size:13px;color:var(--muted);margin-bottom:6px}
-.err{font-size:14px;color:var(--garnet-text)}
-.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:20px}
-
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:46px;padding:10px 22px;border-radius:8px;font-size:16px;
-  line-height:1.2;white-space:nowrap;cursor:pointer;border:1px solid transparent;text-decoration:none;transition:background .15s,border-color .15s}
-.btn.solid{background:var(--garnet);color:var(--on-garnet);border-color:var(--garnet)}
-/* :enabled: a disabled button under the pointer keeps its disabled look */
-.btn.solid:enabled:hover,a.btn.solid:hover{background:var(--garnet-hover);border-color:var(--garnet-hover)}
-.btn.line{background:transparent;color:var(--text);border-color:var(--amethyst-soft)}
-.btn.line:enabled:hover,a.btn.line:hover{background:var(--raised);border-color:var(--text)}
-.btn:enabled:active,a.btn:active{transform:translateY(1px)}
-
-/* Mockup chips are 40px; raised to the 44px touch target. */
-.chip{min-height:44px;padding:6px 14px;border-radius:20px;border:1px solid var(--line);background:transparent;color:var(--soft);font-size:15px;cursor:pointer}
-.chip[aria-pressed="true"]{background:var(--raised);color:var(--text);border-color:var(--amethyst-soft)}
-.chip em{color:var(--muted);margin-left:4px}
-
-.badge{display:inline-block;font-size:13px;padding:3px 10px;border-radius:12px;background:var(--raised);white-space:nowrap}
-.b-held{color:var(--held)}.b-paid{color:var(--paid)}.b-in{color:var(--soft)}.b-off{color:var(--muted)}
-
-/* Native <dialog>; the reset above removes its auto margin, so centre it again. */
-.dlg{margin:auto;width:min(440px,calc(100% - 32px));background:var(--surface);color:var(--text);border:1px solid var(--garnet);border-radius:12px;padding:24px}
-.dlg[open]{display:flex;flex-direction:column;gap:14px}
-.dlg::backdrop{background:rgba(12,8,18,.8)}
-.dlg h2{font-size:26px}
-.dlg p{color:var(--soft)}
-
-/* Single-card screens: login, signed out, not found (the mockup's "Signed out" card) */
-.center{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
-.solo{width:100%;max-width:420px;display:flex;flex-direction:column;gap:14px}
-.solo h1{font-size:30px}
-.solo form{display:flex;flex-direction:column;gap:14px}
-.field{display:flex;flex-direction:column;gap:6px}
-.field label{font-size:15px}
-.field input,.field select,.field textarea{min-height:46px;padding:8px 12px;background:var(--obsidian);border:1px solid var(--line);border-radius:8px;color:var(--text);font-size:16px}
-.field textarea{resize:vertical;line-height:1.5}
-.field [aria-invalid="true"]{border-color:var(--garnet-text)}
-/* Focus is moved into fields by script (autofocus, first error); Chrome skips :focus-visible then, so fields ring on any focus. */
-.field input:focus,.field select:focus,.field textarea:focus{outline:2px solid var(--text);outline-offset:3px}
-.field label span{color:var(--muted);font-size:14px}
-.btn:disabled{background:transparent;color:var(--muted);border-color:var(--line);cursor:not-allowed}
-/* Loading and failed states shared by lists and pages */
-.fail{display:flex;flex-direction:column;align-items:flex-start;gap:14px}
-.skel{height:14px;border-radius:4px;background:var(--raised);margin:16px}
-
-/* Public region, from fanglle-halaman-depan-mockup.jsx (.home) and fanglle-event-gallery-about-mockup.jsx (.ev) */
-html{scroll-behavior:smooth}
-.site{min-height:100vh;font-size:17px;line-height:1.65}
-.site .btn{min-height:48px;padding:12px 26px;letter-spacing:.04em;border-radius:2px}
-.nav{position:sticky;top:0;z-index:5;background:var(--obsidian);border-bottom:1px solid var(--line-soft)}
-.navin{max-width:1240px;margin:0 auto;padding:14px 24px;display:flex;align-items:center;gap:28px}
-.mark{display:inline-block;padding:6px 0;font-size:20px;letter-spacing:.12em;text-decoration:none;white-space:nowrap}
-.links{display:none;gap:26px;margin-left:auto;font-size:15px}
-.links a,.foot nav a{display:inline-flex;align-items:center;min-height:44px;text-decoration:none;color:var(--muted)}
-.links a:hover,.foot nav a:hover{color:var(--text)}
-@media (min-width:860px){.links{display:flex}}
-.wrap{max-width:1240px;margin:0 auto;padding:0 24px}
-.site section{padding:72px 0}
-.home section{padding:96px 0}
-.h2{font-size:clamp(30px,4vw,46px);line-height:1.1;letter-spacing:.02em}
-.home .h2{font-size:clamp(34px,5vw,58px)}
-.h2 em{color:var(--soft)}
-.site .sub{margin-top:14px;max-width:52ch}
-.site .fail{margin-top:28px}
-.lede{font-size:clamp(18px,2vw,21px);color:var(--soft);max-width:48ch;margin-top:16px}
-.kicker{font-size:14px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin-bottom:16px}
-
-.site section.hero{position:relative;overflow:hidden;padding:0;border-bottom:1px solid var(--line-soft)}
-.shards{position:absolute;inset:0 0 auto 0;width:100%;height:100%;opacity:.9}
-.shards polygon{animation:fall 1.4s cubic-bezier(.2,.7,.2,1) both}
-@keyframes fall{from{transform:translateY(-60px);opacity:0}to{transform:none;opacity:1}}
-@media (prefers-reduced-motion:reduce){.shards polygon{animation:none}}
-.heroin{position:relative;max-width:1240px;margin:0 auto;padding:96px 24px 56px}
-.home section.hero{min-height:92vh;min-height:92svh;display:flex;align-items:flex-end}
-.home .shards{height:62%;opacity:1}
-.home .heroin{width:100%;padding:0 24px 72px}
-.home .kicker{margin-bottom:22px}
-.word{line-height:1.02;letter-spacing:.12em;font-size:clamp(40px,11vw,160px)}
-.word .ln{display:block}
-.home .lede{max-width:34ch;margin-top:30px;font-size:clamp(18px,2.1vw,22px)}
-.ctas{display:flex;flex-wrap:wrap;gap:14px;margin-top:36px}
-
-.divider{display:flex;align-items:center;gap:16px;max-width:1240px;margin:0 auto;padding:0 24px}
-.divider .rule{flex:1;height:1px;background:var(--line)}
-.divider svg{width:14px;height:20px}
-
-.nights{list-style:none;margin-top:48px;border-top:1px solid var(--line)}
-.night{display:grid;grid-template-columns:84px minmax(0,1fr);gap:18px 24px;padding:26px 0;border-bottom:1px solid var(--line)}
-.dt{line-height:1}
-.dt .d{font-size:52px}
-.dt .m{display:block;font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-top:8px}
-.nm{font-size:clamp(26px,3vw,36px);line-height:1.15}
-/* padding brings the name link to the 44px touch target */
-.nmlink{display:inline-block;padding:7px 0;text-decoration:none;border-bottom:1px solid transparent}
-.nmlink:hover{border-bottom-color:var(--garnet-text)}
-.who{color:var(--soft);margin-top:6px}
-.who span{color:var(--muted)}
-.status{grid-column:2;display:flex;flex-wrap:wrap;gap:8px 22px;font-size:15px;color:var(--muted)}
-.gone{text-decoration:line-through;text-decoration-color:var(--amethyst)}
-.last{color:var(--garnet-text)}
-/* .cta, not the mockup's .act: that name is the admin action button. */
-.cta{grid-column:2}
-@media (min-width:860px){
-  .night{grid-template-columns:110px minmax(0,1.4fr) minmax(0,1fr) 200px;align-items:center}
-  .status{grid-column:auto;flex-direction:column;gap:4px}
-  .cta{grid-column:auto}
-  .cta .btn{width:100%}
-}
-
-.doors{display:grid;grid-template-columns:1fr;gap:18px;margin-top:48px}
-@media (min-width:860px){.doors{grid-template-columns:1.35fr 1fr}}
-.door{padding:40px 32px;border:1px solid var(--line);display:flex;flex-direction:column;gap:18px}
-.door.main{background:var(--surface);border-color:var(--amethyst-deep);position:relative;overflow:hidden}
-.door.main::after{content:"";position:absolute;right:-40px;top:-30px;width:190px;height:190px;background:var(--amethyst-deep);clip-path:polygon(30% 0,100% 20%,70% 100%,0 60%)}
-.door > *{position:relative;z-index:1}
-.door h3{font-size:clamp(28px,3vw,38px);line-height:1.15}
-.door p{color:var(--soft);max-width:46ch}
-.door ul{list-style:none;display:flex;flex-direction:column;gap:8px;font-size:15px;color:var(--muted)}
-.door .btn{align-self:flex-start;margin-top:auto}
-.door li::before{content:"";display:inline-block;width:6px;height:6px;margin-right:12px;vertical-align:2px;background:var(--amethyst);clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%)}
-
-.info{display:grid;grid-template-columns:1fr;margin-top:48px;border-top:1px solid var(--line)}
-.info.three{margin-top:32px}
-@media (min-width:860px){.info{grid-template-columns:repeat(4,1fr)}.info.three{grid-template-columns:repeat(3,1fr)}}
-.cell{padding:26px 24px 26px 0;border-bottom:1px solid var(--line)}
-@media (min-width:860px){.cell{border-bottom:0;border-right:1px solid var(--line);padding:28px 24px}.cell:first-child{padding-left:0}.cell:last-child{border-right:0}}
-.cell .k{font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
-.cell .v{font-size:20px;margin-top:8px}
-.cell .n{font-size:15px;color:var(--muted);margin-top:4px}
-
-.story{text-align:center}
-.home section.story{padding:120px 0}
-.story .q{font-size:clamp(28px,4vw,46px);line-height:1.3;max-width:22ch;margin:0 auto;letter-spacing:.02em}
-
-/* Event page */
-.name{font-size:clamp(48px,9vw,120px);line-height:1.02;letter-spacing:.08em;text-transform:uppercase;overflow-wrap:anywhere}
-.meta{display:flex;flex-wrap:wrap;gap:8px 28px;margin-top:22px;color:var(--soft)}
-.meta .k{color:var(--muted);margin-right:4px}
-.cols{display:grid;grid-template-columns:1fr;gap:40px}
-@media (min-width:1000px){.cols{grid-template-columns:minmax(0,1.5fr) minmax(320px,1fr);align-items:start}}
-.sets{list-style:none;margin-top:28px;border-top:1px solid var(--line)}
-.sets li{display:grid;grid-template-columns:130px minmax(0,1fr);gap:16px;padding:20px 0;border-bottom:1px solid var(--line);align-items:baseline}
-.sets .t{color:var(--muted);font-size:15px}
-.sets .dj{font-family:var(--head);font-size:clamp(24px,2.6vw,32px);line-height:1.15}
-.sets .role{display:block;font-size:14px;color:var(--muted);margin-top:2px}
-.sets .hl .role{color:var(--garnet-text)}
-.book{position:sticky;top:90px;border:1px solid var(--amethyst-deep);background:var(--surface);padding:26px;display:flex;flex-direction:column;gap:22px}
-.book h3{font-size:26px}
-.opt{display:flex;flex-direction:column;gap:10px;padding-top:20px;border-top:1px solid var(--line)}
-.opt:first-of-type{border-top:0;padding-top:0}
-.st{font-size:15px;color:var(--soft)}
-.st.warn{color:var(--garnet-text)}
-.st.gone{color:var(--muted)}
-.zones{list-style:none;font-size:15px}
-.zones li{display:flex;justify-content:space-between;gap:12px;padding:6px 0;border-bottom:1px solid var(--line-soft)}
-.zones span{color:var(--muted)}
-.others{margin-top:28px;border-top:1px solid var(--line)}
-.other{display:grid;grid-template-columns:minmax(0,1fr);gap:4px;padding:20px 0;border-bottom:1px solid var(--line);text-decoration:none}
-@media (min-width:760px){.other{grid-template-columns:150px minmax(0,1fr) minmax(0,1.2fr) 200px;gap:24px;align-items:baseline}}
-.other:hover .nm{text-decoration:underline;text-decoration-color:var(--garnet-text);text-underline-offset:6px}
-.other .d{font-size:14px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase}
-.other .nm{font-family:var(--head);font-size:26px;line-height:1.15}
-.other .s{font-size:14px;color:var(--soft)}
-.other .s:last-child{color:var(--muted)}
-
-/* "Book a table" in the menu, from both public mockups: right-aligned alone on a phone, after the links on a wide screen. */
-.nav .btn{margin-left:auto;min-height:44px;padding:10px 18px;font-size:15px;letter-spacing:0}
-@media (min-width:860px){.nav .btn{margin-left:0}}
-@media (max-width:420px){.navin{gap:12px;padding:12px 16px}.navin .mark{font-size:17px}}
-.menu summary{display:flex;align-items:center;min-height:44px;padding:0 6px;list-style:none;color:var(--soft);font-size:15px;cursor:pointer}
-.menu summary::-webkit-details-marker{display:none}
-.menu[open] summary{color:var(--text)}
-.menu nav{position:absolute;left:0;right:0;top:100%;display:flex;flex-direction:column;padding:6px 24px 14px;background:var(--obsidian);border-bottom:1px solid var(--line-soft)}
-.menu nav a{display:flex;align-items:center;min-height:48px;font-size:18px;text-decoration:none;color:var(--muted)}
-.menu nav a:hover,.menu nav a[aria-current="page"]{color:var(--text)}
-@media (max-width:420px){.menu nav{padding:6px 16px 14px}}
-/* Under the 360px the site is built for: mark, button and Menu still share one line. */
-@media (max-width:359px){.navin{gap:8px}.navin .mark{font-size:15px;letter-spacing:.08em}.nav .btn{padding:10px 12px}}
-@media (min-width:860px){.menu{display:none}}
-.links a[aria-current="page"],.foot nav a[aria-current="page"]{color:var(--text)}
-.site footer{border-top:1px solid var(--line-soft);padding:40px 0 56px;color:var(--muted);font-size:15px}
-.foot{display:flex;flex-wrap:wrap;gap:14px 28px;align-items:baseline}
-.foot .mark{font-size:18px;color:var(--text)}
-.foot nav{display:flex;gap:22px;flex-wrap:wrap}
-.fine{margin-top:22px}
-.site .loading{display:flex;flex-direction:column;gap:14px;margin-top:28px;max-width:640px}
-.site .loading .skel{margin:0;height:18px}
-.site .loading .skel:last-child{width:60%}
-.heroin.loading{margin-top:0;max-width:1240px;gap:0}
-.heroin .skel.k{height:14px;width:min(240px,50%)}
-.heroin .skel.t{height:clamp(48px,9vw,120px);width:70%;margin-top:18px}
-.heroin.loading .skel.m{height:18px;width:min(420px,80%);margin-top:28px}
-/* Find my QR (/qr) */
-.find{display:flex;flex-direction:column;align-items:flex-start;gap:18px;margin-top:28px}
-.find .field{align-self:stretch}
-.find input{letter-spacing:.14em;text-transform:uppercase}
-.find input::placeholder{letter-spacing:normal;text-transform:none}
-
-/* About and Gallery (S9), from fanglle-event-gallery-about-mockup.jsx. .prose, .house: .story and .rules are taken. */
-.prose{max-width:760px}
-.prose p{color:var(--soft);font-size:clamp(18px,2vw,20px);margin-top:18px}
-.about .sub a{color:var(--text)}
-.about .name,.gal .name{font-size:clamp(44px,7vw,88px)}
-.run{list-style:none;margin-top:28px;border-left:1px solid var(--amethyst);margin-left:6px}
-.run li{position:relative;padding:0 0 22px 26px}
-.run li::before{content:"";position:absolute;left:-5px;top:10px;width:9px;height:9px;background:var(--amethyst-soft);clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%)}
-.run li.key::before{background:var(--garnet-text)}
-.run b{display:block;font-size:26px;line-height:1.2}
-.run span{color:var(--muted)}
-.house{list-style:none;margin-top:24px;display:grid;grid-template-columns:minmax(0,1fr);border-top:1px solid var(--line)}
-@media (min-width:760px){.house{grid-template-columns:1fr 1fr}}
-.house li{padding:18px 24px 18px 0;border-bottom:1px solid var(--line)}
-.house b{display:block;font-size:19px}
-.house span{color:var(--muted);font-size:15px}
-.contact{display:flex;flex-wrap:wrap;gap:12px;margin-top:22px}
-.contact .btn{white-space:normal;overflow-wrap:anywhere}
-.gal .chips{margin-top:0}
-.gal .chip{padding:8px 16px;border-radius:2px}
-.gal .chip[aria-pressed="true"]{border-color:var(--garnet);background:var(--surface)}
-.masonry{columns:1;column-gap:14px;margin-top:28px}
-@media (min-width:640px){.masonry{columns:2}}
-@media (min-width:1000px){.masonry{columns:3}}
-.slot{display:block;width:100%;break-inside:avoid;margin-bottom:14px;position:relative;overflow:hidden;cursor:pointer;text-align:left;
-  background:var(--surface);border:1px dashed var(--amethyst);color:var(--text);padding:0;transition:border-color .2s}
-.slot:hover{border-color:var(--text);border-style:solid}
-.slot::before{content:"";position:absolute;right:-24px;top:-18px;width:110px;height:110px;background:var(--raised);clip-path:polygon(30% 0,100% 20%,70% 100%,0 60%)}
-.slot .in{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:flex-end;gap:6px;padding:18px}
-.slot .tag{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--garnet-text)}
-.slot .shot{font-size:16px;line-height:1.35}
-.slot .spec{font-size:13px;color:var(--muted)}
-.brief{border:1px solid var(--line);padding:18px 20px;margin-top:28px;color:var(--soft);font-size:15px;max-width:760px}
-/* The photo viewer is a full-screen native <dialog>: focus stays inside, Escape closes it, focus returns to the frame. */
-.dlg.viewer{width:100%;max-width:none;height:100%;max-height:none;margin:0;border:0;border-radius:0;background:rgba(12,8,18,.95);padding:24px}
-.dlg.viewer[open]{align-items:center;justify-content:center;gap:18px;overflow-y:auto}
-.vframe{width:min(900px,100%);min-height:200px;max-height:62vh;background:var(--surface);border:1px dashed var(--amethyst-soft);display:flex;align-items:center;
-  justify-content:center;text-align:center;padding:24px}
-.vframe .shot{font-size:clamp(22px,3vw,32px);line-height:1.25;max-width:26ch;color:var(--text)}
-.vmeta{width:min(900px,100%);display:grid;grid-template-columns:auto 1fr;gap:6px 16px;font-size:15px}
-.vmeta dt{color:var(--muted)}
-.vbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:center}
-.vcount{color:var(--muted);min-width:64px;text-align:center}
-
-/* Table booking (/book/:date, /booking/:code), from fanglle-pilih-meja-mockup.jsx */
-.back{margin-left:auto;display:inline-flex;align-items:center;min-height:44px;font-size:15px;color:var(--muted);text-decoration:none}
-.back:hover{color:var(--text)}
-.bkin{padding-top:40px;padding-bottom:96px}
-.alone{max-width:560px}
-.bk .btn{white-space:normal;text-align:center}
-.bk .nav .btn{white-space:nowrap} /* Find my QR is a .bk page with the full menu */
-.bk .btn.slim{min-height:44px;padding:8px 16px;font-size:15px}
-.h1{font-size:clamp(34px,5vw,56px);line-height:1.1;letter-spacing:.02em}
-.h1 em{color:var(--soft)}
-.bk .sub{margin-top:10px;max-width:60ch}
-.lbl{display:block;font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
-.bar{display:flex;flex-wrap:wrap;gap:24px 40px;align-items:flex-end;margin-top:32px;padding-bottom:28px;border-bottom:1px solid var(--line)}
-.bar .err{margin-top:8px}
-.chips{display:flex;gap:8px;flex-wrap:wrap}
-.bk .chip{min-height:52px;padding:8px 16px;border-radius:2px;color:var(--text);text-align:left;line-height:1.3}
-.bk .chip small{display:block;color:var(--muted);font-size:13px}
-.bk .chip[aria-pressed="true"]{border-color:var(--garnet);background:var(--surface)}
-.bk .chip:disabled{cursor:not-allowed;opacity:.55}
-.step{display:flex;align-items:center;width:max-content;border:1px solid var(--line);border-radius:2px}
-.step button{width:48px;height:52px;background:transparent;border:0;color:var(--text);font-size:22px;cursor:pointer}
-.step button:disabled{color:var(--line);cursor:not-allowed}
-.step output{min-width:64px;text-align:center;font-size:20px}
-.site section.evinfo{display:grid;grid-template-columns:1fr;gap:12px 28px;align-items:center;margin-top:24px;padding:18px 22px;border:1px solid var(--amethyst-deep);background:var(--surface)}
-@media (min-width:860px){.site section.evinfo{grid-template-columns:auto minmax(0,1fr) auto}}
-.evname{font-size:28px;line-height:1.1;letter-spacing:.04em}
-.evmeta{font-size:14px;color:var(--muted);margin-top:4px}
-.evhead{display:block;font-size:18px}
-.evwith{display:block;font-size:15px;color:var(--muted)}
-.evlink{justify-self:start}
-.bk .grid{display:grid;grid-template-columns:minmax(0,1fr);gap:28px;margin-top:28px}
-@media (min-width:1000px){.bk .grid{grid-template-columns:minmax(0,1.7fr) minmax(320px,1fr);align-items:start}}
-.viewtoggle{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px}
-.viewtoggle p{font-size:15px;color:var(--muted)}
-/* The plan keeps its proportions and scrolls inside its frame on a phone; the list view needs no scrolling. */
-.scroller{overflow-x:auto;border:1px solid var(--line);background:var(--surface)}
-.plan{position:relative;min-width:640px;aspect-ratio:1000/620}
-.plan svg{position:absolute;inset:0;width:100%;height:100%}
-.plan rect{fill:var(--raised);stroke:var(--amethyst-deep)}
-.plan rect.floor{fill:none;stroke:var(--line);stroke-dasharray:6 6}
-.plan text{fill:var(--muted);font-family:var(--body);font-size:15px;text-anchor:middle}
-.plan text.big{font-size:18px}
-.plan text.df{fill:var(--amethyst);font-family:var(--head);font-size:22px;letter-spacing:4px}
-.plan text.start{text-anchor:start}
-/* min 44px: the mockup's high tables are 41px wide at the plan's narrowest */
-.tb{position:absolute;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:44px;min-height:44px;
-  font-size:14px;line-height:1.1;cursor:pointer;border:1px solid var(--amethyst-soft);background:var(--raised);color:var(--text);transition:background .15s,border-color .15s}
-.tb small{font-size:11px;color:var(--muted);margin-top:2px}
-.tb.round{width:7.6%;aspect-ratio:1;border-radius:50%}
-.tb.high{width:6.4%;aspect-ratio:1;border-radius:4px}
-.tb.booth{width:10%;height:15%;border-radius:22px 22px 6px 6px}
-.tb.free:not([aria-disabled]):hover{border-color:var(--text);background:var(--amethyst-deep)}
-.tb.sel{background:var(--garnet);border-color:var(--garnet);color:var(--on-garnet)}
-.tb.sel small{color:var(--on-garnet)}
-.tb.booked{background:var(--obsidian);border-color:var(--line);color:var(--muted);text-decoration:line-through}
-.tb.held{background:var(--obsidian);border:1px dashed var(--amethyst-soft);color:var(--muted)}
-.tb.small{background:var(--obsidian);border-color:var(--line);color:var(--muted)}
-.tb[aria-disabled]{cursor:not-allowed}
-.legend{display:flex;flex-wrap:wrap;gap:8px 20px;margin-top:12px;font-size:14px;color:var(--muted)}
-.legend span{display:inline-flex;align-items:center;gap:8px}
-.sw{width:14px;height:14px;border:1px solid var(--amethyst-soft);background:var(--raised)}
-.sw.sel{background:var(--garnet);border-color:var(--garnet)}
-.sw.held{background:var(--obsidian);border-style:dashed}
-.sw.booked{background:var(--obsidian);border-color:var(--line)}
-.bk .list{list-style:none;border:1px solid var(--line)}
-.bk .list li{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 16px;border-top:1px solid var(--line)}
-.bk .list li:first-child{border-top:0}
-.dim{font-size:15px;color:var(--muted)}
-.bk .panel{border:1px solid var(--amethyst-deep);background:var(--surface);padding:28px 24px;display:flex;flex-direction:column;gap:18px}
-.bk .panel form{display:flex;flex-direction:column;gap:18px}
-.bk .panel:focus{outline:none}
-.bk .panel:focus-visible{outline:2px solid var(--text);outline-offset:3px}
-.bk .panel h2{font-size:32px;line-height:1.1;overflow-wrap:anywhere}
-.facts{display:grid;grid-template-columns:auto 1fr;gap:6px 16px;font-size:15px}
-.facts dt{color:var(--muted)}
-.facts dd{text-align:right}
-.facts .big{font-size:18px}
-.hint{font-size:14px;color:var(--muted)}
-.bk .zones{display:flex;flex-direction:column;gap:10px}
-.bk .zones li{padding:0 0 10px;border-bottom:1px solid var(--line)}
-.bk .field input:not([type=checkbox]){min-height:48px;padding:10px 12px;border-radius:2px}
-.bk .check{flex-direction:row;align-items:flex-start;gap:12px}
-.bk .check input{width:22px;height:22px;min-height:0;padding:0;margin-top:2px;accent-color:var(--garnet);flex:none}
-.timer{border:1px solid var(--garnet);padding:16px;display:flex;justify-content:space-between;align-items:center;gap:12px}
-.timer strong{font-family:var(--head);font-size:40px;letter-spacing:.06em}
-.alert{border-left:2px solid var(--garnet-text);padding:10px 14px;background:var(--raised);font-size:15px}
-.bk .row{display:flex;gap:10px;flex-wrap:wrap}
-.code{font-family:var(--head);font-size:30px;letter-spacing:.12em}
-.soldout{margin-top:28px;border:1px solid var(--line);padding:40px 28px;text-align:center}
-.soldout h2{font-size:32px;margin-bottom:10px}
-.soldout p{color:var(--muted);max-width:44ch;margin:0 auto 20px}
-
-/* Guestlist (/guestlist/:date), from fanglle-guestlist-mockup.jsx. Rides on the .bk booking styles above. */
-.gl .block{padding:26px 0;border-top:1px solid var(--line)}
-.gl .block:first-child{border-top:0;padding-top:0}
-.gl .chip small.low{color:var(--garnet-text)}
-.gl .note{margin-top:12px}
-.gl fieldset{border:0;min-width:0}
-.modes{display:grid;grid-template-columns:1fr;gap:10px}
-.mode{display:flex;gap:14px;align-items:flex-start;padding:16px;border:1px solid var(--line);cursor:pointer}
-.mode.on{border-color:var(--garnet);background:var(--surface)}
-.mode input{width:22px;height:22px;margin-top:3px;accent-color:var(--garnet);flex:none}
-.mode strong{display:block;font-size:17px}
-.mode span span{display:block;font-size:14px;color:var(--muted)}
-.fields{display:grid;grid-template-columns:minmax(0,1fr);gap:16px}
-@media (min-width:640px){.modes,.fields{grid-template-columns:1fr 1fr}}
-.gl .block .lead{margin-bottom:14px}
-.gl .submit{display:flex;flex-direction:column;gap:10px;align-items:flex-start;padding-top:26px;border-top:1px solid var(--line)}
-.rules{list-style:none;display:flex;flex-direction:column;gap:8px;font-size:15px;color:var(--soft)}
-.rules li::before{content:"";display:inline-block;width:6px;height:6px;margin-right:12px;vertical-align:2px;background:var(--amethyst-soft);clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%)}
-.result{max-width:760px;margin-top:32px}
-.result:focus{outline:none}
-.result:focus-visible{outline:2px solid var(--text);outline-offset:6px}
-.result h2{font-size:clamp(32px,4.5vw,48px);line-height:1.1}
-.result .lead{margin-top:16px}
-.result .alert{margin-top:16px}
-.result .ts{margin-top:20px}
-.gl .card{border-color:var(--amethyst-deep);border-radius:0;padding:22px;margin-top:20px;display:flex;flex-direction:column;gap:14px}
-.one{font-size:20px}
-.qrlist{list-style:none;margin-top:20px;border-top:1px solid var(--line)}
-.qrlist li{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding:16px 0;border-bottom:1px solid var(--line)}
-.holder{overflow-wrap:anywhere}
-.holder small{display:block;color:var(--muted);font-size:14px}
-.again{margin-top:24px}
-
-/* Manager region, from fanglle-pengelola-mockup.jsx */
-.app{min-height:100vh;display:grid;grid-template-columns:1fr}
-@media (min-width:960px){.app{grid-template-columns:248px minmax(0,1fr)}}
-@media (max-width:959px){.app{align-content:start}}
-.side{background:var(--surface);border-right:1px solid var(--line-soft);display:flex;flex-direction:column;padding:20px 14px}
-@media (max-width:959px){.side{flex-direction:row;align-items:center;gap:8px;overflow-x:auto;padding:10px 14px;border-right:0;border-bottom:1px solid var(--line-soft)}}
-.side .brand{padding:4px 10px 22px}
-@media (max-width:959px){.side .brand{padding:0 8px 0 0}}
-.spacer{flex:1}
-.out{margin-top:16px;min-height:44px;padding:0 14px;border:1px solid var(--line);background:transparent;color:var(--soft);border-radius:6px;font-size:15px;cursor:pointer}
-@media (max-width:959px){.out{margin:0}}
-.main{min-width:0}
-/* Mockup pads the top bar 28px against 24px content; 24px lines the two up. */
-.topbar{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;padding:14px 24px;border-bottom:1px solid var(--line-soft);
-  font-size:15px;color:var(--muted)}
-.content{padding:28px 24px;display:flex;flex-direction:column;gap:22px;max-width:1120px;margin:0 auto}
-.grp{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);padding:14px 10px 6px}
-@media (max-width:959px){.grp{display:none}}
-.navbtn{display:flex;align-items:center;width:100%;border-radius:6px;color:var(--soft);font-size:16px;padding:10px 12px;min-height:44px;white-space:nowrap;text-decoration:none}
-@media (max-width:959px){.navbtn{width:auto}}
-.navbtn:hover,.navbtn[aria-current="page"]{background:var(--raised);color:var(--text)}
-.title{font-size:clamp(30px,4vw,42px);line-height:1.1}
-/* Mockup .act is 38px; raised to the 44px touch target. */
-.act{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:6px 14px;border-radius:6px;border:1px solid var(--amethyst-soft);
-  background:transparent;color:var(--text);font-size:14px;line-height:1.2;cursor:pointer;white-space:nowrap;transition:background .15s,border-color .15s}
-.act:hover{border-color:var(--text);background:var(--raised)}
-a.act{text-decoration:none}
-.ok{color:var(--paid);font-size:15px}
-.navgrp{display:contents}
-.navbtn{justify-content:space-between;gap:10px}
-.count{font-size:12px;min-width:22px;padding:1px 7px;border-radius:10px;background:var(--garnet);color:var(--on-garnet);text-align:center}
+button{-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+:focus-visible{outline:2px solid var(--gel-bright);outline-offset:3px}
+.tnum{font-variant-numeric:tabular-nums}
 .vh{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
 
-/* Manager's night (S7): Overview, Table bookings, Guestlist, Door log, detail panel. Scoped to .app: .hero, .meter and friends
-   are the admin mockup's names, and the public site and the door have their own. Timeline steps are .tstep, the two-card
-   row is .duo: .step and .pair are taken. */
-.app .flash{border:1px solid var(--amethyst-soft);background:var(--raised);padding:12px 16px;border-radius:8px}
-.app .over{display:grid;grid-template-columns:minmax(0,1fr);gap:14px}
-@media (min-width:1000px){.app .over{grid-template-columns:minmax(0,1.6fr) minmax(0,1fr)}}
-.app .hero{background:var(--surface);border:1px solid var(--amethyst-deep);border-radius:12px;padding:26px;display:flex;flex-direction:column;gap:20px}
-.app .hero .k{font-size:14px;color:var(--muted)}
-.bignum{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
-.bignum strong{font-family:var(--head);font-size:clamp(56px,7vw,84px);line-height:1}
-.bignum span{color:var(--muted);font-size:18px}
-.capbar{height:10px;background:var(--raised);border-radius:5px;overflow:hidden}
-.capbar i,.app .meter i{display:block;height:100%;background:var(--amethyst-soft)}
-.tline{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px;border-top:1px solid var(--line);padding-top:14px}
-.tstep{font-size:14px;color:var(--muted)}
-.tstep b{display:block;font-size:16px;color:var(--text)}
-.tstep.done b{color:var(--muted);text-decoration:line-through;text-decoration-color:var(--amethyst)}
-.tstep.next b{color:var(--garnet-text)}
-.urgent,.attn li{display:grid;grid-template-columns:minmax(0,1fr) 128px;gap:16px;align-items:center}
-.urgent{border:1px solid var(--garnet);border-radius:8px;padding:14px 16px}
-.urgent small,.attn small{display:block;color:var(--muted);font-size:14px}
-.urgent .act,.attn .act{width:100%}
-.minis{display:grid;grid-template-columns:minmax(0,1fr);gap:14px}
-.mini{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px;color:var(--text);text-decoration:none;
-  display:flex;flex-direction:column;gap:4px;transition:border-color .15s}
-.mini:hover{border-color:var(--amethyst-soft)}
-.mini .k{font-size:14px;color:var(--muted)}
-.mini .v{font-family:var(--head);font-size:32px;line-height:1.1}
-.mini .v.money{font-size:26px}
-.mini .of{font-size:18px;color:var(--muted)}
-.mini .n{font-size:14px;color:var(--soft)}
-.mini .go{font-size:14px;color:var(--muted);margin-top:4px}
-.app .meter{display:block;height:6px;background:var(--raised);border-radius:3px;overflow:hidden;margin-top:6px}
-/* minmax(0,1fr): a one-column grid would otherwise grow to the chart's full width on a phone */
-.duo{display:grid;grid-template-columns:minmax(0,1fr);gap:14px}
-@media (min-width:1000px){.duo{grid-template-columns:minmax(0,1.4fr) minmax(0,1fr)}}
-.app .card h2{font-size:15px;color:var(--soft);margin-bottom:14px}
-.chart{display:flex;align-items:flex-end;gap:6px;height:160px;overflow-x:auto}
-.barbtn{flex:1;min-width:22px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:6px;height:100%;background:transparent;border:0;
-  color:var(--text);cursor:pointer;border-radius:6px;padding:0 2px}
-.barbtn i{display:block;width:100%;max-width:44px;background:var(--amethyst);border-radius:4px 4px 0 0;min-height:2px}
-.barbtn[aria-pressed="true"] i{background:var(--garnet)}
-.barbtn span{font-size:12px;color:var(--muted)}
-.barbtn b{font-size:13px}
-.readout{margin-top:12px;font-size:15px;color:var(--soft);border-top:1px solid var(--line);padding-top:12px}
-.attn{list-style:none}
-.attn li{padding:14px 0;border-top:1px solid var(--line)}
-.attn li:first-child{border-top:0;padding-top:0}
-.flag{color:var(--garnet-text)}
+/* Type */
+.head,.d{font-family:var(--display);font-weight:300;line-height:1}
+.night{font-family:var(--display);font-weight:100;text-transform:uppercase;line-height:.84;letter-spacing:-.005em}
+.label{font:500 13px/1.3 var(--body);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.sub{color:var(--muted)}
+.lab{display:block;font-size:13px;color:var(--muted);margin-bottom:6px}
+.err{font-size:14px;line-height:1.45;color:var(--error)}
+.help,.hint{font-size:14px;line-height:1.45;color:var(--muted)}
 
-.summary{display:flex;gap:18px;flex-wrap:wrap;align-items:center;font-size:15px;color:var(--soft)}
-.summary .meter{width:220px;margin:0}
-.toolbar{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end}
-.toolbar.wide{gap:24px}
-.toolbar .grow{flex:1;min-width:220px}
-.sortby{min-width:180px}
-.search,.select{min-height:44px;padding:8px 12px;background:var(--surface);border:1px solid var(--line);border-radius:8px;color:var(--text);font-size:15px;width:100%}
-.app .chips{gap:6px}
-/* relative: the hidden "Actions" header stays inside the scrolling box instead of widening the page */
-.tablewrap{position:relative;overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
-.tablewrap table{width:100%;border-collapse:collapse;min-width:720px}
-.tablewrap th{text-align:left;font-size:13px;color:var(--muted);padding:12px 16px;border-bottom:1px solid var(--line)}
-.tablewrap td{padding:12px 16px;border-bottom:1px solid var(--line-soft);font-size:15px;vertical-align:middle}
-.tablewrap th.c,.tablewrap td.c{text-align:center}
-.tablewrap tr:last-child td{border-bottom:0}
-.tablewrap tbody tr:hover{background:var(--raised)}
-.tablewrap td small{display:block;color:var(--muted);font-size:13px}
-.empty,.error{padding:36px 20px;text-align:center;color:var(--muted)}
-.empty .act,.error .act{margin-top:10px}
-.error{color:var(--text)}
-.act.danger{border-color:var(--garnet-text);color:var(--garnet-text)}
+/* The logo: the name in display caps, the II lit in tonight's gel. */
+.mark,.brand{font:600 21px/1 var(--display);letter-spacing:.16em;text-transform:uppercase;color:var(--tungsten);text-decoration:none;white-space:nowrap}
+.two,.mark .ii{color:var(--gel-bright)}
 
-/* Detail panel: a native modal <dialog> on the right edge (focus kept inside, Escape and the backdrop close it). */
-.dlg.drawer{margin:0 0 0 auto;width:min(440px,100%);height:100%;max-height:none;border:0;border-left:1px solid var(--amethyst-deep);border-radius:0;padding:0}
-.dlg.drawer[open]{gap:0;overflow-y:auto}
-.dlg.drawer::backdrop{background:rgba(12,8,18,.7)}
-.dh{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;padding:22px;border-bottom:1px solid var(--line)}
-.dh .sub{margin-top:0}
-.dh h2{font-size:28px;line-height:1.15;overflow-wrap:anywhere}
-.db{padding:22px;display:flex;flex-direction:column;gap:18px}
-.tl{list-style:none;border-left:1px solid var(--amethyst);margin-left:4px}
-.tl li{padding:0 0 12px 16px;font-size:15px;position:relative}
-.tl li::before{content:"";position:absolute;left:-4px;top:8px;width:7px;height:7px;background:var(--amethyst-soft);clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%)}
-.drow{display:flex;gap:10px;flex-wrap:wrap}
-@media (prefers-reduced-motion:reduce){.mini{transition:none}}
-
-/* Team (S8) */
-.roles{display:grid;grid-template-columns:minmax(0,1fr);gap:14px}
-@media (min-width:760px){.roles{grid-template-columns:1fr 1fr}}
-.roles b{display:block;font-size:18px}
-.roles p{color:var(--muted);font-size:15px;margin-top:4px}
-.rowacts{display:flex;gap:6px;justify-content:center;flex-wrap:wrap}
-.select.role{min-width:150px;width:auto}
-.invite .err.full{grid-column:1/-1}
-.act:disabled{opacity:.45;cursor:not-allowed}
-
-/* Admin Events */
-.evgrid{display:grid;grid-template-columns:1fr;gap:14px}
-@media (min-width:900px){.evgrid{grid-template-columns:minmax(220px,290px) minmax(0,1fr);align-items:start}}
-.evlist{list-style:none;display:flex;flex-direction:column;gap:6px}
-.evitem{width:100%;text-align:left;background:transparent;border:1px solid var(--line);border-radius:8px;color:var(--text);font-size:15px;padding:12px 14px;cursor:pointer;min-height:56px}
-.evitem[aria-current="true"]{border-color:var(--garnet);background:var(--raised)}
-.evitem small{display:block;color:var(--muted)}
-.newbtn{width:100%;min-height:48px;border-radius:8px;border:1px dashed var(--amethyst-soft);background:transparent;color:var(--text);font-size:15px;cursor:pointer;margin-bottom:6px}
-.newbtn:hover{border-style:solid}
-.form{display:grid;grid-template-columns:1fr;gap:16px;container-type:inline-size}
-@media (min-width:760px){.form{grid-template-columns:1fr 1fr}}
-.form h2{grid-column:1/-1;font-size:26px}
-.field.full{grid-column:1/-1}
-.field.actions{flex-direction:row;align-items:center;gap:12px;flex-wrap:wrap}
-.field.actions .err{flex-basis:100%}
-.hintline{font-size:14px;color:var(--muted)}
-.lineup{grid-column:1/-1;border:0;display:flex;flex-direction:column;gap:10px}
-.lineup legend{font-size:15px;color:var(--soft);margin-bottom:8px}
-.lineup legend span{color:var(--muted)}
-.lrow{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:14px;border:1px solid var(--line);border-radius:10px;background:var(--obsidian)}
-/* Narrow: performer and role full width so Start and End share a line. */
-.lrow .field:nth-child(-n+2){grid-column:1/-1}
-.lrow .field input,.lrow .field select{background:var(--surface)}
-.lrow .act{grid-column:1/-1;justify-self:start}
-.lrow .act:disabled{opacity:.45;cursor:not-allowed}
-.rowerr{grid-column:1/-1}
-/* Rows go side by side when the form, not the window, is wide enough; Role keeps room for "Guest star". */
-@container (min-width:580px){
-  .lrow{grid-template-columns:minmax(0,2fr) minmax(128px,1.3fr) 108px 108px auto;align-items:end}
-  .lrow .field:nth-child(-n+2){grid-column:auto}
-  .lrow .act{grid-column:auto;min-height:46px}
+/* Buttons: solid is the work light (tungsten), line is an outline. Never the gel colour: the gel lights the room, not the controls. */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:52px;padding:0 28px;border-radius:2px;border:1px solid transparent;
+  font:500 16px/1.2 var(--body);letter-spacing:.01em;text-decoration:none;cursor:pointer;white-space:nowrap;
+  transition:transform 160ms var(--ease-out),background-color 200ms ease,border-color 200ms ease,color 200ms ease}
+.btn:enabled:active,a.btn:active{transform:scale(.97)}
+.btn.solid{background:var(--tungsten);color:var(--ink);border-color:var(--tungsten)}
+.btn.line{background:transparent;color:var(--tungsten);border-color:rgba(241,236,228,.38)}
+@media (hover:hover) and (pointer:fine){
+  .btn.solid:enabled:hover,a.btn.solid:hover{background:#FFFDF8;border-color:#FFFDF8}
+  .btn.line:enabled:hover,a.btn.line:hover{border-color:var(--tungsten);background:rgba(241,236,228,.06)}
 }
-.addrow{align-self:flex-start}
-.warns{list-style:none;border:1px solid var(--held);border-radius:8px;padding:12px 14px;display:flex;flex-direction:column;gap:6px;font-size:15px;color:var(--held)}
-.fs{border:0;grid-column:1/-1;display:grid;grid-template-columns:1fr;gap:12px}
-@media (min-width:760px){.fs{grid-template-columns:repeat(3,1fr)}}
-.fs legend{font-size:14px;color:var(--soft);margin-bottom:8px}
+.btn.sm{min-height:44px;padding:0 18px;font-size:15px}
+.btn.wide{width:100%}
+.btn:disabled,.btn[aria-disabled="true"]{background:transparent;color:var(--muted);border-color:var(--line);cursor:not-allowed}
 
-/* Shared page header (door and the guest QR page) */
-.top{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:14px 18px;border-bottom:1px solid var(--line)}
-.top .n{font-size:14px;color:var(--muted)}
-.top .out{margin:0}
+.chip{min-height:44px;padding:6px 14px;border-radius:2px;border:1px solid var(--line);background:transparent;color:var(--soft);font-size:15px;cursor:pointer;
+  transition:border-color 200ms ease,background-color 200ms ease,color 200ms ease}
+.chip[aria-pressed="true"]{background:var(--raised);color:var(--tungsten);border-color:var(--gel-bright)}
+.chip em{color:var(--muted);margin-left:6px}
 
-/* Door region (/door): fanglle-pemindai-pintu-mockup.jsx on a phone, fanglle-pemindai-pintu-desktop-mockup.jsx under .wide.
-   The mockups' phone and window frames are preview chrome; the page is the device. Scanner result colours live only here.
-   Tone classes are r-ok/r-bad/r-warn: .ok is taken by the admin region. */
-.doorapp{min-height:100vh;display:flex;flex-direction:column;font-size:17px;line-height:1.5;
-  --ok:#0F6B38; --ok-text:#F2FFF6; --ok-sub:#D2F2DE; --bad:#A3162F; --bad-text:#FBF7FB; --bad-sub:#F6D9DE;
-  --warn:#C77A12; --warn-text:#140A00; --warn-sub:#2A1600}
-.doorapp:not(.wide){max-width:560px;margin:0 auto}
-.dpage{flex:1;display:flex;flex-direction:column}
-.doorapp .ttl{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
-.doorapp .top .t{font-size:20px;letter-spacing:.06em}
-.sync{padding:8px 18px;font-size:14px;color:var(--muted);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:8px}
-.sync.off{color:var(--text);background:var(--raised)}
-.sync a{color:var(--text)}
-.dot{width:8px;height:8px;border-radius:50%;background:#3FA66B;flex:none}
-.sync.off .dot,.dot.amber{background:#C77A12}
-.nums{display:grid;grid-template-columns:repeat(3,1fr);border-bottom:1px solid var(--line)}
-.nums div{padding:12px 10px;text-align:center;border-right:1px solid var(--line)}
-.nums div:last-child{border-right:0}
-.nums strong{display:block;font-family:var(--head);font-size:26px}
-.nums span{font-size:13px;color:var(--muted)}
+.badge{display:inline-block;font-size:13px;padding:3px 10px;border-radius:2px;background:var(--raised);white-space:nowrap}
+.b-held{color:var(--held)}.b-paid{color:var(--paid)}.b-in{color:var(--soft)}.b-off{color:var(--muted)}
 
-.doorapp .btn{min-height:56px;padding:12px 18px;border-radius:4px;font-size:17px;white-space:normal;text-align:center}
-.doorapp:not(.wide) .btn{width:100%}
-.doorapp .btn.solid,.doorapp .btn.solid:enabled:hover,.doorapp a.btn.solid:hover{background:var(--text);color:var(--obsidian);border-color:var(--text)}
-.doorapp .btn:focus-visible,.cnt button:focus-visible,.doorapp input:focus-visible,.dlist button:focus-visible,.res:focus-visible{outline:3px solid #FFFFFF;outline-offset:3px}
-.doorapp kbd{font-family:var(--body);font-size:14px;border:1px solid currentColor;border-radius:4px;padding:1px 7px}
-.pair{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.startwrap{flex:1;display:flex;flex-direction:column;justify-content:center;gap:16px;padding:28px}
-.startwrap h1{font-size:32px;line-height:1.15}
-.startwrap p{color:var(--muted)}
+/* Fields */
+.field{display:flex;flex-direction:column;gap:8px}
+.field label,.flabel{font:500 14px/1.3 var(--body);color:var(--soft)}
+.field label span{color:var(--muted);font-weight:400}
+.field input,.field select,.field textarea,.input{min-height:52px;padding:0 16px;background:var(--surface);border:1px solid var(--line);border-radius:2px;
+  color:var(--tungsten);font:400 17px var(--body);width:100%;transition:border-color 200ms ease}
+.field textarea{padding:12px 16px;resize:vertical;line-height:1.5}
+.field input::placeholder,.input::placeholder{color:#8A8279}
+/* Focus is moved into fields by script (autofocus, first error); Chrome skips :focus-visible then, so fields ring on any focus. */
+.field input:focus,.field select:focus,.field textarea:focus,.input:focus{outline:2px solid var(--gel-bright);outline-offset:2px}
+.field [aria-invalid="true"]{border-color:var(--error)}
+/* Ticks and radios drawn in the house kit: tungsten tick, gel dot, the same 2 px corners as everything else. */
+input[type="checkbox"],input[type="radio"]{appearance:none;width:20px;height:20px;flex:none;display:inline-grid;place-content:center;margin:0;
+  background:var(--blackout);border:1px solid var(--muted);cursor:pointer;transition:border-color 200ms ease,background-color 200ms ease}
+input[type="checkbox"]{border-radius:2px}
+input[type="checkbox"]::before{content:"";width:10px;height:5px;border:solid var(--ink);border-width:0 0 2px 2px;transform:translateY(-1px) rotate(-45deg);opacity:0}
+input[type="checkbox"]:checked{background:var(--tungsten);border-color:var(--tungsten)}
+input[type="checkbox"]:checked::before{opacity:1}
+input[type="radio"]{border-radius:50%}
+input[type="radio"]::before{content:"";width:10px;height:10px;border-radius:50%;background:var(--gel-bright);transform:scale(.4);opacity:0;transition:transform 160ms var(--ease-out),opacity 160ms ease}
+input[type="radio"]:checked{border-color:var(--gel-bright)}
+input[type="radio"]:checked::before{transform:none;opacity:1}
+input[aria-invalid="true"]{border-color:var(--error)}
 
-.dmain{flex:1;padding:18px;display:flex;flex-direction:column;gap:14px}
-.cam{position:relative;aspect-ratio:1;background:#000;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;overflow:hidden}
-.cam video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-.frame{position:relative;width:62%;aspect-ratio:1;border:3px solid var(--text);border-radius:10px}
-/* The live picture can be bright; the shadow keeps the line readable over it. */
-.cam p{position:absolute;bottom:14px;left:0;right:0;padding:0 16px;text-align:center;font-size:15px;color:var(--soft);text-shadow:0 1px 3px #000}
-.doorapp .field input,.doorapp .panel input{min-height:56px;padding:10px 14px;background:var(--surface);border:1px solid var(--line);border-radius:4px;color:var(--text);font-size:18px}
-.codef{display:flex;flex-direction:column;gap:6px}
-.codef label{font-size:15px}
-.codef input{letter-spacing:.14em;text-transform:uppercase}
-.codef input::placeholder{letter-spacing:normal;text-transform:none}
-.codef input:disabled{opacity:.55}
-.codef .btn{margin-top:6px}
-.dlist{list-style:none;border-top:1px solid var(--line)}
-.dlist li{border-bottom:1px solid var(--line)}
-.dlist button{width:100%;text-align:left;background:transparent;border:0;color:var(--text);font-size:17px;padding:14px 4px;min-height:56px;
-  cursor:pointer;display:flex;justify-content:space-between;gap:10px;overflow-wrap:anywhere}
-.dlist button:hover{background:var(--surface)}
-.dlist small{color:var(--muted);font-size:14px;white-space:nowrap}
-.dlist span small{white-space:normal}
-.log{list-style:none;font-size:15px}
-.log li{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid var(--line)}
-.log .at,.log .how{color:var(--muted)}
-.log .how{font-size:14px}
+/* Card and single-card screens (sign in, signed out, not found) */
+.card{background:var(--surface);border:1px solid var(--line-soft);border-radius:2px;padding:20px}
+.center{min-height:100vh;min-height:100dvh;display:flex;align-items:center;justify-content:center;padding:24px;position:relative;overflow:hidden}
+.solo{position:relative;width:100%;max-width:420px;display:flex;flex-direction:column;gap:16px;background:transparent;border:0;padding:0}
+.solo .brand{margin-bottom:18px}
+.solo h1{font-family:var(--display);font-weight:300;font-size:52px;line-height:1}
+.solo form{display:flex;flex-direction:column;gap:16px}
 
-/* Result: over the whole phone screen, as in the mockup; in the left pane on a wide screen. */
-.res{display:flex;flex-direction:column;gap:16px;padding:28px 22px}
-.doorapp:not(.wide) .res{position:fixed;inset:0;z-index:10;overflow-y:auto}
-.res.r-ok{background:var(--ok);color:var(--ok-text)}
-.res.r-bad{background:var(--bad);color:var(--bad-text)}
-.res.r-warn{background:var(--warn);color:var(--warn-text)}
-.res .icon{font-family:var(--head);font-size:22px;letter-spacing:.14em}
-.res h2{font-size:42px;line-height:1.1;overflow-wrap:anywhere}
-.res .why{font-size:18px}
-.res.r-ok .gmeta{color:var(--ok-sub)}
-.res.r-bad .why{color:var(--bad-sub)}
-.res.r-warn .why{color:var(--warn-sub)}
-.gname{font-size:30px;line-height:1.2;overflow-wrap:anywhere}
-.gmeta{font-size:17px}
-.idcheck{border:2px solid currentColor;padding:12px 14px;font-size:18px}
-.cnt{display:flex;gap:8px;flex-wrap:wrap}
-.cnt button{min-width:56px;min-height:56px;font-size:22px;border-radius:4px;cursor:pointer;background:transparent;color:inherit;border:2px solid currentColor}
-.cnt button[aria-pressed="true"]{background:var(--ok-text);color:var(--ok)}
-.acts{display:flex;flex-direction:column;gap:12px;margin-top:auto}
-.res .btn.go{background:var(--ok-text);color:var(--ok);border:0}
-.res .btn.plain{background:transparent;color:inherit;border:2px solid currentColor}
-.res.r-bad .btn.next{background:var(--bad-text);color:var(--bad);border:0}
-.res.r-warn .btn.next{background:var(--warn-text);color:var(--warn);border:0}
-.blocked{background:rgba(0,0,0,.28);padding:12px 16px;font-size:18px}
+/* Native <dialog>: the reset above removes its auto margin, so centre it again. */
+.dlg{margin:auto;width:min(460px,calc(100% - 32px));background:var(--surface);color:var(--tungsten);border:1px solid var(--line);border-radius:2px;padding:28px;
+  opacity:1;transform:none;transition:opacity 220ms var(--ease-out),transform 220ms var(--ease-out),overlay 220ms allow-discrete,display 220ms allow-discrete}
+@starting-style{.dlg[open]{opacity:0;transform:translateY(10px) scale(.98)}}
+.dlg[open]{display:flex;flex-direction:column;gap:16px}
+.dlg::backdrop{background:rgba(12,10,14,.82)}
+.dlg h2{font-family:var(--display);font-weight:300;font-size:34px;line-height:1.05}
+.dlg p{color:var(--soft)}
+.drow{display:flex;gap:10px;flex-wrap:wrap}
 
-/* Wide: handheld scanner at a desk. */
-.wide .top{padding:14px 24px;gap:24px;justify-content:flex-start}
-.wide .top .t{font-size:24px}
-.wide .top .n{font-size:17px}
-.wide .top .out{margin-left:12px}
-.wide .sync{padding:8px 24px}
-.wide .dot{width:9px;height:9px}
-.wide .nums{display:flex;gap:28px;margin-left:auto;border:0}
-.wide .nums div{padding:0;border:0;text-align:right}
-.wide .nums strong{line-height:1.1}
-.wide .btn{min-height:60px;padding:12px 26px;font-size:19px}
-.wide .startwrap{gap:18px;padding:48px;max-width:640px}
-.wide .startwrap h1{font-size:52px;line-height:1.1}
-.wide .startwrap .btn{align-self:flex-start}
-.dbody{flex:1;display:grid;grid-template-columns:minmax(0,2fr) minmax(320px,1fr)}
-.stage{border-right:1px solid var(--line);display:flex;flex-direction:column}
-.idle{flex:1;display:flex;flex-direction:column;justify-content:center;gap:18px;padding:48px}
-.idle h1{font-size:56px;line-height:1.1}
-.idle p{color:var(--muted);max-width:52ch}
-.listen{display:flex;align-items:center;gap:12px;font-size:19px}
-.wide .listen .dot{width:14px;height:14px}
-.keys{display:flex;gap:18px;flex-wrap:wrap;font-size:15px;color:var(--muted)}
-.keys kbd{margin-right:6px}
-.wide .res{flex:1;gap:18px;padding:40px 48px}
-.wide .res .icon{font-size:26px;letter-spacing:.16em}
-.wide .res h2{font-size:64px;line-height:1.05}
-.wide .gname{font-size:40px;line-height:1.15}
-.wide .gmeta{font-size:20px}
-.wide .res .why{font-size:22px;max-width:40ch}
-.wide .idcheck{padding:12px 16px;font-size:20px;align-self:flex-start}
-.wide .cnt{gap:10px}
-.wide .cnt button{min-width:64px;min-height:64px;font-size:26px}
-.wide .acts{flex-direction:row;flex-wrap:wrap}
-.wide .btn kbd{margin-left:4px}
-.aside{display:flex;flex-direction:column;min-width:0}
-.doorapp .panel{padding:22px 24px;border-bottom:1px solid var(--line);display:flex;flex-direction:column;gap:10px}
-.doorapp .panel:last-child{border-bottom:0}
-.doorapp .ptitle{font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
-.doorapp .panel input{min-height:52px;font-size:17px}
-.wide .codef .btn{align-self:flex-start;min-height:48px;padding:8px 20px;font-size:16px}
-.wide .dlist{border-top:0}
-.wide .dlist li{border-top:1px solid var(--line);border-bottom:0}
-.wide .dlist button{font-size:16px;padding:12px 4px;min-height:52px}
-.wide .log li{display:grid;grid-template-columns:52px 1fr auto;padding:9px 0;border-top:1px solid var(--line);border-bottom:0}
+/* Loading and failed states shared by lists and pages */
+.fail{display:flex;flex-direction:column;align-items:flex-start;gap:14px}
+.skel{height:14px;border-radius:2px;margin:16px;background:linear-gradient(90deg,var(--surface) 0%,var(--raised) 50%,var(--surface) 100%);background-size:200% 100%;
+  animation:shimmer 1.6s linear infinite}
+@keyframes shimmer{from{background-position:100% 0}to{background-position:-100% 0}}
 
-/* Guest QR page (/p/:id), from fanglle-qr-tamu-mockup.jsx. The mockup's phone frame is preview chrome; the page is the phone. */
-.pass{min-height:100vh;max-width:480px;margin:0 auto;display:flex;flex-direction:column;font-size:17px;line-height:1.55}
-.pass .top{padding:18px 20px 12px}
-.pass .mark{padding:0;font-size:17px}
-.pass .kind{font-size:13px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase}
-.pass main{flex:1;display:flex;flex-direction:column}
-.pass .banner{padding:12px 20px;font-size:15px;background:var(--raised);border-bottom:1px solid var(--line)}
-.pass .body{flex:1;padding:20px;display:flex;flex-direction:column;gap:16px}
-.pass .state{font-size:15px;color:var(--soft)}
-.pass .state strong{color:var(--text)}
-.ticket{background:#FFFFFF;color:#0C0812;border-radius:4px;padding:18px 18px 16px;position:relative}
-.ticket .qr{display:block;width:100%;aspect-ratio:1}
-.ticket.off .qr{opacity:.12}
-.ticket .stamp{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px}
-.ticket .stamp strong{font-size:40px;letter-spacing:.08em;color:#0C0812}
-.ticket .stamp span{font-size:16px;color:#3B3346}
-.ticket .who{margin-top:12px;text-align:center;color:#0C0812}
-.ticket .nm{font-size:24px;line-height:1.2;overflow-wrap:anywhere}
-.ticket .ct{font-size:15px;color:#3B3346}
-/* PRD 2.3: at least 28px, capitals, wide tracking. Didact Gothic: Poiret One's hairlines are hard to read out under door lights. */
-.ticket .entry{margin-top:14px;text-align:center}
-.ticket .entry span{display:block;font-size:13px;color:#3B3346}
-.ticket .entry strong{display:block;font-size:30px;line-height:1.2;letter-spacing:.16em;margin-right:-.16em}
-.pass .btn{width:100%;min-height:48px;padding:12px 18px;border-radius:2px;white-space:normal;text-align:center}
-.pass .msg{font-size:14px;color:var(--soft)}
-.pass .center{min-height:0;flex:1;flex-direction:column;gap:12px;text-align:center;padding:28px}
-.pass .center h1{font-size:30px;line-height:1.15}
-.pass .center p{color:var(--muted);max-width:30ch}
-.pass .center .btn{width:auto}
-.pass .skel{margin:0}
-.pass .dlg{border-color:var(--amethyst-deep);border-radius:0;padding:26px}
-.pass .dlg .tag{font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
-.pass .dlg ol{color:var(--soft);padding-left:20px}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{scroll-behavior:auto!important}
+  .stage{transition-duration:240ms}
+  .btn:enabled:active,a.btn:active{transform:none}
+  .skel{animation:none}
+  .dlg{transition:none}
+}

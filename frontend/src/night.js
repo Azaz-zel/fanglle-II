@@ -16,10 +16,12 @@ export const clock = (t) => {
 
 // Noon avoids the date slipping a day in any timezone.
 // en-US names: en-GB writes September as "Sept", the mockup writes "Sep".
+// Formatters are built once: toLocaleDateString with options builds a new one per call, and on a phone that was most of a
+// change of night on Home.
+const [DAY, WEEKDAY, MONTH] = [{ weekday: 'short' }, { weekday: 'long' }, { month: 'short' }].map((o) => new Intl.DateTimeFormat('en-US', o));
 export const dayParts = (iso) => {
   const d = new Date(`${iso}T12:00:00`);
-  const f = (o) => d.toLocaleDateString('en-US', o);
-  return { date: String(d.getDate()), day: f({ weekday: 'short' }), weekday: f({ weekday: 'long' }), month: f({ month: 'short' }) };
+  return { date: String(d.getDate()), day: DAY.format(d), weekday: WEEKDAY.format(d), month: MONTH.format(d) };
 };
 // "Thu 24 Sep"
 export const dayLabel = (iso) => {
@@ -27,7 +29,16 @@ export const dayLabel = (iso) => {
   return `${p.day} ${p.date} ${p.month}`;
 };
 
-export const idr = (n) => `IDR ${Number(n).toLocaleString('en-US')}`;
+const NUM = new Intl.NumberFormat('en-US');
+export const idr = (n) => `IDR ${NUM.format(Number(n))}`;
+
+// The gel that lights a night: one per weekday the club opens, Thursday's for any other day. Drives the gel-* classes
+// (styles.css) and the crystal composition (stage.jsx), so the look follows the date, never a name or a hard-coded night.
+export const NIGHT_KEYS = ['thu', 'fri', 'sat', 'sun'];
+export const gelOf = (iso) => {
+  const k = dayParts(iso).day.toLowerCase();
+  return NIGHT_KEYS.includes(k) ? k : 'thu';
+};
 
 // The club's wall clock. The offset comes from a server timestamp ("…+08:00"), so the device's own zone never matters.
 export const offsetOf = (iso) => {

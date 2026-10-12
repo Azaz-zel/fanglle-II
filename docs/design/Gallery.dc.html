@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Gallery</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="fanglle.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Albert+Sans:wght@400;500&amp;family=Big+Shoulders+Display:wght@100;200;300;400;600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#0C0A0E}
+a{color:#F1ECE4}a:hover{color:#FFFDF8}
+</style>
+</helmet>
+<div class="stage gel-sun" style="position: relative; background: var(--blackout); color: var(--tungsten); font-family: var(--body); overflow-x: clip; width: 100%; min-height: 2100px">
+  <section class="wash" style="position: relative; overflow: hidden">
+    <div style="position: absolute; inset: 0; pointer-events: none"><dc-import name="Crystals" night="3" solid="" reach="0.75" hint-size="100%,100%"></dc-import></div>
+    <div class="beam"></div>
+    <div class="haze"></div>
+    <div class="house"></div>
+  <header style="position: relative; z-index: 2">
+    <div style="max-width: 1312px; margin: 0 auto; padding: 0 64px; box-sizing: border-box; height: 76px; display: flex; align-items: center; gap: 40px; flex-wrap: wrap">
+      <a class="mark" href="Main.dc.html">The Fanglle <span class="ii">II</span></a>
+      <nav aria-label="Main" style="display: flex; gap: 32px; margin-left: auto; flex-wrap: wrap">
+        <a class="navlink" href="Main.dc.html">This week</a>
+        <a class="navlink" href="Gallery.dc.html" aria-current="page">Gallery</a>
+        <a class="navlink" href="About.dc.html">About</a>
+        <a class="navlink" href="FindQrDesk.dc.html">Find my QR</a>
+      </nav>
+      <a class="btn btn-work btn-sm" href="Book.dc.html">Book a table</a>
+    </div>
+  </header>
+    <div style="position: relative; z-index: 2; max-width: 1312px; margin: 0 auto; padding: 200px 64px 56px; box-sizing: border-box">
+      <h1 class="night rise" style="--i: 0; font-size: clamp(80px, 13vw, 184px)">Gallery</h1>
+      <p class="rise" style="--i: 1; margin: 20px 0 0; font-size: 18px; line-height: 1.6; color: var(--soft); max-width: 52ch">The room, the nights, and the tables, as they look after doors.</p>
+    </div>
+  </section>
+
+  <main style="max-width: 1312px; margin: 0 auto; padding: 24px 64px 120px; box-sizing: border-box">
+
+    <div role="group" aria-label="Show" style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 40px">
+      <sc-for list="{{cats}}" as="c" hint-placeholder-count="5">
+        <button class="btn btn-sm {{c.cls}}" aria-pressed="{{c.on}}" onClick="{{c.pick}}">{{c.label}}</button>
+      </sc-for>
+    </div>
+
+    <div style="columns: 3 300px; column-gap: 14px; margin-top: 32px">
+      <sc-for list="{{shots}}" as="s" hint-placeholder-count="10">
+        <button class="photo" onClick="{{s.open}}" aria-label="{{s.alt}}" style="display: flex; width: 100%; break-inside: avoid; margin: 0 0 14px; aspect-ratio: {{s.ratio}}; cursor: pointer; text-align: left; color: inherit; font: inherit; transition: border-color 300ms ease">
+          <span style="display: flex; flex-direction: column; gap: 6px"><span class="label" style="color: var(--gel-bright)">{{s.catName}}</span><span style="font-size: 16px; line-height: 1.4; color: var(--soft)">[FOTO] {{s.shot}}</span></span>
+        </button>
+      </sc-for>
+    </div>
+  </main>
+
+  <sc-if value="{{viewing}}" hint-placeholder-val="{{ false }}">
+    <div role="dialog" aria-modal="true" aria-label="Photo viewer" style="position: absolute; inset: 0; z-index: 10; background: rgba(12,10,14,.96); display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 22px; padding: 120px 64px 64px; box-sizing: border-box">
+      <div class="photo" style="width: min(960px, 100%); aspect-ratio: {{cur.ratio}}; max-height: 620px; align-items: center; justify-content: center; text-align: center">
+        <span style="font-size: 26px; line-height: 1.3; color: var(--soft); max-width: 26ch">[FOTO] {{cur.shot}}</span>
+      </div>
+      <dl style="width: min(960px, 100%); display: grid; grid-template-columns: auto 1fr; gap: 6px 18px; margin: 0; font-size: 15px">
+        <dt style="color: var(--muted)">Category</dt><dd style="margin: 0">{{cur.catName}}</dd>
+        <dt style="color: var(--muted)">Alt text</dt><dd style="margin: 0">{{cur.alt}}</dd>
+      </dl>
+      <div style="display: flex; gap: 10px; align-items: center">
+        <button class="btn btn-line btn-sm" onClick="{{prev}}">Previous</button>
+        <span class="tnum" style="min-width: 72px; text-align: center; color: var(--muted)">{{pos}}</span>
+        <button class="btn btn-line btn-sm" onClick="{{next}}">Next</button>
+        <button class="btn btn-work btn-sm" onClick="{{close}}" style="margin-left: 18px">Close</button>
+      </div>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":2100}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { cat: 'all', open: -1 }; }
+  renderVals() {
+    const CAT = { room: 'The room', night: 'Nights', tables: 'Tables and booths', detail: 'Details' };
+    const ALL = [
+      { cat: 'room', ratio: '16 / 9', shot: 'Main room from the DJ booth, full crowd, lights low', alt: 'The main room seen from the DJ booth, packed dance floor under low coloured light' },
+      { cat: 'night', ratio: '3 / 4', shot: 'Ilse Varga behind the decks at Descent', alt: 'Ilse Varga playing at Descent, lit from behind' },
+      { cat: 'room', ratio: '3 / 2', shot: 'Dance floor from above, beams across the haze', alt: 'Dance floor from above with light beams crossing the haze' },
+      { cat: 'tables', ratio: '3 / 2', shot: 'Booth set for twelve, before doors open', alt: 'An empty booth laid out for twelve guests before opening' },
+      { cat: 'night', ratio: '3 / 2', shot: 'Hands up at midnight, Second Wave', alt: 'Crowd with hands raised as the headliner starts at Second Wave' },
+      { cat: 'detail', ratio: '3 / 4', shot: 'Gel frame on a stage light, close up', alt: 'Close up of a coloured gel filter on a stage light' },
+      { cat: 'tables', ratio: '3 / 4', shot: 'Bottle service arriving at a booth', alt: 'Staff carrying bottle service to a booth' },
+      { cat: 'room', ratio: '3 / 2', shot: 'The bar at 1 am, bartenders mid-pour', alt: 'Bartenders pouring drinks at the bar late at night' },
+      { cat: 'night', ratio: '3 / 4', shot: 'Nadia Sorrel, close up, Fall Line', alt: 'Nadia Sorrel at the decks during Fall Line' },
+      { cat: 'detail', ratio: '3 / 2', shot: 'Entrance at 10 pm, door staff scanning a QR', alt: 'Door staff scanning a guest QR at the entrance' },
+    ];
+    const s = this.state;
+    const list = ALL.filter((x) => s.cat === 'all' || x.cat === s.cat).map((x) => ({ ...x, catName: CAT[x.cat] }));
+    const go = (d) => () => this.setState({ open: (s.open + d + list.length) % list.length });
+    return {
+      cats: [['all', 'All'], ['room', 'The room'], ['night', 'Nights'], ['tables', 'Tables and booths'], ['detail', 'Details']].map(([id, label]) => ({
+        label, on: s.cat === id, cls: s.cat === id ? 'btn-work' : 'btn-line', pick: () => this.setState({ cat: id, open: -1 }),
+      })),
+      shots: list.map((x, k) => ({ ...x, open: () => this.setState({ open: k }) })),
+      viewing: s.open >= 0,
+      cur: list[Math.max(0, s.open)] || list[0],
+      pos: `${s.open + 1} of ${list.length}`,
+      prev: go(-1), next: go(1), close: () => this.setState({ open: -1 }),
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Find my QR</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="fanglle.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Albert+Sans:wght@400;500&amp;family=Big+Shoulders+Display:wght@100;200;300;400;600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#0C0A0E}
+a{color:#F1ECE4}a:hover{color:#FFFDF8}
+</style>
+</helmet>
+<div class="stage gel-thu" style="width: 390px; height: 844px; background: var(--blackout); color: var(--tungsten); font-family: var(--body); overflow: hidden; display: flex; flex-direction: column">
+  <header style="height: 64px; padding: 0 16px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--line-soft)">
+    <a class="mark" href="HomeMobile.dc.html" style="font-size: 17px; letter-spacing: .12em">The Fanglle <span class="ii">II</span></a>
+    <a class="btn btn-work btn-sm" href="BookMobile.dc.html" style="margin-left: auto; padding: 0 14px">Book a table</a>
+    <a class="navlink" href="HomeMobile.dc.html" style="min-width: 52px; justify-content: center">Menu</a>
+  </header>
+  <section class="wash" style="position: relative; overflow: hidden; flex: 1; padding: 150px 16px 32px; display: flex; flex-direction: column; gap: 22px">
+    <div style="position: absolute; inset: 0; pointer-events: none"><dc-import name="Crystals" night="0" solid="" count="8" reach="0.6" hint-size="100%,100%"></dc-import></div>
+    <div class="beam narrow" style="width: 420px"></div>
+    <h1 class="night" style="position: relative; font-size: 88px">Find my QR</h1>
+    <p style="position: relative; margin: 0; font-size: 17px; line-height: 1.6; color: var(--soft)">Type the entry code from your booking or guestlist. It sits under your QR and in the message we sent you.</p>
+    <div class="field" style="position: relative">
+      <label for="fq">Entry code</label>
+      <input id="fq" class="input tnum" value="{{code}}" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-invalid="{{error}}" aria-describedby="fq-e" style="font: 500 24px var(--body); letter-spacing: .16em; text-transform: uppercase; min-height: 60px">
+      <sc-if value="{{error}}" hint-placeholder-val="{{ false }}">
+        <p id="fq-e" class="err">No pass with this code. Check the letters, then try again.</p>
+      </sc-if>
+    </div>
+    <a class="btn btn-work btn-wide" href="Pass.dc.html" style="position: relative">Open my QR</a>
+  </section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"error":{"editor":"boolean","default":false},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const error = this.props.error ?? false;
+    return { error, code: error ? 'K7QM-4TXB' : 'K7QM-4TXP' };
+  }
+}
+</script>
+</body>
+</html>

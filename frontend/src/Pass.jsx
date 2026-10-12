@@ -4,10 +4,13 @@ import { useQuery } from '@tanstack/react-query';
 import QRCode from 'qrcode';
 import { openDB } from 'idb';
 import { api } from './api.js';
-import { dayLabel, entryCode, idr, PASS_KINDS, passOrCopy, passState, validUntil, ZONES } from './night.js';
+import { clock, dayParts, entryCode, gelOf, idr, PASS_KINDS, passOrCopy, passState, validUntil, ZONES } from './night.js';
 import { Button, Dialog, Mark } from './ui.jsx';
+import { Crystals } from './stage.jsx';
+import './pass.css';
 
-// Guest QR page (/p/:id, S5), from fanglle-qr-tamu-mockup.jsx. Its own chunk: qrcode loads only here, idb only here and at the door.
+// Guest QR page (/p/:id, S5), docs/design/Pass.dc.html: the night's band in its gel, the QR on a white work-light card.
+// Its own chunk: qrcode loads only here, idb only here and at the door.
 
 // The build lives under /app/, the page under /p/. A worker at the site root has scope / without any server header.
 if (import.meta.env.PROD) navigator.serviceWorker?.register('/sw.js').catch(() => {});
@@ -31,7 +34,7 @@ function Qr({ text, label }) {
   }, [text]);
   return (
     <svg className="qr" viewBox={`-2 -2 ${size + 4} ${size + 4}`} role="img" aria-label={label} shapeRendering="crispEdges">
-      <path d={d} fill="#0C0812" />
+      <path d={d} fill="#0C0A0E" />
     </svg>
   );
 }
@@ -75,7 +78,7 @@ function KeepAwake() {
     <>
       <p className="hint">At the door, turn your screen brightness up. The scanner reads it faster.</p>
       <Button
-        variant="line"
+        className="wide"
         disabled={want}
         aria-pressed={want}
         onClick={() => {
@@ -98,12 +101,12 @@ function SaveToHome() {
   const [open, setOpen] = useState(false);
   return (
     <>
-      <Button variant="line" onClick={() => setOpen(true)}>
+      <Button variant="line" className="wide" onClick={() => setOpen(true)}>
         Save to home screen
       </Button>
       <Dialog open={open} onClose={() => setOpen(false)} aria-labelledby="save-t">
-        <div className="tag">Save to home screen</div>
-        <h2 id="save-t" className="head">
+        <p className="label">Save to home screen</p>
+        <h2 id="save-t">
           Open it without signal
         </h2>
         <p>Saved to your home screen, this page opens even when the club has no signal.</p>
@@ -133,6 +136,15 @@ function Ticket({ p, savedAt }) {
           No signal. Showing the copy saved on this phone at {savedTime(savedAt)}.{!stamp && ' It still works at the door.'}
         </div>
       )}
+      <div className="band wash">
+        <Crystals night={['thu', 'fri', 'sat', 'sun'].indexOf(gelOf(e.date))} count={7} reach={0.95} />
+        <div className="beam soft" />
+        <p className="night band-name">{e.name}</p>
+        <p className="band-when">
+          {dayParts(e.date).weekday} {dayParts(e.date).date} {dayParts(e.date).month}
+          {e.opens_at && ` · Doors ${clock(e.opens_at)}`}
+        </p>
+      </div>
       <div className="body">
         <p className="state" aria-live="polite">
           {line.map((s, i) => (i % 2 ? <strong key={i}>{s}</strong> : s))}
@@ -142,12 +154,12 @@ function Ticket({ p, savedAt }) {
           <Qr text={p.qr} label={stamp ? 'QR no longer valid' : `Entry QR for ${p.holder_name}`} />
           {stamp && (
             <div className="stamp">
-              <strong className="head">{stamp[0]}</strong>
+              <strong className="d">{stamp[0]}</strong>
               <span>{stamp[1]}</span>
             </div>
           )}
           <div className="who">
-            <h1 className="nm">{p.holder_name}</h1>
+            <h1 className="nm d">{p.holder_name}</h1>
             {who && <div className="ct">{who}</div>}
           </div>
           {/* A dead code at the door only starts an argument, so it goes with the QR. */}
@@ -165,10 +177,6 @@ function Ticket({ p, savedAt }) {
         )}
 
         <dl className="facts">
-          <dt>Night</dt>
-          <dd>
-            {e.name}, {dayLabel(e.date)}
-          </dd>
           {p.kind === 'table' && (
             <>
               <dt>Table</dt>
@@ -201,13 +209,13 @@ function Failed({ q }) {
   if (e.status === 404)
     return (
       <div className="center" role="alert">
-        <h1 className="head">This link doesn't open a QR</h1>
+        <h1 className="d">This link doesn't open a QR</h1>
         <p>It may be incomplete or copied wrong. Open the link from the email we sent, or ask the organiser to share it again.</p>
       </div>
     );
   return (
     <div className="center" role="alert">
-      <h1 className="head">{e.status ? "This QR didn't load" : 'No signal'}</h1>
+      <h1 className="d">{e.status ? "This QR didn't load" : 'No signal'}</h1>
       <p>{e.status ? e.message : "This phone hasn't saved this QR yet. Open the link again when you have signal."}</p>
       <Button variant="line" onClick={() => q.refetch()}>
         Try again
@@ -226,12 +234,12 @@ export default function Pass() {
   const p = q.data?.pass;
 
   return (
-    <div className="pass">
+    <div className={`pass stage gel-${p ? gelOf(p.event.date) : 'thu'}`}>
       <header className="top">
-        <span className="mark head">
+        <span className="mark">
           <Mark />
         </span>
-        {p && <span className="kind">{PASS_KINDS[p.kind]}</span>}
+        {p && <span className="label">{PASS_KINDS[p.kind]}</span>}
       </header>
       <main>
         {p ? (
