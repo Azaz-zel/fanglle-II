@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useParams } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
+import { Link, useParams } from 'react-router-dom';
+import { useQueries, useQuery } from '@tanstack/react-query';
 import QRCode from 'qrcode';
 import { openDB } from 'idb';
 import { api } from './api.js';
-import { clock, dayParts, entryCode, gelOf, idr, PASS_KINDS, passOrCopy, passState, validUntil, ZONES } from './night.js';
+import { clock, dayLabel, dayParts, entryCode, gelOf, idr, PASS_KINDS, passOrCopy, passState, validUntil, waShare, ZONES } from './night.js';
 import { Button, Dialog, Mark } from './ui.jsx';
 import { Crystals } from './stage.jsx';
 import './pass.css';
@@ -224,13 +224,62 @@ function Failed({ q }) {
   );
 }
 
+const passQuery = (id) => ({
+  queryKey: ['pass', id],
+  queryFn: () => passOrCopy(id, { fetchPass: (i) => api(`/api/passes/${encodeURIComponent(i)}`, { guest: true }), store }),
+  networkMode: 'always', // offline is exactly when this query must still run and read the saved copy
+});
+
+// Guestlist with one QR each (F9): the success screen shows every QR on its work-light card, so the organiser can screenshot
+// each one and send it on. The same query as /p/:id, so each pass is also saved on this phone for the night with no signal.
+export function QrSheet({ passes, e }) {
+  const qs = useQueries({ queries: passes.map((x) => passQuery(x.pass_url.split('/').pop())) });
+  return (
+    <ul className="qrsheet">
+      {passes.map(({ holder_name, pass_url }, i) => {
+        const p = qs[i].data?.pass;
+        return (
+          <li key={pass_url}>
+            <div className="ticket">
+              {p ? (
+                <Qr text={p.qr} label={`Entry QR for ${holder_name}`} />
+              ) : qs[i].isError ? (
+                <p className="ct">This QR didn't load here. Its link still opens it.</p>
+              ) : (
+                <div className="wait" role="status" aria-label={`Loading ${holder_name}'s QR`} />
+              )}
+              <div className="who">
+                <p className="nm d">{holder_name}</p>
+                <div className="ct">
+                  {e.name}, {dayLabel(e.date)}. Valid until {clock(e.guestlist_cutoff)}.
+                </div>
+              </div>
+              {p && (
+                <p className="entry">
+                  <span>Can't scan? Give the door this code</span>
+                  <strong>{entryCode(p.entry_code)}</strong>
+                </p>
+              )}
+            </div>
+            {i === 0 ? (
+              <Link className="btn sm solid" to={pass_url}>
+                Open my QR
+              </Link>
+            ) : (
+              <a className="btn sm line" href={waShare(holder_name, e, window.location.origin + pass_url)} target="_blank" rel="noopener noreferrer" aria-label={`Share on WhatsApp, for ${holder_name}`}>
+                Share on WhatsApp
+              </a>
+            )}
+          </li>
+        );
+      })}
+    </ul>
+  );
+}
+
 export default function Pass() {
   const { id } = useParams();
-  const q = useQuery({
-    queryKey: ['pass', id],
-    queryFn: () => passOrCopy(id, { fetchPass: (i) => api(`/api/passes/${encodeURIComponent(i)}`, { guest: true }), store }),
-    networkMode: 'always', // offline is exactly when this query must still run and read the saved copy
-  });
+  const q = useQuery(passQuery(id));
   const p = q.data?.pass;
 
   return (

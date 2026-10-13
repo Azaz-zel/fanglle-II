@@ -319,11 +319,6 @@ button.tbl[aria-disabled="true"]{cursor:not-allowed}
 .qr-one{align-self:stretch;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;border:1px solid var(--line);padding:22px}
 .qr-one .d{display:block;font-size:32px}
 .qr-one small{display:block;margin-top:4px;font-size:14px;color:var(--muted)}
-.qrlist{list-style:none;align-self:stretch;border-top:1px solid var(--line)}
-.qrlist li{display:flex;flex-wrap:wrap;gap:14px 24px;align-items:center;justify-content:space-between;padding:20px 0;border-bottom:1px solid var(--line)}
-.holder{min-width:0;overflow-wrap:anywhere}
-.holder .d{display:block;font-size:32px;font-weight:200}
-.holder small{font-size:14px;color:var(--muted)}
 .again{margin-top:8px}
 .lost{flex:2 1 320px;min-width:0;border:1px solid var(--line);padding:28px;display:flex;flex-direction:column;gap:14px;align-items:flex-start}
 .lost h3{font-size:32px}

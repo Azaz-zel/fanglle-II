@@ -1,15 +1,18 @@
-import { useEffect, useRef, useState } from 'react';
+import { Suspense, lazy, useEffect, useRef, useState } from 'react';
 import { Link, NavLink, useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { AnimatePresence, MotionConfig, motion } from 'motion/react';
 import { api, errorText, weekQuery } from './api.js';
 import {
   clock, dayLabel, dayParts, earliest, gelOf, guestNames, headliners, idr, mmss, nightMinutes, nightRun, others, ROLES, secondsLeft,
-  tableState, waShare, ZONES,
+  tableState, ZONES,
 } from './night.js';
 import { Dialog, Mark } from './ui.jsx';
 import { Letters, Room, useMedia } from './stage.jsx';
 import './public.css';
+
+// The guestlist's one-QR-each success screen draws its QRs with the pass page's code, so qrcode still loads only with Pass.jsx.
+const QrSheet = lazy(() => import('./Pass.jsx').then((m) => ({ default: m.QrSheet })));
 
 // Public region in the Gel dan Kabut design (docs/design/): Home (/), a night (/events/:date), table booking (/book/:date,
 // /booking/:code), guestlist (/guestlist/:date), Gallery, About, Find my QR. The QR page (/p/:id) is its own chunk, Pass.jsx.
@@ -1727,33 +1730,10 @@ export function Guestlist() {
           </div>
         ) : (
           <>
-            <p className="help">Send each guest their own link. It opens their QR on their phone, with or without signal.</p>
-            <ul className="qrlist">
-              {r.passes.map((p, i) => (
-                <li key={p.pass_url}>
-                  <span className="holder">
-                    <span className="d">{p.holder_name}</span>
-                    <small>{i === 0 ? 'You' : `Guest ${i + 1}`}</small>
-                  </span>
-                  <span className="drow">
-                    <Link className={`btn sm ${i === 0 ? 'solid' : 'line'}`} to={p.pass_url} aria-label={`Open ${p.holder_name}'s QR`}>
-                      {i === 0 ? 'Open my QR' : 'Open'}
-                    </Link>
-                    {i > 0 && (
-                      <a
-                        className="btn sm line"
-                        href={waShare(p.holder_name, r.e, window.location.origin + p.pass_url)}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        aria-label={`Share on WhatsApp, for ${p.holder_name}`}
-                      >
-                        Share on WhatsApp
-                      </a>
-                    )}
-                  </span>
-                </li>
-              ))}
-            </ul>
+            <p className="help">Screenshot each QR and send it to that person, or share their link. The door checks the name on it against their ID.</p>
+            <Suspense fallback={<div className="skel" style={{ height: 320, width: '100%', margin: 0 }} />}>
+              <QrSheet passes={r.passes} e={r.e} />
+            </Suspense>
           </>
         )}
         <button type="button" className="btn line again" onClick={restart}>

@@ -32,6 +32,14 @@
 .ticket .entry span{display:block;font-size:13px;color:#3B3346}
 .ticket .entry strong{display:block;margin:4px -.16em 0 0;font:500 30px/1.2 var(--body);letter-spacing:.16em;font-variant-numeric:tabular-nums}
 
+/* QrSheet on the guestlist success screen: one card per person, each small enough to fit one phone screenshot. */
+.qrsheet{list-style:none;align-self:stretch;display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,280px),1fr));gap:32px 24px}
+.qrsheet li{min-width:0;max-width:380px;display:flex;flex-direction:column;align-items:flex-start;gap:12px}
+.qrsheet .ticket{align-self:stretch}
+.qrsheet .ticket .wait{width:86%;margin:0 auto;aspect-ratio:1;background:#ECE6DC}
+.qrsheet .ticket .nm{font-size:26px}
+.qrsheet .ticket>.ct{padding:24px 8px;text-align:center}
+
 .pass .facts{display:grid;grid-template-columns:auto 1fr;gap:6px 16px;font-size:15px;padding-top:6px;border-top:1px solid var(--line-soft)}
 .pass .facts dt{color:var(--muted)}
 .pass .facts dd{text-align:right}
