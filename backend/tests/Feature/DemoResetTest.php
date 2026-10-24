@@ -91,6 +91,36 @@ class DemoResetTest extends TestCase
         $this->assertSame([1, 2, 1, 1], [CheckIn::count(), Pass::count(), TableBooking::count(), GuestlistSignup::count()]);
     }
 
+    public function test_orders_fill_the_empty_nights_with_guests_who_could_really_be_there(): void
+    {
+        // Saturday 1 am: Thursday is over, Friday's night is under way, Saturday and Sunday are ahead.
+        $this->travelTo('2026-10-03 01:00');
+        $this->seed();
+        $this->orders('2026-10-01'); // a night with real orders is left alone
+
+        $this->artisan('fanglle:demo-reset --orders')->assertSuccessful();
+
+        $thu = Event::firstWhere('date', '2026-10-01');
+        $this->assertSame(1, TableBooking::where('event_id', $thu->id)->count());
+        foreach (Event::where('date', '>', '2026-10-01')->get() as $event) {
+            $this->assertGreaterThan(0, TableBooking::where('event_id', $event->id)->where('status', BookingStatus::Paid)->count());
+            $this->assertGreaterThan(0, GuestlistSignup::where('event_id', $event->id)->count());
+        }
+
+        // Nobody is let in before a night opens or after now, and nobody more than their pass allows.
+        $this->assertGreaterThan(1, CheckIn::count());
+        foreach (CheckIn::with('pass.event')->whereRelation('pass', 'event_id', '!=', $thu->id)->get() as $checkIn) {
+            $this->assertSame('2026-10-02', $checkIn->pass->event->date->toDateString());
+            $this->assertTrue($checkIn->scanned_at->lte(now()) && $checkIn->scanned_at->gte('2026-10-02 22:00'));
+        }
+        $this->assertSame(0, Pass::whereColumn('inside_count', '>', 'people')->count());
+        $this->assertSame(0, TableBooking::where('status', BookingStatus::NoShow)->whereRelation('event', 'date', '>=', '2026-10-02')->count());
+
+        $counts = [CheckIn::count(), Pass::count(), TableBooking::count(), GuestlistSignup::count()];
+        $this->artisan('fanglle:demo-reset --orders')->assertSuccessful();
+        $this->assertSame($counts, [CheckIn::count(), Pass::count(), TableBooking::count(), GuestlistSignup::count()]);
+    }
+
     public function test_it_runs_every_day_at_noon(): void
     {
         $event = collect(app(Schedule::class)->events())->first(fn ($e) => str_contains($e->command, 'fanglle:demo-reset'));

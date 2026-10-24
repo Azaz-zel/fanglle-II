@@ -5,6 +5,7 @@ use App\Models\Event;
 use App\Models\GuestlistSignup;
 use App\Models\Pass;
 use App\Models\TableBooking;
+use Database\Seeders\DemoOrdersSeeder;
 use Database\Seeders\DemoWeekSeeder;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
@@ -86,8 +87,8 @@ Artisan::command('fanglle:backup', function () {
 
 // PRD Backend 2.3: the demo stays alive long after it was built. Nights from before this week (F2: the week of tonight) go, with
 // every booking, signup, pass and check-in on them; then this week's Thursday to Sunday are put back where missing.
-// Staff and the floor plan stay. Running it twice changes nothing.
-Artisan::command('fanglle:demo-reset', function () {
+// Staff and the floor plan stay. Running it twice changes nothing. --orders also gives this week's nights sample guests.
+Artisan::command('fanglle:demo-reset {--orders : Fill the empty nights of this week with sample bookings, guestlist and check-ins}', function () {
     $monday = DemoWeekSeeder::thursday()->subDays(3)->toDateString();
     $old = Event::where('date', '<', $monday)->pluck('id');
 
@@ -103,6 +104,9 @@ Artisan::command('fanglle:demo-reset', function () {
     });
 
     (new DemoWeekSeeder)->run();
+    if ($this->option('orders')) {
+        (new DemoOrdersSeeder)->run();
+    }
 
     $week = Event::whereBetween('date', [DemoWeekSeeder::thursday()->toDateString(), DemoWeekSeeder::thursday()->addDays(3)->toDateString()])
         ->orderBy('date')->get()->map(fn (Event $event) => $event->date->format('D j M').' '.$event->name)->join(', ');
@@ -111,4 +115,4 @@ Artisan::command('fanglle:demo-reset', function () {
 
 Schedule::command('bookings:expire')->everyMinute()->withoutOverlapping();
 Schedule::command('fanglle:backup')->dailyAt('05:00');
-Schedule::command('fanglle:demo-reset')->dailyAt('12:00'); // noon: when a new night starts (F2)
+Schedule::command('fanglle:demo-reset --orders')->dailyAt('12:00'); // noon: when a new night starts (F2)
