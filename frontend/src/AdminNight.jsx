@@ -4,13 +4,12 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { api, errorText } from './api.js';
 import { clock, dayLabel, dayParts, headliners, hhmm, idr, nightMinutes, offsetOf, others, wallClock, ZONES } from './night.js';
 import { Badge, Chip, Confirm, Dialog } from './ui.jsx';
-import './stage.css'; // .wash, the gel band on the night's card
 import {
   arrivalOf, attention, bookingLog, bookingRows, HOW, minsLeft, nightClock, pickHour, readout, signupLine, signupRows, STATUS, timeline, whatsApp, whenOf,
 } from './tonight.js';
 
-// Manager's night (S7): Overview, Table bookings, Guestlist, Door log and the detail panel. Look from docs/design/AdminOverview.dc.html
-// and AdminBookings.dc.html; Guestlist and Door log follow the bookings page. Every number comes from GET /api/admin/tonight and
+// Manager's night (S7): Overview, Table bookings, Guestlist, Door log and the detail panel. Look from the Sorot boards AdminOverview
+// and AdminBookings; Guestlist and Door log follow the bookings page. Every number comes from GET /api/admin/tonight and
 // the night's three lists; they refresh every 30 seconds.
 
 // date: the night picked in the top bar; null lets the server choose tonight, else the next night, else the last one. The
@@ -74,10 +73,11 @@ const Meter = ({ part, of }) => (
   </span>
 );
 
-// Page heading: the display title, and the line under it when there is one.
-const Head = ({ title, children }) => (
+// Page heading: the italic line above when there is one, the display title, and the line under it when there is one.
+const Head = ({ kicker, title, children }) => (
   <div className="ph">
-    <h1 className="d title">{title}</h1>
+    {kicker && <p className="kicker">{kicker}</p>}
+    <h1 className="night title">{title}</h1>
     {children && <p className="sub">{children}</p>}
   </div>
 );
@@ -105,19 +105,16 @@ export function Overview({ night, open }) {
         // tiles, then the arrivals chart. The held table that used to sit in the night card leads "Needs you".
         return (
           <>
-            <Head title={when === 'tonight' ? 'Tonight' : `${day.weekday} ${day.date} ${day.month}`}>
+            <Head kicker={`${when === 'tonight' ? 'Tonight, ' : ''}${day.weekday} ${day.date} ${day.month}`} title={e.name}>
               {when === 'ahead' ? `Still to come. Doors at ${clock(e.opens_at)}.` : when === 'past' && 'This night is over.'}
             </Head>
             <div className="over">
               <section className="nightcard" aria-labelledby="h-night">
-                <div className="wash band">
-                  <h2 id="h-night" className="night">
-                    {e.name}
-                  </h2>
-                  <span>
+                <div className="band">
+                  <h2 id="h-night" className="d">
                     {heads.join(' and ') || 'Line-up to come'}
-                    {rest.length > 0 && ` with ${rest.join(', ')}`}
-                  </span>
+                  </h2>
+                  {rest.length > 0 && <span>with {rest.join(', ')}</span>}
                 </div>
                 <div className="nbody">
                   <p className="inside">

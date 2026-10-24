@@ -4,18 +4,18 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { AnimatePresence, MotionConfig, motion } from 'motion/react';
 import { api, errorText, weekQuery } from './api.js';
 import {
-  clock, dayLabel, dayParts, earliest, gelOf, guestNames, headliners, idr, mmss, nightMinutes, nightRun, others, ROLES, secondsLeft,
+  clock, dayLabel, dayParts, earliest, gelOf, guestNames, headliners, idr, laneOf, mmss, nightMinutes, others, ROLES, secondsLeft,
   tableState, ZONES,
 } from './night.js';
 import { Dialog, Mark } from './ui.jsx';
-import { Letters, Room, useMedia } from './stage.jsx';
+import { Dot, Lit, Room, useMedia } from './stage.jsx';
 import './public.css';
 
 // The guestlist's one-QR-each success screen draws its QRs with the pass page's code, so qrcode still loads only with Pass.jsx.
 const QrSheet = lazy(() => import('./Pass.jsx').then((m) => ({ default: m.QrSheet })));
 
-// Public region in the Gel dan Kabut design (docs/design/): Home (/), a night (/events/:date), table booking (/book/:date,
-// /booking/:code), guestlist (/guestlist/:date), Gallery, About, Find my QR. The QR page (/p/:id) is its own chunk, Pass.jsx.
+// Public region in the Sorot design (DESIGN.md): Home (/), a night (/events/:date), table booking (/book/:date, /booking/:code),
+// guestlist (/guestlist/:date), Gallery, About, Find my QR. The QR page (/p/:id) is its own chunk, Pass.jsx.
 // Every page is lit by its night's gel (gelOf): the colour follows the date, never a name.
 
 // "This week" opens the nearest night's own page; until the week has loaded, the night picker on Home.
@@ -36,55 +36,79 @@ const NavLinks = () => (
 // A page when there is one, else an anchor on this page.
 const Go = ({ to, ...rest }) => (!to || to.startsWith('#') ? <a href={to || '#ways-in'} {...rest} /> : <Link to={to} {...rest} />);
 
-// flow: the booking pages, which trade the menu and footer for one way back. book: where "Book a table" goes.
-// gel: the night lighting the page. The header sits over the first room of every page.
-function Site({ gel = 'thu', flow, book = '/#ways-in', className = '', children }) {
+const Burger = () => (
+  <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
+    <path d="M2 6h14M2 12h14" />
+  </svg>
+);
+
+// flow: the booking pages, which trade the menu and footer for one way back. book: where "Book a table" goes; list: where
+// "Guestlist" goes. gel: the night lighting the page. The header sits over the first room of every page.
+function Site({ gel = 'thu', flow, book = '/#ways-in', list, className = '', children }) {
   return (
     <MotionConfig reducedMotion="user">
-      <div className={`site stage gel-${gel} ${className}`}>
+      <div className={`site gel-${gel} ${className}`}>
+        <Dot />
         <a className="skip" href="#main">Skip to content</a>
-        <header className="nav">
-          <div className="wrap navin">
-            <Link to="/" className="mark">
-              <Mark />
+        <header className="masthead">
+          <Link to="/" className="mark">
+            <Mark />
+          </Link>
+          {flow ? (
+            <Link to="/" className="go back">
+              Back to this week
             </Link>
-            {flow ? (
-              <Link to="/" className="navlink back">
-                Back to this week
-              </Link>
-            ) : (
-              <>
-                <nav className="links" aria-label="Main">
-                  <NavLinks />
-                </nav>
-                <Go className="btn solid sm" to={book}>
+          ) : (
+            <>
+              <nav className="links" aria-label="Main">
+                <NavLinks />
+              </nav>
+              <div className="pair">
+                {list && (
+                  <Go className="btn quiet" to={list}>
+                    Guestlist
+                  </Go>
+                )}
+                <Go className="btn solid" to={book}>
                   Book a table
                 </Go>
-                {/* Below 900px the links fold in here. A link to the page already open would leave it open, so any link closes it. */}
-                <details className="menu" onClick={(x) => x.target.closest('a') && (x.currentTarget.open = false)}>
-                  <summary>Menu</summary>
+              </div>
+              {/* Below 900px the links fold into a full-screen sheet. A link to the page already open would leave it open, so any
+                  link closes it. */}
+              <details
+                className="menu"
+                onClick={(x) => x.target.closest('a') && (x.currentTarget.open = false)}
+                onKeyDown={(x) => {
+                  if (x.key !== 'Escape' || !x.currentTarget.open) return;
+                  x.currentTarget.open = false;
+                  x.currentTarget.querySelector('summary').focus();
+                }}
+              >
+                <summary aria-label="Menu">
+                  <Burger />
+                </summary>
+                <div className="sheet">
                   <nav aria-label="Main">
                     <NavLinks />
                   </nav>
-                </details>
-              </>
-            )}
-          </div>
+                  <Go className="btn solid" to={book}>
+                    Book a table
+                  </Go>
+                </div>
+              </details>
+            </>
+          )}
         </header>
         <main id="main">{children}</main>
         {!flow && (
           <footer className="foot">
-            <div className="wrap">
-              <div className="footin">
-                <Link to="/" className="mark">
-                  <Mark />
-                </Link>
-                <nav aria-label="Footer">
-                  <NavLinks />
-                </nav>
-              </div>
-              <p className="fine">A fictional venue. Portfolio concept by Ralph de Vinca Group.</p>
-            </div>
+            <Link to="/" className="mark">
+              <Mark />
+            </Link>
+            <nav aria-label="Footer">
+              <NavLinks />
+            </nav>
+            <p className="label fine">A fictional venue. Portfolio concept by Ralph de Vinca Group.</p>
           </footer>
         )}
       </div>
@@ -117,7 +141,7 @@ function Wait({ q, loading, fail, children }) {
 
 // The first room of a page while its night loads, or when it didn't.
 const RoomSkeleton = ({ label }) => (
-  <div className="wrap room-in hero-in loading" role="status">
+  <div className="hero-copy loading" role="status">
     <span className="vh">{label}</span>
     <div className="skel k" />
     <div className="skel t" />
@@ -125,7 +149,7 @@ const RoomSkeleton = ({ label }) => (
   </div>
 );
 const RoomFail = ({ q, fail }) => (
-  <div className="wrap room-in hero-in">
+  <div className="hero-copy">
     <div className="fail" role="alert">
       <p>{q.error.status ? q.error.message : fail}</p>
       <button type="button" className="btn line" onClick={() => q.refetch()}>
@@ -141,8 +165,6 @@ const tablesQuery = (date) => ({ queryKey: ['tables', date], queryFn: () => api(
 const firstOpen = (events = []) => (events.find((x) => x.tables.status !== 'sold_out') ?? events[0])?.date;
 
 const who = (e) => headliners(e.lineup).map((s) => s.performer).join(' and ') || 'Line-up to come';
-// The longest word of a name: on a phone the name is sized so this word fills the width (public.css, --chars).
-const chars = (s) => ({ '--chars': Math.max(...s.split(' ').map((w) => w.length)) });
 const withWho = (e) => {
   const rest = others(e.lineup);
   return rest.length ? `${who(e)}, with ${rest.join(', ')}` : who(e);
@@ -150,8 +172,12 @@ const withWho = (e) => {
 const cheapest = (e) => idr(Math.min(...Object.values(e.min_spend)));
 const people = (n) => `${n} ${n === 1 ? 'person' : 'people'}`;
 const places = (n) => `${n} ${n === 1 ? 'place' : 'places'}`;
+const kicker = (iso) => {
+  const d = dayParts(iso);
+  return `${d.weekday} ${d.date} ${d.month}`;
+};
 
-// The short status of a night, as its swatch shows it.
+// The short status of a night, as its tab shows it.
 const tablesShort = (e) => {
   const t = e.tables.status;
   if (t === 'sold_out') return e.guestlist.status === 'open' ? 'Guestlist only' : 'Fully booked';
@@ -166,7 +192,7 @@ const guestLine = (e) => {
   return g.status === 'full' ? 'Guestlist full' : g.status === 'closed' ? 'Guestlist closed' : `Guestlist open until ${clock(e.guestlist_cutoff)}, ${places(g.places_left)} left`;
 };
 
-// The night picker: one swatch per night, each lit in its own gel.
+// The night picker: each night's name in the display face, its gel under the chosen one.
 function NightSwatches({ events, current, onPick, compact, label = 'This week', note = tablesShort, off = () => false }) {
   return (
     <div className={`swatches${compact ? ' compact' : ''}`} role="group" aria-label={label}>
@@ -182,11 +208,11 @@ function NightSwatches({ events, current, onPick, compact, label = 'This week', 
             disabled={off(x)}
             onClick={() => onPick(x)}
           >
-            <span className="day">
+            <span className="day tnum">
               {d.day} {d.date}
             </span>
-            {!compact && <span className="nm">{x.name}</span>}
-            {note && <span className={`st ${noteClass(x, note)}`}>{note(x)}</span>}
+            <span className="nm">{x.name}</span>
+            {note && !compact && <span className={`st ${noteClass(x, note)}`}>{note(x)}</span>}
           </button>
         );
       })}
@@ -196,11 +222,10 @@ function NightSwatches({ events, current, onPick, compact, label = 'This week', 
 const noteClass = (x, note) =>
   note === tablesShort ? (x.tables.status === 'few' ? 'st-last' : x.tables.status === 'sold_out' && x.guestlist.status !== 'open' ? 'st-gone' : '') : '';
 
-// The change of night on Home: the text goes first, then the light and the crystals move, then the new name comes in.
+// The cue between nights: copy and object dip to black, the gel changes in the dark, then the new night comes up.
 function useNightCue(count) {
   const [i, setI] = useState(0);
   const [out, setOut] = useState(false);
-  const [moved, setMoved] = useState(false);
   const t = useRef();
   useEffect(() => () => clearTimeout(t.current), []);
   const go = (k) => {
@@ -210,74 +235,69 @@ function useNightCue(count) {
     t.current = setTimeout(() => {
       setI(k);
       setOut(false);
-      setMoved(true);
-    }, 260);
+    }, 240);
   };
-  return { i: Math.min(i, Math.max(0, count - 1)), out, base: moved ? 0 : 760, go };
+  return { i: Math.min(i, Math.max(0, count - 1)), out, go };
 }
 
-// Hour by hour: every set on one shared hour axis, the guestlist cutoff and closing time marked under it (F2 order).
-function Timeline({ e }) {
-  const sets = [...e.lineup].sort((a, b) => nightMinutes(a.starts_at) - nightMinutes(b.starts_at));
-  if (sets.length === 0) return <p className="sub tl-empty">Line-up to come.</p>;
-  const ends = (s) => {
-    const a = nightMinutes(s.starts_at);
-    const b = nightMinutes(s.ends_at);
-    return b > a ? b : b + 1440;
-  };
-  const a0 = Math.floor(nightMinutes(sets[0].starts_at) / 60) * 60;
-  const a1 = Math.ceil(Math.max(nightMinutes(e.close_time), ...sets.map(ends)) / 60) * 60;
-  const pc = (m) => +Math.min(100, Math.max(0, ((m - a0) / (a1 - a0)) * 100)).toFixed(2);
-  const hhmm = (m) => `${String(Math.floor(m / 60) % 24).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`;
-  const hours = [];
-  for (let m = a0; m <= a1; m += 60) hours.push(m);
-  const ticks = hours.map((m, j) => ({ m, left: pc(m), label: clock(hhmm(m)), edge: j === 0 ? 'first' : j === hours.length - 1 ? 'last' : '', odd: j % 2 === 1 }));
+const sorted = (e) => [...e.lineup].sort((a, b) => nightMinutes(a.starts_at) - nightMinutes(b.starts_at));
+
+// Hour by hour: every set as a block on one hour axis, the headliner lit. pick/sel: blocks are buttons that choose an artist
+// (the night's page); without them the lane is a picture of the night. On a phone the same sets read as a list.
+function Lane({ e, sel, pick }) {
+  if (e.lineup.length === 0) return <p className="sub">Line-up to come.</p>;
+  const l = laneOf(e.lineup);
+  const span = `Sets, ${clock(l.from)} to ${clock(l.to)}`;
   return (
-    <div className="tl">
-      <div className="tl-axis" aria-hidden="true">
-        <span />
-        <div className="tl-ticks swap-in" style={{ '--d': 40 }}>
-          {ticks.map((k) => (
-            <span key={k.m} className={`tick ${k.edge}${k.odd ? ' odd' : ''}`} style={{ left: `${k.left}%` }}>
-              {k.label}
-            </span>
+    <>
+      <div className="lane-box">
+        <ol className="lane" aria-label={span}>
+          {l.sets.map((s) => {
+            const body = (
+              <>
+                <span className="label tnum">
+                  {s.starts_at} to {s.ends_at}
+                </span>
+                <span className="d nm">{s.performer}</span>
+                <span className="label role">{ROLES[s.role]}</span>
+              </>
+            );
+            return (
+              <li
+                key={`${s.starts_at}-${s.performer}`}
+                className={`blk${s.role === 'headliner' ? ' lead' : ''}`}
+                style={{ left: `${s.left}%`, width: `${s.width}%` }}
+              >
+                {pick ? (
+                  <button type="button" aria-pressed={sel === s.performer} onClick={() => pick(s.performer)}>
+                    {body}
+                  </button>
+                ) : (
+                  body
+                )}
+              </li>
+            );
+          })}
+        </ol>
+        <div className="axis" style={{ '--n': l.hours.length }} aria-hidden="true">
+          {l.hours.map((h) => (
+            <span key={h}>{clock(h)}</span>
           ))}
         </div>
       </div>
-      <ol className="tl-rows" aria-label="Set times">
-        {sets.map((s, j) => {
-          const a = nightMinutes(s.starts_at);
-          const big = s.role === 'headliner';
-          return (
-            <li key={`${s.starts_at}-${s.performer}`} className={`tl-row${big ? ' head-set' : ''}`}>
-              <div className="tl-who swap-in" style={{ '--d': 60 + j * 70 }}>
-                <span className="tl-dj">{s.performer}</span>
-                <span className="tl-meta tnum">
-                  <span className="tl-role">{ROLES[s.role]}</span> · {s.starts_at} to {s.ends_at}
-                </span>
-              </div>
-              <div className="tl-track" aria-hidden="true">
-                {ticks.map((k) => (
-                  <span key={k.m} className="tl-grid" style={{ left: `${k.left}%` }} />
-                ))}
-                <span className={`tl-bar grow role-${s.role}`} style={{ '--d': 160 + j * 70, left: `${pc(a)}%`, width: `${pc(ends(s)) - pc(a)}%` }} />
-              </div>
-            </li>
-          );
-        })}
+      <ol className="sets" aria-label={span}>
+        {l.sets.map((s) => (
+          <li key={`${s.starts_at}-${s.performer}`} className={s.role === 'headliner' ? 'lead' : undefined}>
+            <span className="label tnum">
+              {s.starts_at} to {s.ends_at}
+            </span>
+            <span className="d nm">{s.performer}</span>
+            <span />
+            <span className="label">{ROLES[s.role]}</span>
+          </li>
+        ))}
       </ol>
-      <div className="tl-marks swap-in" style={{ '--d': 520 }}>
-        <span className="tl-doors">Doors {clock(e.opens_at)}</span>
-        <div className="tl-marks-in">
-          <span className="mk cut tnum" style={{ left: `${pc(nightMinutes(e.guestlist_cutoff))}%` }}>
-            Guestlist closes {clock(e.guestlist_cutoff)}
-          </span>
-          <span className="mk close tnum" style={{ left: `${pc(nightMinutes(e.close_time))}%` }}>
-            Close {clock(e.close_time)}
-          </span>
-        </div>
-      </div>
-    </div>
+    </>
   );
 }
 
@@ -346,14 +366,21 @@ const Furniture = ({ t, k }) => {
   );
 };
 
+// The light on the plan: a pool of the gel that slides to the chosen table, and fades when nothing is chosen. In the plan's own
+// width (cqw): x runs 0 to 1000 over 100cqw, y 0 to 620 over 62cqw.
+const Beam = ({ t }) => (
+  <div className="beam" aria-hidden="true" style={{ transform: `translate(${(t?.x ?? 500) / 10}cqw, ${(t?.y ?? 310) / 10}cqw)`, opacity: t ? 1 : 0 }} />
+);
+
 // The floor plan. onPick: tables are buttons; without it the plan is a picture (Home, a phone's overview).
 function FloorPlan({ tables, party = 1, sel, onPick, locked, mini, e, dimZone }) {
   return (
     <div className={`plan${mini ? ' mini' : ''}`}>
-      <div className="zone dj">DJ</div>
-      <div className="zone floor">{mini ? 'FLOOR' : 'DANCE FLOOR'}</div>
-      <div className="zone bar">BAR</div>
-      {!mini && <div className="zone door">ENTRANCE</div>}
+      <div className="zone dj">Stage</div>
+      <div className="zone floor">{mini ? 'Floor' : 'Dance floor'}</div>
+      <div className="zone bar">Bar</div>
+      {!mini && <div className="zone door">Entrance</div>}
+      {!mini && <Beam t={tables.find((t) => t.code === sel)} />}
       {tables.map((t) => {
         const st = lightOf(t, party, sel);
         const fz = furniture(t);
@@ -405,7 +432,66 @@ const Legend = ({ count }) => (
 );
 const freeOf = (tables) => tables.filter((t) => t.status === 'free').length;
 
-// Home (docs/design/Main.dc.html and HomeMobile.dc.html).
+// The night's two ways in and what they cost, from the week list and the night's tables. Shared by Home and a night's page.
+const tableLine = (e, tables) =>
+  e.tables.status === 'sold_out' ? 'Every table is booked for this night' : tables ? `${freeOf(tables)} of ${tables.length} tables free` : tablesLong(e);
+const listLine = (e) =>
+  e.guestlist.status === 'open' ? `${places(e.guestlist.places_left)} left, until ${clock(e.guestlist_cutoff)}` : guestLine(e);
+
+// The buttons for a night: book, guestlist, or why neither.
+function Ctas({ e, short }) {
+  const g = e.guestlist.status;
+  return (
+    <div className="ctas">
+      {g === 'open' ? (
+        <Link className="btn line" to={`/guestlist/${e.date}`}>
+          {short ? 'Guestlist' : 'Join the guestlist'}
+        </Link>
+      ) : (
+        <span className="btn line" aria-disabled="true">
+          {g === 'full' ? 'Guestlist full' : 'Guestlist closed'}
+        </span>
+      )}
+      {e.tables.status !== 'sold_out' ? (
+        <Link className="btn gel" to={`/book/${e.date}`}>
+          Book a table
+        </Link>
+      ) : (
+        <span className="btn line" aria-disabled="true">
+          Tables sold out
+        </span>
+      )}
+    </div>
+  );
+}
+
+const BeforeYouCome = ({ e, children }) => (
+  <section className="sec block" aria-labelledby="visit-h">
+    <div className="info2">
+      <div className="sec-title">
+        <h2 id="visit-h" className="d h2">
+          Before you come
+        </h2>
+        <hr className="rule" />
+      </div>
+      <dl>
+        <dt>Age</dt>
+        <dd>21 and over. Valid ID, every night.</dd>
+        <dt>Dress</dt>
+        <dd>Smart. No sportswear, no flip-flops.</dd>
+      </dl>
+      <dl>
+        <dt>Doors</dt>
+        <dd>{e ? `From ${clock(e.opens_at)}` : 'From the afternoon'}, Thursday to Sunday. Closing time is on each night's page.</dd>
+        <dt>Where</dt>
+        <dd>Canggu. The exact location comes with your booking.</dd>
+      </dl>
+    </div>
+    {children}
+  </section>
+);
+
+// Home (Sorot: Main and HomeMobile).
 export function Home() {
   const week = useQuery(weekQuery);
   const { hash } = useLocation();
@@ -413,6 +499,7 @@ export function Home() {
   const cue = useNightCue(events.length);
   const e = events[cue.i];
   const tq = useQuery({ ...tablesQuery(e?.date), enabled: !!e });
+  const gel = e ? gelOf(e.date) : 'thu';
 
   // Arriving on /#ways-in from another page: scroll once the page has rendered.
   useEffect(() => {
@@ -420,338 +507,261 @@ export function Home() {
   }, [hash, week.isSuccess]);
 
   const pick = (x) => cue.go(events.indexOf(x));
-  const base = cue.base;
   const book = e && e.tables.status !== 'sold_out' ? `/book/${e.date}` : firstOpen(events) ? `/book/${firstOpen(events)}` : '#ways-in';
-  const letters = e ? e.name.replace(/ /g, '').length : 0;
+  const swap = `swap${cue.out ? ' out' : ''}`;
+  const n = events.length;
+  const prev = n > 1 && events[(cue.i + n - 1) % n];
+  const next = n > 1 && events[(cue.i + 1) % n];
 
   return (
-    <Site gel={e ? gelOf(e.date) : 'thu'} book={book} className="home">
-      <Room gel={e ? gelOf(e.date) : 'thu'} className="hero" aria-label="This week's nights">
+    <Site gel={gel} book={book} list={e?.guestlist.status === 'open' ? `/guestlist/${e.date}` : undefined} className="home">
+      <Room gel={gel} out={cue.out} className="hero" aria-label="This week's nights">
         {week.isPending ? (
           <RoomSkeleton label="Loading this week's nights..." />
         ) : week.isError ? (
           <RoomFail q={week} fail="This week's nights didn't load. Check the connection, then try again." />
         ) : !e ? (
-          <div className="wrap room-in hero-in">
-            <p className="label">Thursday to Sunday</p>
-            <h1 className="night name">The Fanglle II</h1>
-            <p className="lede">No nights on sale this week yet.</p>
+          <div className="hero-mid">
+            <h1 className="night">The Fanglle II</h1>
+            <p className="body">No nights on sale this week yet. Thursday to Sunday, from the afternoon.</p>
           </div>
         ) : (
-          <div className={`wrap room-in hero-in${cue.out ? ' swap-out' : ''}`}>
-            <div key={e.date}>
-              <p className="label swap-in" style={{ '--d': base + 40 }}>
-                {dayParts(e.date).weekday} {dayParts(e.date).date} {dayParts(e.date).month} · Doors {clock(e.opens_at)}
-              </p>
-              <h1 className="night name" style={chars(e.name)}>
-                <Link to={`/events/${e.date}`}>
-                  <Letters text={e.name} delay={base + 120} />
-                </Link>
+          <>
+            <div className={`hero-mid ${swap}`}>
+              <h1 key={e.date} className="night settle">
+                <Link to={`/events/${e.date}`}>{e.name}</Link>
               </h1>
-              <p className="lede swap-in" style={{ '--d': base + 160 + letters * 32 }}>
-                {withWho(e)}
-                {e.genre && ` · ${e.genre}`}
-              </p>
-              <div className="ctas swap-in" style={{ '--d': base + 260 + letters * 32 }}>
-                {e.tables.status !== 'sold_out' && (
-                  <Link className="btn solid" to={`/book/${e.date}`}>
-                    Book a table
-                  </Link>
-                )}
-                {e.guestlist.status === 'open' && (
-                  <Link className={`btn ${e.tables.status === 'sold_out' ? 'solid' : 'line'}`} to={`/guestlist/${e.date}`}>
-                    Join the guestlist
-                  </Link>
-                )}
-                {e.tables.status === 'sold_out' && e.guestlist.status !== 'open' && (
-                  <button type="button" className="btn solid" disabled>
-                    Fully booked
-                  </button>
-                )}
-              </div>
             </div>
-          </div>
+            <div className={`hero-row ${swap}`}>
+              <div className="info">
+                <p className="kicker">{kicker(e.date)}</p>
+                <hr className="rule gel" />
+                <p className="body">
+                  {withWho(e)}.{e.genre && ` ${e.genre}.`} Doors {clock(e.opens_at)}, close {clock(e.close_time)}.
+                </p>
+              </div>
+              <Ctas e={e} />
+            </div>
+          </>
         )}
-        {events.length > 0 && (
-          <div id="week" className="wrap room-in week">
+        {n > 0 && (
+          <div id="week" className="strip">
             <NightSwatches events={events} current={e?.date} onPick={pick} />
           </div>
         )}
       </Room>
 
       {e && (
-        <section className="sec hours" id="hours" aria-labelledby="hours-h">
-          <div className="wrap">
-            <div className="sec-head">
-              <div className={cue.out ? 'swap-out' : ''}>
-                <div key={e.date}>
-                  <h2 id="hours-h" className="d h2 swap-in" style={{ '--d': 60 }}>
-                    {e.name}, hour by hour
-                  </h2>
-                  <p className="sub swap-in" style={{ '--d': 140 }}>
-                    Doors at {clock(e.opens_at)}.
-                    {headliners(e.lineup).length > 0 && ` The headliner from ${clock(earliest(headliners(e.lineup).map((s) => s.starts_at)))}.`} Close at{' '}
-                    {clock(e.close_time)}.
-                  </p>
-                </div>
-              </div>
-              <NightSwatches events={events} current={e.date} onPick={pick} compact label="Night" note={null} />
+        <section className="sec panel" aria-labelledby="hours-h">
+          <div className="sec-head">
+            <div className={`sec-title ${swap}`}>
+              <h2 id="hours-h" className="d h2">
+                {e.name}, hour by hour
+              </h2>
+              <hr className="rule" />
             </div>
-            <div className={cue.out ? 'swap-out' : ''}>
-              <Timeline key={e.date} e={e} />
-            </div>
+            <Link className="go" to={`/events/${e.date}`}>
+              The full night
+            </Link>
+          </div>
+          <div className={swap}>
+            <Lane key={e.date} e={e} />
           </div>
         </section>
       )}
 
-      <section className="sec" id="ways-in" aria-labelledby="ways-h">
-        <div className="wrap">
+      <section className="ways" id="ways-in" aria-labelledby="ways-h">
+        <div className="crop drift wake">
+          <Lit out={cue.out} pose="crown" />
           <h2 id="ways-h" className="d h2">
             Two ways in
           </h2>
-          <div className="ways">
-            <article className="way tables">
-              {e && (
-                <div className="way-plan">
-                  {tq.data ? (
-                    <>
-                      <FloorPlan tables={tq.data.tables} />
-                      <Legend count={<span className="tnum count">{freeOf(tq.data.tables)} of {tq.data.tables.length} tables free</span>} />
-                    </>
-                  ) : (
-                    <div className="plan-wait skel" role="status">
-                      <span className="vh">{tq.isError ? "The floor plan didn't load." : 'Loading the floor plan...'}</span>
-                    </div>
-                  )}
-                </div>
-              )}
-              <div>
-                <h3 className="d h3">A table for the night</h3>
-                <p className="copy">
-                  Pick your table on the floor plan. Half the minimum spend holds it as a deposit, and all of it goes toward your bill on the night.
-                </p>
-              </div>
-              <div className="way-act">
-                {e && e.tables.status !== 'sold_out' && (
-                  <Link className="btn solid" to={`/book/${e.date}`}>
-                    Book a table
-                  </Link>
-                )}
-                {e && <span className={`st ${e.tables.status === 'few' ? 'st-last' : ''}`}>{tablesLong(e)}</span>}
-              </div>
-            </article>
-
-            <article className="way list">
-              {e && e.guestlist.status === 'open' ? (
-                <p className="big-num">
-                  <span className="d tnum num">{e.guestlist.places_left}</span>
-                  <span>{e.guestlist.places_left === 1 ? 'place' : 'places'} left on the list</span>
-                </p>
-              ) : (
-                e && <p className="d big-word">{e.guestlist.status === 'full' ? 'Full' : 'Closed'}</p>
-              )}
-              <div>
-                <h3 className="d h3">The guestlist</h3>
-                <p className="copy">
-                  {e && `Free entry before ${clock(e.guestlist_cutoff)}. `}Add up to ten names, then take one QR for the group or one for each person.
-                </p>
-              </div>
-              <ul className="ticks">
-                <li>Limited places each night</li>
-                <li>Names checked against ID at the door</li>
-              </ul>
-              <div className="way-act">
-                {e && e.guestlist.status === 'open' ? (
-                  <Link className="btn line" to={`/guestlist/${e.date}`}>
-                    Join the guestlist
-                  </Link>
-                ) : (
-                  e && (
-                    <button type="button" className="btn line" disabled>
-                      {e.guestlist.status === 'full' ? 'Guestlist full' : 'Guestlist closed'}
-                    </button>
-                  )
-                )}
-              </div>
-            </article>
-          </div>
         </div>
+        <article className={`way ${swap}`}>
+          <h3 className="d nm">A table for the night</h3>
+          <p className="body">Pick your table on the floor plan. Half the minimum spend holds it as a deposit, and all of it goes toward your bill.</p>
+          {e && (
+            <>
+              <p className="d price tnum">{e.tables.status === 'sold_out' ? 'Sold out' : `From ${cheapest(e)}`}</p>
+              <p className="label tnum">{tableLine(e, tq.data?.tables)}</p>
+              {e.tables.status !== 'sold_out' && (
+                <Link className="btn gel" to={`/book/${e.date}`}>
+                  Book a table
+                </Link>
+              )}
+            </>
+          )}
+        </article>
+        <article className={`way ${swap}`}>
+          <h3 className="d nm">The guestlist</h3>
+          <p className="body">
+            {e && `Free entry before ${clock(e.guestlist_cutoff)}. `}Add up to ten names, then take one QR for the group or one for each person.
+          </p>
+          {e && (
+            <>
+              <p className="d price">{e.guestlist.status === 'open' ? 'Free entry' : e.guestlist.status === 'full' ? 'Full' : 'Closed'}</p>
+              <p className="label tnum">{listLine(e)}</p>
+              {e.guestlist.status === 'open' && (
+                <Link className="btn line" to={`/guestlist/${e.date}`}>
+                  Join the guestlist
+                </Link>
+              )}
+            </>
+          )}
+        </article>
       </section>
 
-      <section className="sec" id="visit" aria-labelledby="visit-h">
-        <div className="wrap">
-          <h2 id="visit-h" className="d h2">
-            Before you come
-          </h2>
-          <div className="facts4">
-            <div>
-              <p className="label">Age</p>
-              <p className="d v">21+</p>
-              <p className="n">Valid ID, every night</p>
-            </div>
-            <div>
-              <p className="label">Dress</p>
-              <p className="d v">Smart</p>
-              <p className="n">No sportswear, no flip-flops</p>
-            </div>
-            {e && (
-              <div>
-                <p className="label">Doors</p>
-                <p className="d v tnum">From {clock(e.opens_at)}</p>
-                <p className="n">Thursday to Sunday. Closing time is on each night's page</p>
-              </div>
-            )}
-            <div>
-              <p className="label">Where</p>
-              <p className="d v">Canggu</p>
-              <p className="n">Exact location sent with your booking</p>
-            </div>
-          </div>
-        </div>
-      </section>
+      <BeforeYouCome e={e} />
 
-      <section className="quote">
-        <div className="beam narrow" />
-        <p className="d">Some fall once. The second time, you choose to.</p>
-      </section>
+      {prev && (
+        <nav className="ends" aria-label="Other nights">
+          {(n === 2 ? [['Night after', next]] : [['Night before', prev], ['Night after', next]]).map(([l, x]) => (
+            <button key={l} type="button" className={`end gel-${gelOf(x.date)}`} onClick={() => pick(x)}>
+              <span className="label">{l}</span>
+              <span className="d h2">{x.name}</span>
+            </button>
+          ))}
+        </nav>
+      )}
     </Site>
   );
 }
 
-// A night (docs/design/Event.dc.html).
+// A night (Sorot: Event).
 function Details({ e }) {
-  const d = dayParts(e.date);
   const g = e.guestlist.status;
   const tq = useQuery(tablesQuery(e.date));
-  const hls = headliners(e.lineup);
-  const sets = [...e.lineup].sort((a, b) => nightMinutes(a.starts_at) - nightMinutes(b.starts_at));
-  const zoneLine = (z) => {
-    const list = tq.data?.tables.filter((t) => t.zone === z) ?? [];
-    if (!list.length) return null;
-    const caps = list.map((t) => t.capacity);
-    const lo = Math.min(...caps);
-    const hi = Math.max(...caps);
-    return `Seats ${lo === hi ? hi : `${lo} to ${hi}`} · ${freeOf(list)} of ${list.length} free`;
+  const sets = sorted(e);
+  // Who is playing: the headliners first, then everyone else in running order.
+  const names = [...new Set([...headliners(sets), ...sets].map((s) => s.performer))];
+  const [a, setA] = useState(names[0]);
+  const [out, setOut] = useState(false);
+  const t = useRef();
+  useEffect(() => () => clearTimeout(t.current), []);
+  const pickArtist = (x) => {
+    if (x === a || out) return;
+    setOut(true);
+    clearTimeout(t.current);
+    t.current = setTimeout(() => {
+      setA(x);
+      setOut(false);
+    }, 240);
   };
+  const mine = sets.filter((s) => s.performer === a);
+  const roles = [...new Set(mine.map((s) => ROLES[s.role]))];
+  const zoneLine = (z) => {
+    const list = tq.data?.tables.filter((x) => x.zone === z) ?? [];
+    return list.length ? `${freeOf(list)} of ${list.length} free` : null;
+  };
+  const head = headliners(e.lineup);
+
   return (
     <>
-      <Room gel={gelOf(e.date)} className="hero ev-hero" aria-labelledby="ev-h">
-        <div className="wrap room-in hero-in">
-          <p className="label rise" style={{ '--i': 0 }}>
-            {d.weekday} {d.date} {d.month}
-          </p>
-          <h1 id="ev-h" className="night name" style={chars(e.name)}>
-            <Letters text={e.name} delay={760} />
+      <section className="ev-hero" aria-labelledby="ev-h">
+        <div className="hero-copy">
+          <Link className="go dim" to="/#week">
+            This week
+          </Link>
+          <p className="kicker rise">{kicker(e.date)}</p>
+          <h1 id="ev-h" className="night settle">
+            {e.name}
           </h1>
-          <dl className="ev-meta rise" style={{ '--i': 3 }}>
-            <div>
-              <dt className="label">Doors</dt>
-              <dd className="d tnum">{clock(e.opens_at)}</dd>
-            </div>
-            <div>
-              <dt className="label">Close</dt>
-              <dd className="d tnum">{clock(e.close_time)}</dd>
-            </div>
-            {e.genre && (
-              <div>
-                <dt className="label">Sound</dt>
-                <dd className="d">{e.genre}</dd>
-              </div>
-            )}
-            <div>
-              <dt className="label">Guestlist</dt>
-              <dd className="d tnum">{g === 'full' ? 'Full' : g === 'closed' ? 'Closed' : `Until ${clock(e.guestlist_cutoff)}`}</dd>
-            </div>
-          </dl>
+          <hr className="rule gel" />
+          <p className="body">
+            {withWho(e)}.{e.genre && ` ${e.genre}.`} Doors {clock(e.opens_at)}
+            {sets[0] && `, music from ${clock(sets[0].starts_at)}`}, close at {clock(e.close_time)}.
+          </p>
+          <Ctas e={e} />
         </div>
-      </Room>
+        <Room gel={gelOf(e.date)} pose="side" at={[0.5, 0.32]} className="ev-lit" aria-hidden="true" />
+      </section>
 
-      <section className="sec">
-        <div className="wrap ev-cols">
-          <div className="ev-main">
-            {e.blurb && <p className="d blurb">{e.blurb}</p>}
-            <section aria-labelledby="lu-h">
-              <h2 id="lu-h" className="d h2 sm">
-                Line-up
-              </h2>
-              {sets.length === 0 ? (
-                <p className="sub">Line-up to come.</p>
-              ) : (
-                <ol className="lineup">
-                  {sets.map((s) => (
-                    <li key={`${s.starts_at}-${s.performer}`} className={s.role === 'headliner' ? 'hl' : undefined}>
-                      <span className="t d tnum">
-                        {s.starts_at} to {s.ends_at}
-                      </span>
-                      <span>
-                        <span className="dj d">{s.performer}</span>
-                        <span className="role">{ROLES[s.role]}</span>
-                      </span>
-                    </li>
-                  ))}
-                </ol>
-              )}
-            </section>
-            {hls[0] && (
-              <div className="photo wide">
-                <span>
-                  Photo to come: {hls[0].performer} behind the decks at {e.name}
-                </span>
-              </div>
-            )}
-          </div>
+      <section className="sec panel" aria-labelledby="hours-h">
+        <div className="sec-title">
+          <h2 id="hours-h" className="d h2">
+            Hour by hour
+          </h2>
+          <hr className="rule" />
+        </div>
+        {e.blurb && <p className="body blurb">{e.blurb}</p>}
+        <Lane e={e} sel={a} pick={names.length ? pickArtist : undefined} />
+      </section>
 
-          <aside className="ev-side" aria-labelledby="yn-h">
-            <h2 id="yn-h" className="d">
-              Your night
+      {names.length > 0 && (
+        <section className="who" aria-labelledby="who-h">
+          <div className="who-copy">
+            <h2 id="who-h" className="label">
+              Who is playing
             </h2>
-            <div>
-              <p className="label">Tables, minimum spend</p>
-              <ul className="zones">
-                {Object.entries(ZONES).map(([z, name]) => (
-                  <li key={z}>
-                    <span>
-                      {name}
-                      {zoneLine(z) && <small>{zoneLine(z)}</small>}
-                    </span>
-                    <span className="tnum">{idr(e.min_spend[z])}</span>
-                  </li>
-                ))}
-              </ul>
-              <p className="help">The deposit is half the minimum spend and counts toward it.</p>
-            </div>
-            {e.tables.status === 'sold_out' ? (
-              <button type="button" className="btn solid wide" disabled>
-                Tables sold out
-              </button>
-            ) : (
-              <Link className="btn solid wide" to={`/book/${e.date}`}>
-                Book a table
-              </Link>
-            )}
-            <div className="side-list">
-              {g === 'open' ? (
-                <p className="big-num">
-                  <span className="d tnum num">{e.guestlist.places_left}</span>
-                  <span>
-                    {e.guestlist.places_left === 1 ? 'place' : 'places'} left on the guestlist, free before {clock(e.guestlist_cutoff)}
-                  </span>
-                </p>
-              ) : (
-                <p className="sub">{g === 'full' ? 'The guestlist is full.' : `The guestlist closed at ${clock(e.guestlist_cutoff)}.`}</p>
-              )}
-              {g === 'open' ? (
-                <Link className="btn line wide" to={`/guestlist/${e.date}`}>
-                  Join the guestlist
-                </Link>
-              ) : (
-                <button type="button" className="btn line wide" disabled>
-                  {g === 'full' ? 'Guestlist full' : 'Guestlist closed'}
+            <div className="artists" role="group" aria-label="Artists">
+              {names.map((x) => (
+                <button key={x} type="button" className="d" aria-pressed={x === a} onClick={() => pickArtist(x)}>
+                  {x}
                 </button>
-              )}
+              ))}
             </div>
-          </aside>
+            <div className={`swap${out ? ' out' : ''}`} aria-live="polite">
+              <p className="body">
+                {roles.join(' and ')} on {e.name}.{e.genre && ` ${e.genre}.`}
+              </p>
+              <p className="label tnum">{mine.map((s) => `${s.starts_at} to ${s.ends_at}`).join(', ')}</p>
+            </div>
+          </div>
+          <div className="crop">
+            <Lit out={out} pose={`a${names.indexOf(a) % 4}`} />
+          </div>
+        </section>
+      )}
+
+      <section className="sec block" aria-labelledby="entry-h">
+        <div className="sec-title">
+          <h2 id="entry-h" className="d h2">
+            Getting in
+          </h2>
+          <hr className="rule" />
         </div>
+        <dl className="facts">
+          <div>
+            <dt>Guestlist</dt>
+            <dd>{g === 'open' ? `Free before ${clock(e.guestlist_cutoff)}, ${places(e.guestlist.places_left)} left` : guestLine(e)}</dd>
+          </div>
+          <div>
+            <dt>Tables</dt>
+            <dd>{e.tables.status === 'sold_out' ? 'Sold out' : `${tablesLong(e)}${tq.data ? `, ${tableLine(e, tq.data.tables)}` : ''}`}</dd>
+          </div>
+          <div>
+            <dt>Close</dt>
+            <dd>{clock(e.close_time)}</dd>
+          </div>
+          <div>
+            <dt>Age</dt>
+            <dd>21 and over, valid ID</dd>
+          </div>
+          <div>
+            <dt>Dress</dt>
+            <dd>Smart, no sportswear</dd>
+          </div>
+          <div>
+            <dt>Where</dt>
+            <dd>Canggu, sent with your booking</dd>
+          </div>
+        </dl>
+        <div className="zones">
+          <p className="label">Minimum spend per table. The deposit is half and counts toward it.</p>
+          <ul>
+            {Object.entries(ZONES).map(([z, name]) => (
+              <li key={z}>
+                <span>
+                  {name}
+                  {zoneLine(z) && <small className="tnum">{zoneLine(z)}</small>}
+                </span>
+                <span className="tnum">{idr(e.min_spend[z])}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+        <Ctas e={e} />
+        {head[0] && <p className="label">Photo of {head[0].performer} to come.</p>}
       </section>
     </>
   );
@@ -767,16 +777,22 @@ export function EventPage() {
     window.scrollTo({ top: 0, behavior: 'instant' });
   }, [date]);
 
+  const e = ev.data;
   return (
-    <Site gel={gelOf(date)} book={ev.data?.tables.status === 'sold_out' ? undefined : `/book/${date}`} className="ev">
+    <Site
+      gel={gelOf(date)}
+      book={e?.tables.status === 'sold_out' ? undefined : `/book/${date}`}
+      list={e?.guestlist.status === 'open' ? `/guestlist/${date}` : undefined}
+      className="ev"
+    >
       {ev.isSuccess ? (
-        <Details key={date} e={ev.data} />
+        <Details key={date} e={e} />
       ) : (
-        <Room gel={gelOf(date)} className="hero ev-hero">
+        <Room gel={gelOf(date)} className="hero short">
           {ev.isPending ? (
             <RoomSkeleton label="Loading the night..." />
           ) : ev.error?.status === 404 ? (
-            <div className="wrap room-in hero-in">
+            <div className="hero-copy">
               <div className="fail" role="alert">
                 <h1 className="d h2">{ev.error.message}</h1>
                 <Link className="btn line" to="/">
@@ -791,29 +807,35 @@ export function EventPage() {
       )}
 
       <section className="sec" aria-labelledby="other-h">
-        <div className="wrap">
-          <h2 id="other-h" className="d h2 sm">
+        <div className="sec-title">
+          <h2 id="other-h" className="d h2">
             {ev.isSuccess ? 'Other nights this week' : 'Nights this week'}
           </h2>
-          <Wait q={week} loading="Loading this week's nights..." fail="This week's nights didn't load. Check the connection, then try again.">
-            {(data) => {
-              const rest = data.events.filter((x) => x.date !== date);
-              if (rest.length === 0) return <p className="sub">No other nights this week.</p>;
-              return (
-                <div className="swatches others">
-                  {rest.map((x) => (
-                    <Link key={x.date} className={`swatch gel-${gelOf(x.date)}`} to={`/events/${x.date}`}>
-                      <span className="day">{dayLabel(x.date)}</span>
-                      <span className="nm">{x.name}</span>
-                      <span className="st">{[who(x), x.genre].filter(Boolean).join(' · ')}</span>
-                      <span className={`st ${noteClass(x, tablesShort)}`}>{tablesShort(x)}</span>
-                    </Link>
-                  ))}
-                </div>
-              );
-            }}
-          </Wait>
+          <hr className="rule" />
         </div>
+        <Wait q={week} loading="Loading this week's nights..." fail="This week's nights didn't load. Check the connection, then try again.">
+          {(data) => {
+            const rest = data.events.filter((x) => x.date !== date);
+            if (rest.length === 0) return <p className="sub">No other nights this week.</p>;
+            return (
+              <ul className="rows">
+                {rest.map((x) => (
+                  <li key={x.date} className={`gel-${gelOf(x.date)}`}>
+                    <Link to={`/events/${x.date}`}>
+                      <span className="label tnum">{dayLabel(x.date)}</span>
+                      <span className="d nm">
+                        <i aria-hidden="true" />
+                        {x.name}
+                      </span>
+                      <span className="label">{[who(x), x.genre].filter(Boolean).join(', ')}</span>
+                      <span className={`label ${noteClass(x, tablesShort)}`}>{tablesShort(x)}</span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            );
+          }}
+        </Wait>
       </section>
     </Site>
   );
@@ -986,18 +1008,20 @@ const Step2 = ({ k, children }) => (
   </AnimatePresence>
 );
 
-// The title room of the booking and guestlist pages: crystals in the night's gel, the title, then the page's own controls.
-const FlowRoom = ({ date, kicker, title, sub, children }) => (
-  <Room gel={gelOf(date)} className="flow-room" reach={0.8} count={12} beam="soft">
-    <div className="wrap room-in">
-      {kicker && <p className="label kicker">{kicker}</p>}
-      <h1 className="night flow-h" style={chars(title)}>
-        {title}
-      </h1>
-      {sub && <p className="flow-sub">{sub}</p>}
-      {children}
-    </div>
-  </Room>
+// The title of the booking and guestlist pages: a way back to the night, the title with its gel rule, then the page's own controls.
+const FlowRoom = ({ date, kicker: k, title, sub, children }) => (
+  <div className="flow-head">
+    {date && (
+      <Link className="go dim" to={`/events/${date}`}>
+        The night
+      </Link>
+    )}
+    {k && <p className="kicker">{k}</p>}
+    <h1 className="d flow-h">{title}</h1>
+    <hr className="rule gel" />
+    {sub && <p className="body">{sub}</p>}
+    {children}
+  </div>
 );
 
 // Night swatches, group size, the night's line, floor plan (or list), and the side panel.
@@ -1194,7 +1218,7 @@ function Planner({ date, party, onParty, sel, onPick, onNight, locked, errors = 
         </div>
       </FlowRoom>
 
-      <div className="wrap bk-body">
+      <div className="bk-body">
         {ev.error?.status === 404 ? (
           <div className="fail" role="alert">
             <p>{ev.error.message}</p>
@@ -1368,7 +1392,7 @@ export function Book() {
         {ts.widget}
         <Err id="ts-e">{errors.turnstile_token}</Err>
         {alertBox}
-        <button type="submit" className="btn solid wide" disabled={busy}>
+        <button type="submit" className="btn gel wide" disabled={busy}>
           {busy ? 'Holding your table...' : `Hold table ${t.code} for 15 minutes`}
         </button>
         <p className="help">Holding is free. You pay the deposit on the next step. Deposits aren't refunded for cancellations or no-shows.</p>
@@ -1537,7 +1561,7 @@ export function Booking() {
           Pay the deposit before the time runs out, or the table goes back on the plan. It counts toward your minimum spend and isn't refunded if you
           cancel or don't come. Test mode through Xendit: no real money moves.
         </p>
-        <a className="btn solid wide" href={s.payment_url}>
+        <a className="btn gel wide" href={s.payment_url}>
           Pay {idr(s.deposit)}
         </a>
         <button type="button" className="btn line wide" onClick={release} disabled={releasing}>
@@ -1569,12 +1593,8 @@ export function Booking() {
 
   return (
     <Site flow className="bk">
-      <Room gel="thu" className="flow-room" reach={0.8} count={12} beam="soft">
-        <div className="wrap room-in">
-          <h1 className="night flow-h">Your booking</h1>
-        </div>
-      </Room>
-      <div className="wrap bk-body alone">
+      <FlowRoom title="Your booking" />
+      <div className="bk-body alone">
         {q.error?.status === 404 ? (
           <div className="fail" role="alert">
             <p>{q.error.message}</p>
@@ -1903,7 +1923,7 @@ export function Guestlist() {
                 {alert}
               </p>
             )}
-            <button type="submit" className="btn solid" disabled={busy || !open || party > g.places_left}>
+            <button type="submit" className="btn gel" disabled={busy || !open || party > g.places_left}>
               {busy ? 'Adding you to the list...' : `Add ${people(party)} to the list`}
             </button>
             <p className="help">No account needed. Your QR shows on the next screen and arrives by email.</p>
@@ -1911,10 +1931,10 @@ export function Guestlist() {
         </form>
 
         <aside className="gl-side" aria-labelledby="night-h">
-          <div className="wash gl-band">
-            <div className="beam soft" />
-            <p className="label room-in">{dayLabel(e.date)}</p>
-            <h2 id="night-h" className="night room-in" aria-live="polite">
+          <div className={`crop gl-band gel-${gelOf(e.date)}`}>
+            <Lit pose="tip" />
+            <p className="kicker">{dayLabel(e.date)}</p>
+            <h2 id="night-h" className="night" aria-live="polite">
               {e.name}
             </h2>
           </div>
@@ -1954,7 +1974,7 @@ export function Guestlist() {
           sub={`${e ? `Free entry before ${clock(e.guestlist_cutoff)}. ` : ''}Up to ten names, then one QR for the group or one for each person.`}
         />
       )}
-      <div className="wrap bk-body">
+      <div className="bk-body">
         {done?.passes ? (
           signedUp(done)
         ) : done ? (
@@ -1976,127 +1996,114 @@ export function Guestlist() {
   );
 }
 
-// About (docs/design/About.dc.html). Every hour on it comes from this week's first night (F3).
+// About (Sorot: About). Every hour on it comes from this week's nights (F3).
 export function About() {
   const week = useQuery(weekQuery);
   const next = week.data?.events[0];
+  const gel = next ? gelOf(next.date) : 'sun';
 
   return (
-    <Site gel={next ? gelOf(next.date) : 'fri'} className="about">
-      <Room gel={next ? gelOf(next.date) : 'fri'} className="hero page-hero" reach={0.75}>
-        <div className="wrap room-in hero-in">
-          <p className="label rise" style={{ '--i': 0 }}>
-            Canggu, Bali · Thursday to Sunday
-          </p>
-          <h1 className="night name" style={chars('About')}>
-            <Letters text="About" delay={760} />
-          </h1>
-        </div>
+    <Site gel={gel} book={firstOpen(week.data?.events) ? `/book/${firstOpen(week.data.events)}` : '/#ways-in'} className="about">
+      <Room gel={gel} pose="about" lamp={false} className="hero ab-hero" aria-labelledby="ab-h">
+        <h1 id="ab-h" className="kicker rise">
+          About
+        </h1>
+        <p className="d statement settle">Everyone knows the first fall. It happens to you. The second one you choose.</p>
+        <hr className="rule gel" />
+        <p className="body rise" style={{ '--i': 6 }}>
+          You walk in, the doors close behind you, and the night takes over from there.
+        </p>
       </Room>
 
-      <section className="sec">
-        <div className="wrap">
-          <h2 className="d statement">Everyone knows the first fall. It happens to you. The second one you choose.</h2>
-          <div className="two-col">
-            <p>You walk in, the doors close behind you, and the night takes over from there.</p>
-            <p>
-              The Fanglle II is built around that choice. One room, one sound system, four nights a week, and a door that opens
-              {next ? ` at ${clock(next.opens_at)}` : ' every night'} whether the street outside is ready or not.
-            </p>
-          </div>
-          <div className="photo cinema">
-            <span>Photo to come: the room before doors, house lights still up</span>
-          </div>
-        </div>
-      </section>
-
-      <section className="sec" aria-labelledby="run-h">
-        <div className="wrap">
+      <section className="sec panel" aria-labelledby="run-h">
+        <div className="sec-title">
           <h2 id="run-h" className="d h2">
-            How a night runs
+            When we open
           </h2>
-          <Wait q={week} loading="Loading this week's nights..." fail="The hours didn't load. Check the connection, then try again.">
-            {() =>
-              next ? (
-                <>
-                  <p className="sub run-sub">
-                    <Link to={`/events/${next.date}`}>
-                      {next.name}, {dayLabel(next.date)}
-                    </Link>
-                    . Hours can change from night to night; each night's page has its own.
-                  </p>
-                  <ol className="run">
-                    {nightRun(next).map((step) => (
-                      <li key={step.at + step.text} className={step.key ? 'key' : undefined}>
-                        <span className="d tnum at">{clock(step.at)}</span>
-                        <span className="dot" aria-hidden="true" />
-                        <span className="what">{step.text}</span>
-                      </li>
-                    ))}
-                  </ol>
-                </>
-              ) : (
-                <p className="sub">No nights on the calendar this week yet.</p>
-              )
-            }
-          </Wait>
+          <hr className="rule" />
         </div>
+        <Wait q={week} loading="Loading this week's nights..." fail="The hours didn't load. Check the connection, then try again.">
+          {(data) =>
+            data.events.length ? (
+              <ul className="rows hours">
+                {data.events.map((x) => (
+                  <li key={x.date} className={`gel-${gelOf(x.date)}`}>
+                    <Link to={`/events/${x.date}`}>
+                      <span className="label tnum">{dayParts(x.date).weekday}</span>
+                      <span className="d nm">
+                        <i aria-hidden="true" />
+                        {x.name}
+                      </span>
+                      <span className="label tnum">Doors {clock(x.opens_at)}</span>
+                      <span className="label tnum">Close {clock(x.close_time)}</span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="sub">No nights on the calendar this week yet.</p>
+            )
+          }
+        </Wait>
       </section>
 
       <section className="sec" aria-labelledby="rules-h">
-        <div className="wrap">
+        <div className="sec-title">
           <h2 id="rules-h" className="d h2">
             House rules
           </h2>
-          <ul className="rules">
-            <li>
-              <span className="d">21 and over</span>
-              <span>Valid ID for everyone, every night. No exceptions for tables.</span>
-            </li>
-            <li>
-              <span className="d">Smart dress</span>
-              <span>No sportswear, no flip-flops, no swimwear.</span>
-            </li>
-            <li>
-              <span className="d">One QR, one entry</span>
-              <span>Each QR works once. Screenshots shared with friends won't get them in.</span>
-            </li>
-            <li>
-              <span className="d">Tables have a minimum spend</span>
-              <span>Your deposit counts toward it. The rest is spent on the night.</span>
-            </li>
-          </ul>
+          <hr className="rule" />
         </div>
+        <ul className="rules">
+          <li>
+            <span className="d nm">21 and over</span>
+            <span className="body">Valid ID for everyone, every night. No exceptions for tables.</span>
+          </li>
+          <li>
+            <span className="d nm">Smart dress</span>
+            <span className="body">No sportswear, no flip-flops, no swimwear.</span>
+          </li>
+          <li>
+            <span className="d nm">One QR, one entry</span>
+            <span className="body">Each QR works once. Screenshots shared with friends won't get them in.</span>
+          </li>
+          <li>
+            <span className="d nm">Tables have a minimum spend</span>
+            <span className="body">Your deposit counts toward it. The rest is spent on the night.</span>
+          </li>
+        </ul>
       </section>
 
-      <section className="private" aria-labelledby="pv-h">
-        <div className="beam narrow" />
-        <div className="wrap room-in">
+      <section className="sec block private" aria-labelledby="pv-h">
+        <div className="sec-title">
           <h2 id="pv-h" className="d h2">
             Private nights
           </h2>
-          <p>The room can be booked for private nights from Monday to Wednesday. Tell us the date, the number of guests, and what you have in mind.</p>
-          <a className="d mail" href="mailto:events@thefanglle.example">
-            events@thefanglle.example
-          </a>
+          <hr className="rule" />
         </div>
+        <p className="body">
+          The room can be booked for private nights from Monday to Wednesday. Tell us the date, the number of guests, and what you have in mind.
+        </p>
+        <a className="btn solid" href="mailto:events@thefanglle.example">
+          Write to events@thefanglle.example
+        </a>
       </section>
     </Site>
   );
 }
 
-// Gallery (docs/design/Gallery.dc.html). No photos yet: each frame is the brief for the real photo, its shape and its alt text,
-// labelled as a placeholder so it is never mistaken for the real thing. Replace a frame and the layout stays.
+// Gallery (Sorot: Gallery). No photos yet: each frame is the brief for the real photo, its shape and its alt text, labelled as a
+// placeholder so it is never mistaken for the real thing. Replace a frame and the layout stays.
 const SHOTS = [
   { cat: 'room', ratio: '16 / 9', shot: 'Main room from the DJ booth, full crowd, lights low', alt: 'The main room seen from the DJ booth, packed dance floor under low coloured light' },
-  { cat: 'night', ratio: '3 / 4', shot: 'Ilse Varga behind the decks at Descent', alt: 'Ilse Varga playing at Descent, lit from behind' },
+  { cat: 'night', ratio: '3 / 4', shot: 'The Weeknd on stage at Descent', alt: 'The Weeknd performing at Descent, lit from behind' },
   { cat: 'room', ratio: '3 / 2', shot: 'Dance floor from above, beams across the haze', alt: 'Dance floor from above with light beams crossing the haze' },
   { cat: 'tables', ratio: '3 / 2', shot: 'Booth set for twelve, before doors open', alt: 'An empty booth laid out for twelve guests before opening' },
   { cat: 'night', ratio: '3 / 2', shot: 'Hands up at midnight, Second Wave', alt: 'Crowd with hands raised as the headliner starts at Second Wave' },
   { cat: 'detail', ratio: '3 / 4', shot: 'Gel frame on a stage light, close up', alt: 'Close up of a coloured gel filter on a stage light' },
   { cat: 'tables', ratio: '3 / 4', shot: 'Bottle service arriving at a booth', alt: 'Staff carrying bottle service to a booth' },
   { cat: 'room', ratio: '3 / 2', shot: 'The bar at 1 am, bartenders mid-pour', alt: 'Bartenders pouring drinks at the bar late at night' },
-  { cat: 'night', ratio: '3 / 4', shot: 'Nadia Sorrel, close up, Fall Line', alt: 'Nadia Sorrel at the decks during Fall Line' },
+  { cat: 'night', ratio: '3 / 4', shot: 'Playboi Carti, close up, Fall Line', alt: 'Playboi Carti performing during Fall Line' },
   { cat: 'detail', ratio: '3 / 2', shot: 'Entrance at doors, door staff scanning a QR', alt: "Door staff scanning a guest's QR at the entrance" },
   { cat: 'tables', ratio: '3 / 2', shot: 'Stage front tables, looking toward the DJ', alt: 'Stage front tables with a clear view of the DJ booth' },
   { cat: 'night', ratio: '3 / 2', shot: 'Afterglow, softer Sunday light at the bar', alt: 'A quieter Sunday night at the bar during Afterglow' },
@@ -2113,60 +2120,49 @@ export function Gallery() {
 
   return (
     <Site gel="sun" className="gal">
-      <Room gel="sun" className="hero page-hero" reach={0.75}>
-        <div className="wrap room-in hero-in">
-          <h1 className="night name" style={chars('Gallery')}>
-            <Letters text="Gallery" delay={760} />
-          </h1>
-          <p className="lede rise" style={{ '--i': 3 }}>
-            The room, the nights, and the tables, as they look after doors.
-          </p>
+      <section className="sec page-head" aria-labelledby="gal-h">
+        <h1 id="gal-h" className="night settle">
+          Gallery
+        </h1>
+        <hr className="rule gel" />
+        <p className="body">The room, the nights, and the tables, as they look after doors. Photos arrive soon; each frame says what it will show.</p>
+        <div className="filters" role="group" aria-label="Show photos of">
+          {CATS.map(([k, l]) => (
+            <button
+              key={k}
+              type="button"
+              className="chip"
+              aria-pressed={cat === k}
+              onClick={() => {
+                setCat(k);
+                setView(null);
+              }}
+            >
+              {l}
+              <em className="tnum">{k === 'all' ? SHOTS.length : SHOTS.filter((s) => s.cat === k).length}</em>
+            </button>
+          ))}
         </div>
-      </Room>
-      <section className="sec gal-sec">
-        <div className="wrap">
-          <div className="filters" role="group" aria-label="Show photos of">
-            {CATS.map(([k, l]) => (
-              <button
-                key={k}
+        <div className="masonry">
+          <AnimatePresence initial={false} mode="popLayout">
+            {shots.map((s, i) => (
+              <motion.button
+                layout
+                key={s.shot}
                 type="button"
-                className={`btn sm ${cat === k ? 'solid' : 'line'}`}
-                aria-pressed={cat === k}
-                onClick={() => {
-                  setCat(k);
-                  setView(null);
-                }}
+                className="photo slot"
+                style={{ aspectRatio: s.ratio }}
+                initial={{ opacity: 0, scale: 0.97 }}
+                animate={{ opacity: 1, scale: 1, transition: { duration: 0.32, ease: [0.23, 1, 0.32, 1] } }}
+                exit={{ opacity: 0, transition: { duration: 0.14 } }}
+                onClick={() => setView(i)}
+                aria-label={`Photo to come: ${s.shot}. Open details.`}
               >
-                {l}
-                <span className="tnum count">{k === 'all' ? SHOTS.length : SHOTS.filter((s) => s.cat === k).length}</span>
-              </button>
+                <span className="label tag">{catName(s.cat)}</span>
+                <span className="shot">Photo to come: {s.shot}</span>
+              </motion.button>
             ))}
-          </div>
-          <div className="masonry">
-            <AnimatePresence initial={false} mode="popLayout">
-              {shots.map((s, i) => (
-                <motion.button
-                  layout
-                  key={s.shot}
-                  type="button"
-                  className="photo slot"
-                  style={{ aspectRatio: s.ratio }}
-                  initial={{ opacity: 0, scale: 0.97 }}
-                  animate={{ opacity: 1, scale: 1, transition: { duration: 0.32, ease: [0.23, 1, 0.32, 1] } }}
-                  exit={{ opacity: 0, transition: { duration: 0.14 } }}
-                  onClick={() => setView(i)}
-                  aria-label={`Photo to come: ${s.shot}. Open details.`}
-                >
-                  <span className="slot-in">
-                    <span className="label tag">{catName(s.cat)}</span>
-                    <span className="shot">Photo to come: {s.shot}</span>
-                  </span>
-                </motion.button>
-              ))}
-            </AnimatePresence>
-          </div>
-          {/* Every frame is a brief for the real photo: what to shoot, the shape it needs, and the alt text it ships with.
-              Replace a frame and the layout stays the same. */}
+          </AnimatePresence>
         </div>
       </section>
       {v && (
@@ -2197,7 +2193,7 @@ export function Gallery() {
             <button type="button" className="btn line sm" onClick={() => setView((view - 1 + shots.length) % shots.length)} aria-label="Previous photo">
               Previous
             </button>
-            <span className="vcount tnum" aria-live="polite">
+            <span className="vcount label tnum" aria-live="polite">
               {view + 1} of {shots.length}
             </span>
             <button type="button" className="btn line sm" onClick={() => setView((view + 1) % shots.length)} aria-label="Next photo">
@@ -2213,8 +2209,7 @@ export function Gallery() {
   );
 }
 
-// Find my QR (/qr, docs/design/FindQr.dc.html and FindQrDesk.dc.html): a guest who closed their QR types the entry code
-// printed under it and lands on that QR again.
+// Find my QR (/qr, Sorot: FindQr): a guest who closed their QR types the entry code printed under it and lands on that QR again.
 export function FindQr() {
   const navigate = useNavigate();
   const next = useQuery(weekQuery).data?.events[0];
@@ -2240,20 +2235,18 @@ export function FindQr() {
     setBusy(false);
   }
 
-  const gel = next ? gelOf(next.date) : 'thu';
   return (
-    <Site gel={gel} className="findqr">
-      <Room gel={gel} className="hero find-room" reach={0.62}>
-        <div className="wrap room-in find-in">
-          <div className="find-text">
-            <h1 className="night name" style={chars('Find my QR')}>
-              <Letters text="Find my QR" delay={760} />
-            </h1>
-            <p className="lede rise" style={{ '--i': 3 }}>
-              Closed the page with your QR? Type the entry code from your booking or guestlist to open it again.
-            </p>
-          </div>
-          <form className="find-form rise" style={{ '--i': 4 }} onSubmit={submit} noValidate>
+    <Site gel={next ? gelOf(next.date) : 'thu'} className="findqr">
+      <section className="fq" aria-labelledby="fq-h">
+        <div className="halo" aria-hidden="true" />
+        <div className="box">
+          <p className="kicker rise">Lost the page?</p>
+          <h1 id="fq-h" className="night settle">
+            Find my QR
+          </h1>
+          <hr className="rule gel" />
+          <p className="body">Closed the page with your QR? Type the entry code from your booking or guestlist to open it again.</p>
+          <form className="find-form" onSubmit={submit} noValidate>
             <Input
               id="fc"
               label="Entry code"
@@ -2272,13 +2265,13 @@ export function FindQr() {
                 {alert}
               </p>
             )}
-            <button type="submit" className="btn solid wide" disabled={busy}>
+            <button type="submit" className="btn gel wide" disabled={busy}>
               {busy ? 'Finding your QR...' : 'Open my QR'}
             </button>
             <p className="help">The QR opens on this device. Opened once with signal, it keeps working without it.</p>
           </form>
         </div>
-      </Room>
+      </section>
     </Site>
   );
 }

@@ -113,7 +113,15 @@ function Camera({ onRead }) {
   return (
     <div className={`cam${error ? ' off' : ''}`}>
       <video ref={video} muted playsInline aria-hidden="true" />
-      {!error && <div className="frame" />}
+      {!error && (
+        <div className="frame">
+          <i />
+          <i />
+          <i />
+          <i />
+          <b />
+        </div>
+      )}
       <p role={error ? 'alert' : undefined}>{error || 'Hold the QR inside the frame'}</p>
     </div>
   );

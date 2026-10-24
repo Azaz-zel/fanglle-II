@@ -1,7 +1,8 @@
-/* Door region (/door), "Gel dan Kabut": docs/design/DoorPhone.dc.html on a phone, DoorDesk.dc.html under .wide.
+/* Door region (/door), Sorot: board DoorPhone on a phone, DoorDesk under .wide, DoorStates for every verdict.
    The design's phone and window frames are preview chrome; the page is the device. Everything sits under .doorapp, so nothing
    leaks into a region loaded later in the same session. Tone classes are r-ok/r-bad/r-warn: .ok is taken by the admin region.
-   No entrance motion anywhere here: a result must be readable the instant it lands. Colour transitions stay under 200 ms. */
+   A verdict gets one short rise (180 ms) and nothing else: it must be readable the instant it lands. The only idle motion is the
+   line of light sweeping the camera frame. Colour transitions stay under 200 ms. */
 .doorapp{min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;font-size:17px;line-height:1.5;
   --ok:#0F6B38;--ok-text:#F2FFF6;--ok-sub:#D2F2DE;--bad:#A3162F;--bad-text:#FBF7FB;--bad-sub:#F6D9DE;
   --warn:#C77A12;--warn-text:#140A00;--warn-sub:#2A1600;--ready:#3FA66B;--paused:#C77A12}
@@ -11,7 +12,7 @@
 
 /* Header, sync bar, tonight's numbers */
 .doorapp .dtop{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:12px 16px;border-bottom:1px solid var(--line)}
-.doorapp .dtop .t{font-size:28px;letter-spacing:.04em}
+.doorapp .dtop .t{font-size:26px;font-weight:300;letter-spacing:.2em;text-transform:uppercase}
 .doorapp .dtop .n{min-width:0;font-size:14px;color:var(--muted);overflow-wrap:anywhere}
 /* SignOut (staff.jsx) renders a bare button.out: here it reads as a quiet header link. */
 .doorapp .out{margin:0 0 0 auto;display:inline-flex;align-items:center;min-height:44px;padding:0 4px;background:none;border:0;border-radius:2px;
@@ -28,7 +29,7 @@
 .doorapp .nums{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border-bottom:1px solid var(--line)}
 .doorapp .nums div{padding:10px;text-align:center;border-right:1px solid var(--line)}
 .doorapp .nums div:last-child{border-right:0}
-.doorapp .nums strong{display:block;font-family:var(--display);font-weight:400;font-size:30px;line-height:1.1}
+.doorapp .nums strong{display:block;font-family:var(--display);font-weight:400;font-size:32px;line-height:1.1}
 .doorapp .nums span{font-size:13px;color:var(--muted)}
 
 /* Controls. Phone actions are at least 56 px tall and span the width, as in the design. */
@@ -42,16 +43,28 @@
 
 /* Start, loading, no event, no signal, didn't load: one display headline, a sentence, the tungsten button. */
 .doorapp .startwrap{flex:1;display:flex;flex-direction:column;justify-content:center;gap:16px;padding:28px 20px}
-.doorapp .startwrap h1{font-size:44px;line-height:1.05;overflow-wrap:anywhere}
+.doorapp .startwrap h1{font-size:40px;line-height:1.08;overflow-wrap:anywhere}
+.doorapp .startwrap h1::after,.doorapp .idle h1::after{content:"";display:block;width:28px;height:1px;margin-top:18px;background:var(--gel-bright)}
 .doorapp .startwrap p:not(.label){color:var(--muted)}
 .doorapp .startwrap .btn.solid{min-height:60px;font-size:18px}
 
 /* Phone: camera, typed code, name search */
 .doorapp .dmain{flex:1;display:flex;flex-direction:column;gap:14px;padding:16px}
-.doorapp .dmain h1{font-size:36px;line-height:1.05}
-.doorapp .cam{position:relative;aspect-ratio:1;background:#050406;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;overflow:hidden}
+.doorapp .dmain h1{font-size:32px;line-height:1.08}
+.doorapp .cam{position:relative;aspect-ratio:1;background:#0B0B0E;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;overflow:hidden}
+.doorapp .cam::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 50% 50%,color-mix(in oklab,var(--gel-bright) 18%,transparent),transparent 50%)}
 .doorapp .cam video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-.doorapp .frame{position:relative;width:62%;aspect-ratio:1;border:3px solid var(--tungsten);border-radius:10px}
+/* The frame: four bone corners, and one line of light in the gel sweeping it while the camera looks. */
+.doorapp .frame{position:relative;width:62%;aspect-ratio:1}
+.doorapp .frame i{position:absolute;width:16%;height:16%;border:0 solid var(--tungsten)}
+.doorapp .frame i:nth-child(1){left:0;top:0;border-width:3px 0 0 3px}
+.doorapp .frame i:nth-child(2){right:0;top:0;border-width:3px 3px 0 0}
+.doorapp .frame i:nth-child(3){left:0;bottom:0;border-width:0 0 3px 3px}
+.doorapp .frame i:nth-child(4){right:0;bottom:0;border-width:0 3px 3px 0}
+.doorapp .frame b{position:absolute;left:4%;right:4%;top:0;height:1px;background:var(--gel-bright);box-shadow:0 0 12px var(--gel-bright);
+  animation:sweepY 2.6s var(--ease-in-out) infinite}
+@keyframes sweepY{50%{top:calc(100% - 1px)}}
+@media (prefers-reduced-motion:reduce){.doorapp .frame b{animation:none;top:50%}}
 /* The live picture can be bright; the shadow keeps the line readable over it. */
 .doorapp .cam p{position:absolute;bottom:14px;left:0;right:0;padding:0 16px;text-align:center;font-size:15px;color:var(--soft);text-shadow:0 1px 3px #000}
 /* No camera: the box stays as the place the picture would be, and says why in plain tungsten. */
@@ -78,17 +91,19 @@
 
 /* Result: over the whole phone screen, in the left pane on a wide screen. Shown at once, no fade, no slide.
    --fg is the screen's text colour; every focus ring on it uses that, so it shows on green, red and amber alike. */
-.doorapp .res{display:flex;flex-direction:column;gap:16px;padding:32px 22px 24px;background:var(--bg);color:var(--fg)}
+.doorapp .res{display:flex;flex-direction:column;gap:16px;padding:32px 22px 24px;background:var(--bg);color:var(--fg);animation:up 180ms var(--ease-out)}
+@keyframes up{from{opacity:0;transform:translateY(12px)}}
+@media (prefers-reduced-motion:reduce){.doorapp .res{animation:none}}
 .doorapp:not(.wide) .res{position:fixed;inset:0;z-index:10;overflow-y:auto}
 .doorapp .res.r-ok{--bg:var(--ok);--fg:var(--ok-text);--sub:var(--ok-sub);--go-bg:var(--ok-text);--go-fg:var(--ok)}
 .doorapp .res.r-bad{--bg:var(--bad);--fg:var(--bad-text);--sub:var(--bad-sub);--go-bg:var(--bad-text);--go-fg:var(--bad)}
 .doorapp .res.r-warn{--bg:var(--warn);--fg:var(--warn-text);--sub:var(--warn-sub);--go-bg:var(--warn-text);--go-fg:#F6C77A}
 .doorapp .res:focus-visible{outline:3px solid var(--fg);outline-offset:-8px}
 .doorapp .res :focus-visible{outline:3px solid var(--fg);outline-offset:3px}
-.doorapp .res .cue{font:600 22px/1 var(--display);letter-spacing:.16em}
-.doorapp .res h2{font-size:60px;line-height:1.02;overflow-wrap:anywhere}
-.doorapp .res.r-warn h2{font-size:54px}
-.doorapp .res .gname{font-size:36px;font-weight:300;line-height:1.1;overflow-wrap:anywhere}
+.doorapp .res .cue{font:500 13px/1 var(--body);letter-spacing:.22em}
+.doorapp .res h2{font-weight:500;font-size:56px;line-height:.98;letter-spacing:.06em;text-transform:uppercase;overflow-wrap:anywhere}
+.doorapp .res.r-warn h2{font-size:48px}
+.doorapp .res .gname{font:500 26px/1.2 var(--body);overflow-wrap:anywhere}
 .doorapp .res .gmeta{font-size:17px;color:var(--sub)}
 .doorapp .res .why{font-size:19px;line-height:1.45;color:var(--sub)}
 .doorapp .res .idcheck{border:2px solid currentColor;padding:12px 14px;font-size:18px}
@@ -96,7 +111,7 @@
 .doorapp .res .cntl{margin-bottom:8px;font-size:15px}
 .doorapp .cnt{display:flex;gap:8px;flex-wrap:wrap}
 /* No transition: the count changes from the keyboard (1 to 9) and must simply be there. */
-.doorapp .cnt button{min-width:56px;min-height:56px;font-size:22px;border-radius:4px;cursor:pointer;background:transparent;color:inherit;border:2px solid currentColor}
+.doorapp .cnt button{min-width:56px;min-height:56px;font-size:22px;border-radius:999px;cursor:pointer;background:transparent;color:inherit;border:2px solid currentColor}
 .doorapp .cnt button[aria-pressed="true"]{background:var(--fg);color:var(--bg);border-color:var(--fg)}
 .doorapp .acts{margin-top:auto;display:flex;flex-direction:column;gap:10px}
 .doorapp .res .btn.go,.doorapp .res .btn.go:enabled:hover{min-height:60px;font-size:19px;background:var(--go-bg);color:var(--go-fg);border:0}
@@ -109,19 +124,21 @@
 .doorapp.wide .dtop .n{font-size:17px}
 .doorapp.wide .nums{margin-left:auto;flex:none;display:flex;gap:32px;border:0}
 .doorapp.wide .nums div{padding:0;border:0;text-align:right}
-.doorapp.wide .nums strong{font-size:32px;line-height:1}
+.doorapp.wide .nums strong{font-size:34px;line-height:1}
 .doorapp.wide .out{font-size:15px}
 .doorapp.wide .nums ~ .out{margin-left:12px}
 .doorapp.wide .sync{padding:9px 28px}
 .doorapp.wide .dot{width:9px;height:9px}
 .doorapp.wide .startwrap{gap:22px;padding:56px;max-width:760px}
-.doorapp.wide .startwrap h1{font-size:72px;line-height:1.02}
+.doorapp.wide .startwrap h1{font-size:56px;line-height:1.05}
 .doorapp.wide .startwrap p:not(.label){max-width:52ch}
 .doorapp.wide .startwrap .btn{align-self:flex-start;padding:0 30px}
 .doorapp .dbody{flex:1;display:grid;grid-template-columns:minmax(0,2fr) minmax(360px,1fr)}
 .doorapp .pane{border-right:1px solid var(--line);display:flex;flex-direction:column;min-width:0}
-.doorapp .idle{flex:1;display:flex;flex-direction:column;justify-content:center;gap:22px;padding:56px}
-.doorapp .idle h1{font-size:72px;line-height:1.02}
+.doorapp .idle{position:relative;flex:1;display:flex;flex-direction:column;justify-content:center;gap:22px;padding:56px}
+.doorapp .idle::before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle at 50% 44%,color-mix(in oklab,var(--gel-bright) 16%,transparent),transparent 52%)}
+.doorapp .idle>*{position:relative}
+.doorapp .idle h1{font-size:56px;line-height:1.05}
 .doorapp .idle p{color:var(--muted);max-width:52ch}
 .doorapp .idle .listen{display:flex;align-items:center;gap:12px;font-size:20px;color:var(--tungsten);max-width:none}
 .doorapp .listen .dot{width:14px;height:14px}
@@ -129,8 +146,8 @@
 .doorapp .keys kbd{margin-right:6px}
 .doorapp.wide .res{flex:1;gap:18px;padding:44px 52px}
 .doorapp.wide .res .cue{font-size:26px}
-.doorapp.wide .res h2{font-size:88px;line-height:1}
-.doorapp.wide .res .gname{font-size:44px}
+.doorapp.wide .res h2{font-size:80px;line-height:.98}
+.doorapp.wide .res .gname{font-size:32px}
 .doorapp.wide .res .gmeta{font-size:20px}
 .doorapp.wide .res .why{font-size:22px;max-width:40ch}
 .doorapp.wide .res .idcheck{align-self:flex-start;padding:12px 16px;font-size:20px}

@@ -81,6 +81,29 @@ export function lineupWarnings(rows, close, opens) {
 }
 
 // Table booking (S3). A table is booked, held by someone else, too small for the group, or free.
+// Hour by hour (Public.jsx Lane): each set's place on one hour axis in percent, and the whole hours under it. Sets that end
+// "earlier" than they start run past the end of the night's day (F2).
+const at = (m) => `${String(Math.floor(m / 60) % 24).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`;
+export function laneOf(lineup) {
+  const sets = [...lineup].sort((a, b) => nightMinutes(a.starts_at) - nightMinutes(b.starts_at));
+  const end = (s) => {
+    const a = nightMinutes(s.starts_at);
+    const b = nightMinutes(s.ends_at);
+    return b > a ? b : b + 1440;
+  };
+  const a0 = Math.floor(nightMinutes(sets[0].starts_at) / 60) * 60;
+  const a1 = Math.ceil(Math.max(...sets.map(end)) / 60) * 60;
+  const pc = (m) => +(((m - a0) / (a1 - a0)) * 100).toFixed(2);
+  const hours = [];
+  for (let m = a0; m < a1; m += 60) hours.push(at(m));
+  return {
+    from: at(a0),
+    to: at(a1),
+    hours,
+    sets: sets.map((s) => ({ ...s, left: pc(nightMinutes(s.starts_at)), width: +(pc(end(s)) - pc(nightMinutes(s.starts_at))).toFixed(2) })),
+  };
+}
+
 export const tableState = (t, party) =>
   t.status === 'booked' ? 'booked' : t.status === 'held' ? 'held' : t.capacity < party ? 'small' : 'free';
 

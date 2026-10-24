@@ -47,14 +47,14 @@ class PublicEventsTest extends TestCase
     public function test_event_detail_matches_the_contract(): void
     {
         $this->getJson('/api/events/2026-09-25')->assertOk()->assertExactJson([
-            'date' => '2026-09-25', 'name' => 'Second Wave', 'genre' => 'Afro house', 'blurb' => 'Percussion from the first record to the last.',
+            'date' => '2026-09-25', 'name' => 'Second Wave', 'genre' => 'Hip-hop', 'blurb' => 'Hooks from the first record to the last.',
             'opens_at' => '15:00', 'close_time' => '04:00', 'guestlist_cutoff' => '23:00',
             'lineup' => [
-                ['performer' => 'Kirana', 'role' => 'warm_up', 'starts_at' => '22:00', 'ends_at' => '23:30'],
-                ['performer' => 'Bayu Kencana', 'role' => 'guest_star', 'starts_at' => '23:30', 'ends_at' => '00:30'],
-                ['performer' => 'Marcel Oduya', 'role' => 'headliner', 'starts_at' => '00:30', 'ends_at' => '02:30'],
-                ['performer' => 'Lintang', 'role' => 'guest_star', 'starts_at' => '02:30', 'ends_at' => '03:30'],
-                ['performer' => 'Kirana', 'role' => 'closing', 'starts_at' => '03:30', 'ends_at' => '04:00'],
+                ['performer' => '21 Savage', 'role' => 'warm_up', 'starts_at' => '22:00', 'ends_at' => '23:30'],
+                ['performer' => 'Future', 'role' => 'guest_star', 'starts_at' => '23:30', 'ends_at' => '00:30'],
+                ['performer' => 'Drake', 'role' => 'headliner', 'starts_at' => '00:30', 'ends_at' => '02:30'],
+                ['performer' => 'Lil Baby', 'role' => 'guest_star', 'starts_at' => '02:30', 'ends_at' => '03:30'],
+                ['performer' => 'PartyNextDoor', 'role' => 'closing', 'starts_at' => '03:30', 'ends_at' => '04:00'],
             ],
             'min_spend' => ['stage' => 16000000, 'booth' => 24000000, 'bar' => 8000000],
             'tables' => ['status' => 'open', 'free' => 16],

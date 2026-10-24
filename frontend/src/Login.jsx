@@ -3,17 +3,19 @@ import { Link, useLocation, useNavigate, useParams, useSearchParams } from 'reac
 import { useQueryClient } from '@tanstack/react-query';
 import { api, errorText } from './api.js';
 import { Button, Mark } from './ui.jsx';
-import './stage.css'; // .beam
+import { Lit } from './stage.jsx';
 import './admin.css';
 
 // ?next= is honoured only inside the staff regions; anything else (other hosts, //host, public pages) goes home.
 const staffPath = (p) => /^\/(admin|door)(?=[/?#]|$)/.test(p || '');
 
-// docs/design/Login.dc.html: the logo, a big title and the form on blackout, a narrow beam of gel behind. There is no night
-// yet before signing in, so it is Thursday's gel, the default.
+// Sorot board Login: the fang in the dark on one side, the logo, title and form on the other. There is no night yet before
+// signing in, so it is Thursday's gel, the default.
 const Gate = ({ children }) => (
   <main className="signin gel-thu">
-    <div className="beam narrow" aria-hidden="true" />
+    <div className="signin-lit">
+      <Lit pose="login" />
+    </div>
     <div className="sheet">
       <span className="mark">
         <Mark />

@@ -1,31 +1,38 @@
-/* Guest QR page (/p/:id), docs/design/Pass.dc.html. The page is the phone: one column, at most 480px wide. The QR card is the
+/* Guest QR page (/p/:id), Sorot board Pass. The page is the phone: one column, at most 480px wide. The QR card is the
    work light: off-white so a door scanner reads it fast in a dark room. Loaded with Pass.jsx, precached for offline use. */
 
-.pass{min-height:100vh;min-height:100dvh;max-width:480px;margin:0 auto;display:flex;flex-direction:column;font-size:17px;line-height:1.55}
-.pass .top{display:flex;align-items:baseline;justify-content:space-between;gap:10px;padding:16px 20px 12px}
-.pass .mark{font-size:16px;letter-spacing:.12em}
+.pass{position:relative;min-height:100vh;min-height:100dvh;max-width:480px;margin:0 auto;display:flex;flex-direction:column;font-size:16px;line-height:1.6;overflow:hidden}
+/* A halo of the night's gel over the top of the page. */
+.pass::before{content:"";position:absolute;left:50%;top:-180px;width:640px;height:640px;margin-left:-320px;pointer-events:none;
+  background:radial-gradient(circle,color-mix(in oklab,var(--gel-bright) 26%,transparent),transparent 62%)}
+.pass>*{position:relative}
+.pass .top{display:flex;align-items:baseline;justify-content:center;gap:10px;padding:20px 20px 12px}
+.pass .mark{font-size:15px}
 .pass main{flex:1;display:flex;flex-direction:column}
 .pass .banner{padding:12px 20px;font-size:15px;background:var(--raised);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
 
-/* The night's band: its gel, its crystals, its name. */
-.pass .band{padding:30px 20px 16px}
-.pass .band .crystals{z-index:0}
-.band-name,.band-when{position:relative;z-index:1}
-.band-name{font-size:54px;overflow-wrap:anywhere}
-.band-when{margin-top:8px;font-size:15px;color:var(--soft)}
+/* The night's band: the day, the name, the gel rule. */
+.pass .band{display:flex;flex-direction:column;align-items:center;gap:10px;padding:22px 20px 16px;text-align:center}
+.band-when{font-size:20px}
+.band-name{font-size:40px;overflow-wrap:anywhere}
 
 .pass .body{flex:1;padding:16px 20px 24px;display:flex;flex-direction:column;gap:14px}
-.pass .state{font-size:15px;color:var(--soft)}
+.pass .state{font-size:14px;color:var(--soft);text-align:center}
 .pass .state strong{font-weight:500;color:var(--tungsten)}
 
-.ticket{position:relative;background:var(--work);color:var(--ink);border-radius:4px;padding:18px 18px 16px}
+.ticket{position:relative;background:var(--work);color:var(--ink);padding:18px 18px 16px;overflow:hidden}
+/* One sweep of light across the card when the pass opens, then still. */
+@keyframes sweep{from{transform:translateX(-120%) skewX(-18deg)}to{transform:translateX(320%) skewX(-18deg)}}
+.pass .ticket::after{content:"";position:absolute;top:0;bottom:0;left:0;width:40%;pointer-events:none;
+  background:linear-gradient(90deg,rgba(255,255,255,0),rgba(255,255,255,.55),rgba(255,255,255,0));transform:translateX(320%);animation:sweep 1.4s var(--ease-out) .5s backwards}
+@media (prefers-reduced-motion:reduce){.pass .ticket::after{display:none}}
 .ticket .qr{display:block;width:86%;margin:0 auto;aspect-ratio:1}
 .ticket.off .qr{opacity:.12}
 .ticket .stamp{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px}
-.ticket .stamp strong{font-size:52px;font-weight:400;letter-spacing:.06em;color:var(--ink)}
+.ticket .stamp strong{font-size:48px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:var(--ink)}
 .ticket .stamp span{font-size:16px;color:#3B3346}
 .ticket .who{margin-top:12px;text-align:center}
-.ticket .nm{font-size:30px;line-height:1.15;color:var(--ink);overflow-wrap:anywhere}
+.ticket .nm{font-size:28px;font-weight:500;line-height:1.15;color:var(--ink);overflow-wrap:anywhere}
 .ticket .ct{margin-top:2px;font-size:14px;color:#3B3346}
 /* At least 28px, capitals, wide tracking, in the body face: display hairlines are hard to read out under door lights. */
 .ticket .entry{margin-top:12px;padding-top:12px;border-top:1px solid #DDD6CB;text-align:center}
@@ -40,14 +47,15 @@
 .qrsheet .ticket .nm{font-size:26px}
 .qrsheet .ticket>.ct{padding:24px 8px;text-align:center}
 
-.pass .facts{display:grid;grid-template-columns:auto 1fr;gap:6px 16px;font-size:15px;padding-top:6px;border-top:1px solid var(--line-soft)}
+.pass .facts{display:grid;grid-template-columns:96px 1fr;gap:0 12px;font-size:15px}
+.pass .facts dt,.pass .facts dd{padding:12px 0;border-top:1px solid var(--line-soft)}
 .pass .facts dt{color:var(--muted)}
-.pass .facts dd{text-align:right}
+.pass .facts dt{font-size:12.5px;padding-top:14px}
 .pass .msg{font-size:14px;color:var(--soft)}
 .pass .hint{text-align:center}
 
 .pass .center{min-height:0;flex:1;flex-direction:column;gap:14px;text-align:center;padding:40px 24px}
-.pass .center h1{font-size:40px;line-height:1.05}
+.pass .center h1{font-size:34px;line-height:1.1}
 .pass .center p{color:var(--muted);max-width:30ch}
 .pass .skel{margin:0}
 .pass .dlg ol{color:var(--soft);padding-left:20px}

@@ -1,107 +1,129 @@
-/* The Fanglle II, "Gel dan Kabut" (docs/design/). Global base: faces, tokens, reset, and the pieces every region shares.
-   Region styles load with their chunk: stage.css (lit room and crystals), public.css, pass.css, door.css, admin.css. */
+/* The Fanglle II, "Sorot" (DESIGN.md): one object in the dark, one light that follows you, one gel per night.
+   Global base: faces, tokens, reset, and the pieces every region shares. Region styles load with their chunk: stage.css (the lit
+   object), public.css, pass.css, door.css, admin.css. */
 
-/* Big Shoulders Display and Albert Sans, self-hosted from public/fonts (SIL OFL 1.1, licences beside the files) so the QR page and
-   the door scanner keep their type without signal. Both are variable: one file per subset covers every weight used. */
-@font-face{font-family:'Big Shoulders Display';font-style:normal;font-weight:100 600;font-display:swap;src:url(/fonts/big-shoulders-display-latin-ext.woff2) format('woff2');
+/* Cormorant Garamond and Jost, self-hosted from public/fonts (SIL OFL 1.1, licences beside the files) so the QR page and the door
+   scanner keep their type without signal. Both are variable: one file per subset covers every weight used. */
+@font-face{font-family:'Cormorant Garamond';font-style:normal;font-weight:300 500;font-display:swap;src:url(/fonts/cormorant-garamond-latin-ext.woff2) format('woff2');
   unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
-@font-face{font-family:'Big Shoulders Display';font-style:normal;font-weight:100 600;font-display:swap;src:url(/fonts/big-shoulders-display-latin.woff2) format('woff2');
+@font-face{font-family:'Cormorant Garamond';font-style:normal;font-weight:300 500;font-display:swap;src:url(/fonts/cormorant-garamond-latin.woff2) format('woff2');
   unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
-@font-face{font-family:'Albert Sans';font-style:normal;font-weight:400 500;font-display:swap;src:url(/fonts/albert-sans-latin-ext.woff2) format('woff2');
+@font-face{font-family:'Cormorant Garamond';font-style:italic;font-weight:400;font-display:swap;src:url(/fonts/cormorant-garamond-italic-latin-ext.woff2) format('woff2');
   unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
-@font-face{font-family:'Albert Sans';font-style:normal;font-weight:400 500;font-display:swap;src:url(/fonts/albert-sans-latin.woff2) format('woff2');
+@font-face{font-family:'Cormorant Garamond';font-style:italic;font-weight:400;font-display:swap;src:url(/fonts/cormorant-garamond-italic-latin.woff2) format('woff2');
+  unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'Jost';font-style:normal;font-weight:300 500;font-display:swap;src:url(/fonts/jost-latin-ext.woff2) format('woff2');
+  unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}
+@font-face{font-family:'Jost';font-style:normal;font-weight:300 500;font-display:swap;src:url(/fonts/jost-latin.woff2) format('woff2');
   unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
 
-/* Gel colours are registered so a change of night cross-fades the light instead of snapping. */
+/* Gel colours are registered so a change of night cross-fades the tint instead of snapping. */
 @property --gel-deep{syntax:'<color>';inherits:true;initial-value:#2B21B0}
 @property --gel-bright{syntax:'<color>';inherits:true;initial-value:#9A93FF}
-@property --gel-haze{syntax:'<color>';inherits:true;initial-value:#120F2B}
 
 :root{
-  --blackout:#0C0A0E;--surface:#16131A;--raised:#211D26;--line:#3A3441;--line-soft:#26212C;
-  --tungsten:#F1ECE4;--soft:#CFC7BD;--muted:#9E968C;--work:#F7F3EC;--ink:#0C0A0E;
+  --blackout:#07070A;--surface:#0F0F13;--raised:#17171C;--line:#3A3A43;--line-soft:#26262D;
+  --tungsten:#ECE9E3;--soft:#BDB9B1;--muted:#8E8B85;--ink:#07070A;--work:#F4F2EE;
   --held:#F0B55A;--paid:#6FD49A;--error:#FF8F8F;
-  --display:'Big Shoulders Display','Arial Narrow',sans-serif;
-  --body:'Albert Sans','Helvetica Neue',Arial,sans-serif;
+  --display:'Cormorant Garamond','Times New Roman',serif;
+  --body:'Jost','Helvetica Neue',Arial,sans-serif;
   --ease-out:cubic-bezier(.23,1,.32,1);
-  --ease-cue:cubic-bezier(.65,0,.35,1);
-  --cue:900ms;
+  --ease-in-out:cubic-bezier(.77,0,.175,1);
+  --ease-drawer:cubic-bezier(.32,.72,0,1);
   color-scheme:dark;
-
 }
-/* One gel per night of the week (gelOf in night.js). Only one is on stage at a time. */
-.gel-thu{--gel-deep:#2B21B0;--gel-bright:#9A93FF;--gel-haze:#120F2B}
-.gel-fri{--gel-deep:#B4600E;--gel-bright:#F5AE4E;--gel-haze:#22140A}
-.gel-sat{--gel-deep:#A30F25;--gel-bright:#FF6676;--gel-haze:#210A0F}
-.gel-sun{--gel-deep:#9C3F66;--gel-bright:#F4A3C0;--gel-haze:#1F0F17}
-/* Only the logo cross-fades its gel here. The lit room cross-fades layers of light instead (stage.css), and the rest of the page
-   swaps its gel under its own fade (the timeline) or a reload (the floor plan). */
-.stage .mark{transition:--gel-bright var(--cue) var(--ease-cue)}
+/* One gel per night of the week (gelOf in night.js). Only one is lit at a time. */
+.gel-thu{--gel-deep:#2B21B0;--gel-bright:#9A93FF}
+.gel-fri{--gel-deep:#B4600E;--gel-bright:#F5AE4E}
+.gel-sat{--gel-deep:#A30F25;--gel-bright:#FF6676}
+.gel-sun{--gel-deep:#9C3F66;--gel-bright:#F4A3C0}
+/* The colour block under "Before you come" and the other ends of a page: the night's deep gel, half sunk into the dark. Set
+   with each gel, since a custom property resolves where it is declared. */
+:root,.gel-thu,.gel-fri,.gel-sat,.gel-sun{--block:color-mix(in oklab,var(--gel-deep) 50%,var(--blackout))}
 
 *{box-sizing:border-box;margin:0;padding:0}
 html{font-synthesis:none;-webkit-text-size-adjust:100%;scrollbar-color:var(--line) var(--blackout)}
 ::selection{background:color-mix(in srgb,var(--gel-deep) 70%,var(--blackout));color:var(--tungsten)}
 input,textarea{caret-color:var(--tungsten)}
-em,i,cite,dfn,var,address{font-style:normal}
-body{min-height:100vh;min-height:100dvh;background:var(--blackout);color:var(--tungsten);font-family:var(--body);font-size:16px;line-height:1.5}
+body{min-height:100vh;min-height:100dvh;background:var(--blackout);color:var(--tungsten);font-family:var(--body);font-weight:400;font-size:16px;line-height:1.6;
+  -webkit-font-smoothing:antialiased}
 a{color:inherit}
 button,input,select,textarea{font:inherit;color:inherit}
 button{-webkit-tap-highlight-color:transparent;touch-action:manipulation}
-:focus-visible{outline:2px solid var(--gel-bright);outline-offset:3px}
-.tnum{font-variant-numeric:tabular-nums}
+:focus-visible{outline:2px solid var(--gel-bright);outline-offset:3px;border-radius:2px}
+.tnum{font-variant-numeric:lining-nums tabular-nums}
+/* Cormorant sets old-style figures by default: a 0 reads as an O at display size. */
+.d,.night,.kicker,.mark{font-variant-numeric:lining-nums}
 .vh{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
 
-/* Type */
-.head,.d{font-family:var(--display);font-weight:300;line-height:1}
-.night{font-family:var(--display);font-weight:100;text-transform:uppercase;line-height:.84;letter-spacing:-.005em}
-.label{font:500 13px/1.3 var(--body);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+/* Type: Cormorant for names and titles, Jost for everything you read or press. */
+.head,.d{font-family:var(--display);font-weight:400;line-height:1.08}
+.night{font-family:var(--display);font-weight:300;text-transform:uppercase;letter-spacing:.2em;line-height:1.02}
+.kicker{font-family:var(--display);font-style:italic;font-weight:400;font-size:clamp(20px,1.9vw,26px);letter-spacing:.02em;color:var(--soft)}
+.label{font-size:12.5px;line-height:1.4;letter-spacing:.02em;color:var(--muted)}
 .sub{color:var(--muted)}
 .lab{display:block;font-size:13px;color:var(--muted);margin-bottom:6px}
-.err{font-size:14px;line-height:1.45;color:var(--error)}
-.help,.hint{font-size:14px;line-height:1.45;color:var(--muted)}
+.err{font-size:13px;line-height:1.45;color:var(--error)}
+.help,.hint{font-size:13px;line-height:1.5;color:var(--muted)}
+/* The short rule under every title; lit in the gel on the first one of a page. */
+.rule{display:block;width:28px;height:1px;background:var(--tungsten);border:0}
+.rule.gel{background:var(--gel-bright)}
+/* A text link with a line in front that grows on hover. */
+.go{display:inline-flex;align-items:center;gap:14px;min-height:44px;font-size:13px;letter-spacing:.06em;text-decoration:none;color:var(--tungsten)}
+/* 30px drawn at 60% takes 18px of the row; on hover it grows into the gap without moving the words. */
+.go::before{content:"";width:30px;height:1px;margin-right:-12px;background:currentColor;transform:scaleX(.6);transform-origin:left;transition:transform 320ms var(--ease-out)}
+@media (hover:hover) and (pointer:fine){.go:hover::before{transform:none}}
 
-/* The logo: the name in display caps, the II lit in tonight's gel. */
-.mark,.brand{font:600 21px/1 var(--display);letter-spacing:.16em;text-transform:uppercase;color:var(--tungsten);text-decoration:none;white-space:nowrap}
-.two,.mark .ii{color:var(--gel-bright)}
+/* The logo: the name in display caps, wide. */
+.mark,.brand{font:500 19px/1 var(--display);letter-spacing:.24em;text-transform:uppercase;color:var(--tungsten);text-decoration:none;white-space:nowrap}
+.two{color:inherit}
 
-/* Buttons: solid is the work light (tungsten), line is an outline. Never the gel colour: the gel lights the room, not the controls. */
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:52px;padding:0 28px;border-radius:2px;border:1px solid transparent;
-  font:500 16px/1.2 var(--body);letter-spacing:.01em;text-decoration:none;cursor:pointer;white-space:nowrap;
+/* Buttons: pills are the only rounded shape; panels, inputs and photos stay square. solid is bone, gel is the night's light (the
+   one booking action per screen), line is an outline, quiet has no edge. */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:44px;padding:0 24px;border-radius:999px;border:1px solid transparent;
+  font:500 13.5px/1.2 var(--body);letter-spacing:.04em;text-decoration:none;cursor:pointer;white-space:nowrap;
   transition:transform 160ms var(--ease-out),background-color 200ms ease,border-color 200ms ease,color 200ms ease}
 .btn:enabled:active,a.btn:active{transform:scale(.97)}
-.btn.solid{background:var(--tungsten);color:var(--ink);border-color:var(--tungsten)}
-.btn.line{background:transparent;color:var(--tungsten);border-color:rgba(241,236,228,.38)}
+.btn.solid{background:var(--tungsten);color:var(--ink)}
+.btn.gel{background:var(--gel-bright);color:var(--ink)}
+.btn.line{background:transparent;color:var(--tungsten);border-color:var(--line)}
+.btn.quiet{background:transparent;color:var(--tungsten)}
 @media (hover:hover) and (pointer:fine){
-  .btn.solid:enabled:hover,a.btn.solid:hover{background:#FFFDF8;border-color:#FFFDF8}
-  .btn.line:enabled:hover,a.btn.line:hover{border-color:var(--tungsten);background:rgba(241,236,228,.06)}
+  .btn.solid:enabled:hover,a.btn.solid:hover{background:#fff}
+  .btn.gel:enabled:hover,a.btn.gel:hover{background:color-mix(in oklab,var(--gel-bright) 82%,#fff)}
+  .btn.line:enabled:hover,a.btn.line:hover{border-color:var(--tungsten)}
+  .btn.quiet:enabled:hover,a.btn.quiet:hover{background:rgba(236,233,227,.06)}
 }
-.btn.sm{min-height:44px;padding:0 18px;font-size:15px}
+.btn.sm{min-height:44px;padding:0 18px;font-size:13px}
 .btn.wide{width:100%}
-.btn:disabled,.btn[aria-disabled="true"]{background:transparent;color:var(--muted);border-color:var(--line);cursor:not-allowed}
+.btn:disabled,.btn[aria-disabled="true"]{background:transparent;color:var(--muted);border-color:var(--line-soft);cursor:not-allowed}
+.btn.danger{background:transparent;color:var(--error);border-color:color-mix(in oklab,var(--error) 45%,transparent)}
 
-.chip{min-height:44px;padding:6px 14px;border-radius:2px;border:1px solid var(--line);background:transparent;color:var(--soft);font-size:15px;cursor:pointer;
+.chip{min-height:44px;padding:6px 16px;border-radius:999px;border:1px solid var(--line);background:transparent;color:var(--soft);font-size:13.5px;cursor:pointer;
   transition:border-color 200ms ease,background-color 200ms ease,color 200ms ease}
-.chip[aria-pressed="true"]{background:var(--raised);color:var(--tungsten);border-color:var(--gel-bright)}
-.chip em{color:var(--muted);margin-left:6px}
+.chip[aria-pressed="true"]{background:var(--tungsten);color:var(--ink);border-color:var(--tungsten)}
+.chip em{font-style:normal;opacity:.7;margin-left:6px}
+@media (hover:hover) and (pointer:fine){.chip:hover{border-color:var(--tungsten)}}
 
-.badge{display:inline-block;font-size:13px;padding:3px 10px;border-radius:2px;background:var(--raised);white-space:nowrap}
-.b-held{color:var(--held)}.b-paid{color:var(--paid)}.b-in{color:var(--soft)}.b-off{color:var(--muted)}
+/* Status: a dot and a word, never colour alone. */
+.badge{display:inline-flex;align-items:center;gap:8px;font-size:12.5px;white-space:nowrap;color:var(--soft)}
+.badge::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--muted);flex:none}
+.b-held::before{background:var(--held)}.b-paid::before{background:var(--paid)}.b-in::before{background:var(--tungsten)}.b-off::before{background:var(--line)}
+.b-held{color:var(--held)}.b-paid{color:var(--paid)}
 
-/* Fields */
+/* Fields: square, raised, lit in the gel on focus. */
 .field{display:flex;flex-direction:column;gap:8px}
-.field label,.flabel{font:500 14px/1.3 var(--body);color:var(--soft)}
-.field label span{color:var(--muted);font-weight:400}
-.field input,.field select,.field textarea,.input{min-height:52px;padding:0 16px;background:var(--surface);border:1px solid var(--line);border-radius:2px;
-  color:var(--tungsten);font:400 17px var(--body);width:100%;transition:border-color 200ms ease}
-.field textarea{padding:12px 16px;resize:vertical;line-height:1.5}
-.field input::placeholder,.input::placeholder{color:#8A8279}
+.field label,.flabel{font-size:13px;line-height:1.3;color:var(--soft)}
+.field label span{color:var(--muted)}
+.field input,.field select,.field textarea,.input{min-height:48px;padding:0 16px;background:var(--raised);border:1px solid var(--line);border-radius:0;
+  color:var(--tungsten);font:400 15px var(--body);width:100%;transition:border-color 200ms ease}
+.field textarea{padding:12px 16px;resize:vertical;line-height:1.55}
+.field input::placeholder,.input::placeholder{color:var(--muted)}
 /* Focus is moved into fields by script (autofocus, first error); Chrome skips :focus-visible then, so fields ring on any focus. */
-.field input:focus,.field select:focus,.field textarea:focus,.input:focus{outline:2px solid var(--gel-bright);outline-offset:2px}
+.field input:focus,.field select:focus,.field textarea:focus,.input:focus{outline:none;border-color:var(--gel-bright);box-shadow:0 0 0 1px var(--gel-bright)}
 .field [aria-invalid="true"]{border-color:var(--error)}
-/* Ticks and radios drawn in the house kit: tungsten tick, gel dot, the same 2 px corners as everything else. */
 input[type="checkbox"],input[type="radio"]{appearance:none;width:20px;height:20px;flex:none;display:inline-grid;place-content:center;margin:0;
   background:var(--blackout);border:1px solid var(--muted);cursor:pointer;transition:border-color 200ms ease,background-color 200ms ease}
-input[type="checkbox"]{border-radius:2px}
 input[type="checkbox"]::before{content:"";width:10px;height:5px;border:solid var(--ink);border-width:0 0 2px 2px;transform:translateY(-1px) rotate(-45deg);opacity:0}
 input[type="checkbox"]:checked{background:var(--tungsten);border-color:var(--tungsten)}
 input[type="checkbox"]:checked::before{opacity:1}
@@ -111,33 +133,41 @@ input[type="radio"]:checked{border-color:var(--gel-bright)}
 input[type="radio"]:checked::before{transform:none;opacity:1}
 input[aria-invalid="true"]{border-color:var(--error)}
 
-/* Card and single-card screens (sign in, signed out, not found) */
-.card{background:var(--surface);border:1px solid var(--line-soft);border-radius:2px;padding:20px}
-.center{min-height:100vh;min-height:100dvh;display:flex;align-items:center;justify-content:center;padding:24px;position:relative;overflow:hidden}
-.solo{position:relative;width:100%;max-width:420px;display:flex;flex-direction:column;gap:16px;background:transparent;border:0;padding:0}
-.solo .brand{margin-bottom:18px}
-.solo h1{font-family:var(--display);font-weight:300;font-size:52px;line-height:1}
-.solo form{display:flex;flex-direction:column;gap:16px}
+/* Card and single-card screens (signed out, not found) */
+.card{background:var(--surface);border:1px solid var(--line-soft);padding:20px}
+.center{min-height:100vh;min-height:100dvh;display:flex;align-items:center;justify-content:center;padding:24px;position:relative;overflow:hidden;
+  background:radial-gradient(circle at 50% -10%,color-mix(in oklab,var(--gel-bright) 16%,transparent),transparent 55%)}
+.solo{position:relative;width:100%;max-width:420px;display:flex;flex-direction:column;gap:18px;background:transparent;border:0;padding:0}
+.solo .brand{margin-bottom:18px;font-size:16px}
+.solo h1{font-family:var(--display);font-weight:400;font-size:clamp(34px,6vw,44px);line-height:1.08}
+.solo form{display:flex;flex-direction:column;gap:18px}
+.solo .btn{align-self:flex-start}
 
 /* Native <dialog>: the reset above removes its auto margin, so centre it again. */
-.dlg{margin:auto;width:min(460px,calc(100% - 32px));background:var(--surface);color:var(--tungsten);border:1px solid var(--line);border-radius:2px;padding:28px;
+.dlg{margin:auto;width:min(460px,calc(100% - 32px));background:var(--surface);color:var(--tungsten);border:1px solid var(--line);padding:28px;
   opacity:1;transform:none;transition:opacity 220ms var(--ease-out),transform 220ms var(--ease-out),overlay 220ms allow-discrete,display 220ms allow-discrete}
 @starting-style{.dlg[open]{opacity:0;transform:translateY(10px) scale(.98)}}
 .dlg[open]{display:flex;flex-direction:column;gap:16px}
-.dlg::backdrop{background:rgba(12,10,14,.82)}
-.dlg h2{font-family:var(--display);font-weight:300;font-size:34px;line-height:1.05}
+.dlg::backdrop{background:rgba(7,7,10,.88)}
+.dlg h2{font-family:var(--display);font-weight:400;font-size:30px;line-height:1.1}
 .dlg p{color:var(--soft)}
 .drow{display:flex;gap:10px;flex-wrap:wrap}
 
 /* Loading and failed states shared by lists and pages */
 .fail{display:flex;flex-direction:column;align-items:flex-start;gap:14px}
-.skel{height:14px;border-radius:2px;margin:16px;background:linear-gradient(90deg,var(--surface) 0%,var(--raised) 50%,var(--surface) 100%);background-size:200% 100%;
+.skel{height:14px;margin:16px;background:linear-gradient(90deg,var(--surface) 0%,var(--raised) 50%,var(--surface) 100%);background-size:200% 100%;
   animation:shimmer 1.6s linear infinite}
 @keyframes shimmer{from{background-position:100% 0}to{background-position:-100% 0}}
 
+/* Entrances: names settle (tracking pulls in), the rest rises. Both fill backwards only, so nothing stays a layer once done. */
+@keyframes settle{from{opacity:0;letter-spacing:.42em}}
+.settle{animation:settle 1.4s var(--ease-out) 250ms backwards}
+@keyframes rise{from{opacity:0;transform:translateY(10px)}}
+.rise{animation:rise 800ms var(--ease-out) backwards;animation-delay:calc(var(--i,0) * 80ms)}
+
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{scroll-behavior:auto!important}
-  .stage{transition-duration:240ms}
+  .settle,.rise{animation:none}
   .btn:enabled:active,a.btn:active{transform:none}
   .skel{animation:none}
   .dlg{transition:none}

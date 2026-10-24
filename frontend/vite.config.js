@@ -39,7 +39,7 @@ export default defineConfig(({ command }) => ({
       outDir: '../backend/public',
       workbox: {
         globDirectory: out,
-        globPatterns: ['index.html', 'assets/*.{js,css}', 'fonts/*.woff2'],
+        globPatterns: ['index.html', 'assets/*.{js,css}', 'fonts/{cormorant,jost}-*.woff2'],
         manifestTransforms: [passShell],
         // /p/* opens from the cached page with or without signal; the pass data comes from IndexedDB, never from here.
         navigateFallback: '/p',

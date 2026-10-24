@@ -4,20 +4,17 @@ import { useQuery } from '@tanstack/react-query';
 import Events from './AdminEvents.jsx';
 import { Bookings, clubNow, DoorLog, Drawer, eventsQuery, Guestlist, nightQuery, Overview } from './AdminNight.jsx';
 import Team from './AdminTeam.jsx';
-import { clock, gelOf } from './night.js';
+import { clock, dayParts, gelOf } from './night.js';
 import { SignOut, Staff } from './staff.jsx';
 import { Mark } from './ui.jsx';
 import './admin.css';
 
 // Manager region: /admin/*. Door staff are sent to /door by Staff.
-// The side menu lists only pages that exist, in the two groups of docs/design/AdminOverview.dc.html.
+// The side menu lists only pages that exist, in the two groups of the Sorot board AdminOverview.
 const NAV = [
   ['Night', [['/admin', 'Overview'], ['/admin/tables', 'Table bookings'], ['/admin/guestlist', 'Guestlist'], ['/admin/door', 'Door log']]],
   ['Planning', [['/admin/events', 'Events'], ['/admin/team', 'Team']]],
 ];
-
-// "Thursday 8 October", from the event's date; noon keeps the day in any zone.
-const longDate = (iso) => new Date(`${iso}T12:00:00`).toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
 
 // Re-render now and then, so the club's clock and the held-table minutes keep moving between refreshes.
 function useTick(ms) {
@@ -78,17 +75,20 @@ function Shell({ me }) {
           {!t?.event ? (
             <span />
           ) : (
-            <label className="nightpick">
-              <span>Night</span>
-              <select className="input" value={date ?? t.event.date} onChange={(e) => setDate(e.target.value)}>
-                {nights.map((n) => (
-                  <option key={n.date} value={n.date}>
-                    {longDate(n.date)} · {n.name}
-                    {n.date === t.tonight ? ' (tonight)' : ''}
-                  </option>
-                ))}
-              </select>
-            </label>
+            <div className="nights" role="group" aria-label="Night">
+              {nights.map((n) => {
+                const d = dayParts(n.date);
+                return (
+                  <button key={n.date} type="button" className={`gel-${gelOf(n.date)}`} aria-pressed={n.date === (date ?? t.event.date)} onClick={() => setDate(n.date)}>
+                    <span className="tnum">
+                      {d.day} {d.date} {d.month}
+                      {n.date === t.tonight && ', tonight'}
+                    </span>
+                    <b>{n.name}</b>
+                  </button>
+                );
+              })}
+            </div>
           )}
           <span className="tnum">
             Signed in as {me.name}, {me.role}

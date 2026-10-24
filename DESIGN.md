@@ -1,260 +1,159 @@
 ---
 name: The Fanglle II
-description: A fictional Canggu superclub where every night of the week has its own light.
+description: A fictional Canggu superclub. One glass fang in the dark, one light that follows you, one gel per night.
 colors:
-  blackout: "#0C0A0E"
-  surface: "#16131A"
-  raised: "#211D26"
-  line: "#3A3441"
-  line-soft: "#26212C"
-  tungsten: "#F1ECE4"
-  soft: "#CFC7BD"
-  muted: "#9E968C"
-  work: "#F7F3EC"
-  ink: "#0C0A0E"
+  ink: "#07070A"
+  surface: "#0F0F13"
+  raised: "#17171C"
+  line: "#3A3A43"
+  line-soft: "#26262D"
+  bone: "#ECE9E3"
+  soft: "#BDB9B1"
+  muted: "#8E8B85"
+  work: "#F4F2EE"
   held: "#F0B55A"
   paid: "#6FD49A"
   error: "#FF8F8F"
-  gel-thu-deep: "#2B21B0"
   gel-thu-bright: "#9A93FF"
-  gel-thu-haze: "#120F2B"
-  gel-fri-deep: "#B4600E"
+  gel-thu-deep: "#2B21B0"
   gel-fri-bright: "#F5AE4E"
-  gel-fri-haze: "#22140A"
-  gel-sat-deep: "#A30F25"
+  gel-fri-deep: "#B4600E"
   gel-sat-bright: "#FF6676"
-  gel-sat-haze: "#210A0F"
-  gel-sun-deep: "#9C3F66"
+  gel-sat-deep: "#A30F25"
   gel-sun-bright: "#F4A3C0"
-  gel-sun-haze: "#1F0F17"
+  gel-sun-deep: "#9C3F66"
   door-let-in: "#0F6B38"
   door-stop: "#A3162F"
   door-check: "#C77A12"
 typography:
   night:
-    fontFamily: "Big Shoulders Display, Arial Narrow, sans-serif"
-    fontSize: "clamp(64px, 18.4vw, 264px)"
-    fontWeight: 100
-    lineHeight: 0.84
-    letterSpacing: "-0.005em"
-  headline:
-    fontFamily: "Big Shoulders Display, Arial Narrow, sans-serif"
-    fontSize: "clamp(44px, 5vw, 72px)"
+    fontFamily: "Cormorant Garamond, Times New Roman, serif"
+    fontSize: "clamp(44px, 10vw, 152px)"
     fontWeight: 300
-    lineHeight: 1
-  title:
-    fontFamily: "Big Shoulders Display, Arial Narrow, sans-serif"
-    fontSize: "34px"
-    fontWeight: 200
-    lineHeight: 1.05
-  mark:
-    fontFamily: "Big Shoulders Display, Arial Narrow, sans-serif"
-    fontSize: "21px"
-    fontWeight: 600
-    lineHeight: 1
-    letterSpacing: "0.16em"
-  body:
-    fontFamily: "Albert Sans, Helvetica Neue, Arial, sans-serif"
-    fontSize: "17px"
+    lineHeight: 1.02
+    letterSpacing: "0.2em"
+    textTransform: uppercase
+  kicker:
+    fontFamily: "Cormorant Garamond, Times New Roman, serif"
+    fontSize: "clamp(20px, 1.9vw, 26px)"
+    fontStyle: italic
     fontWeight: 400
-    lineHeight: 1.6
-  label:
-    fontFamily: "Albert Sans, Helvetica Neue, Arial, sans-serif"
-    fontSize: "13px"
+  title:
+    fontFamily: "Cormorant Garamond, Times New Roman, serif"
+    fontSize: "clamp(30px, 3vw, 44px)"
+    fontWeight: 400
+    lineHeight: 1.08
+  name:
+    fontFamily: "Cormorant Garamond, Times New Roman, serif"
+    fontSize: "22px"
+    fontWeight: 400
+  nav:
+    fontFamily: "Jost, Helvetica Neue, Arial, sans-serif"
+    fontSize: "11.5px"
     fontWeight: 500
-    lineHeight: 1.3
-    letterSpacing: "0.12em"
+    letterSpacing: "0.22em"
+    textTransform: uppercase
+  body:
+    fontFamily: "Jost, Helvetica Neue, Arial, sans-serif"
+    fontSize: "15.5px"
+    fontWeight: 300
+    lineHeight: 1.75
+  label:
+    fontFamily: "Jost, Helvetica Neue, Arial, sans-serif"
+    fontSize: "12.5px"
+    fontWeight: 400
 rounded:
-  sharp: "2px"
+  pill: "999px"
+  square: "0"
 spacing:
-  gutter-phone: "16px"
-  gutter-desk: "64px"
-  section: "140px"
-  container: "1312px"
+  gutter: "clamp(16px, 5vw, 80px)"
+  section: "clamp(56px, 7vw, 104px)"
 components:
-  button-solid:
-    backgroundColor: "{colors.tungsten}"
-    textColor: "{colors.ink}"
-    rounded: "{rounded.sharp}"
-    padding: "0 28px"
-    height: "52px"
-  button-solid-hover:
-    backgroundColor: "#FFFDF8"
-    textColor: "{colors.ink}"
-  button-line:
-    backgroundColor: "transparent"
-    textColor: "{colors.tungsten}"
-    rounded: "{rounded.sharp}"
-    padding: "0 28px"
-    height: "52px"
-  button-small:
-    padding: "0 18px"
-    height: "44px"
-  chip:
-    backgroundColor: "transparent"
-    textColor: "{colors.soft}"
-    rounded: "{rounded.sharp}"
-    padding: "6px 14px"
-    height: "44px"
-  chip-pressed:
-    backgroundColor: "{colors.raised}"
-    textColor: "{colors.tungsten}"
-  input:
-    backgroundColor: "{colors.surface}"
-    textColor: "{colors.tungsten}"
-    rounded: "{rounded.sharp}"
-    padding: "0 16px"
-    height: "52px"
-  card:
-    backgroundColor: "{colors.surface}"
-    rounded: "{rounded.sharp}"
-    padding: "20px"
-  ticket:
-    backgroundColor: "{colors.work}"
-    textColor: "{colors.ink}"
-    rounded: "{rounded.sharp}"
+  button-solid: { backgroundColor: "{colors.bone}", textColor: "{colors.ink}", rounded: "{rounded.pill}", height: "44px" }
+  button-gel: { backgroundColor: "gel-bright of the night", textColor: "{colors.ink}", rounded: "{rounded.pill}", height: "44px" }
+  button-line: { backgroundColor: transparent, textColor: "{colors.bone}", border: "{colors.line}", rounded: "{rounded.pill}" }
+  input: { backgroundColor: "{colors.raised}", textColor: "{colors.bone}", border: "{colors.line}", rounded: "{rounded.square}", height: "48px" }
+  ticket: { backgroundColor: "{colors.work}", textColor: "{colors.ink}", rounded: "{rounded.square}" }
 ---
 
 # Design System: The Fanglle II
 
 ## Overview
 
-**Creative North Star: "Gel dan Kabut" (the gel and the haze)**
+**Creative North Star: "Sorot" (the spotlight)**
 
-Every night of the week has its own light. A page is a hazy room washed by the gel of the night on stage: strongest at the rig at the top, falling away into blackout. Only one gel is lit at a time. Changing nights is a lighting cue, not a slide change: the text leaves, the crystals pan out of the room, the gel cross-fades, the next night's crystals pan in, and its name arrives letter by letter.
+One object in the dark. A glass fang, photographed in grey, stands in a black room; the night's gel tints it, and a lamp follows the visitor's pointer so the fang only comes up where the light reaches. Changing nights is a cut through black: copy and object dip out fast, the gel changes in the dark, the next night comes up slower and its name settles in from wide tracking. Pages are slabs that stack: surface, black, then a block of the night's deep gel.
 
-The controls are not part of the show. Buttons, fields and the ticket are lit by the work light (tungsten), never by the gel, so the colour on stage always means "which night" and never "click here". Luxury comes from restraint: thin tall type, sharp 2 px corners, near-black ground, and motion that has a cause. There are no photos yet; photo frames carry a labelled brief until the owner's photos arrive.
+Luxury comes from restraint: a high-contrast serif in wide caps for names, a light geometric sans for everything you read or press, pills for controls only, square panels and fields, and motion that has a cause. There are no photos yet; the fang is the only image, and photo frames carry a labelled brief until the owner's photos arrive.
 
-The same world runs through three regions. The public site (persuade) carries the full room. The guest pass (offline) carries a band of the night's room above a light ticket. The door scanner and the manager panel (operate) keep the gel as a thin accent and a single washed band; at the door, speed and contrast beat the look.
+The same world runs through four regions. The public site (persuade) carries the lamp and the fang. The guest pass (offline) carries a halo of the gel over a white ticket. The manager panel (operate) keeps the gel to a glow at the head of the rail and the picked night's underline. The door (operate, dark and loud) keeps only the frame's sweeping line; speed and contrast beat look.
 
-**Key Characteristics:**
-- One gel per weekday (Thursday blue, Friday amber, Saturday red, Sunday rose), one on stage at a time
-- Flat geometric crystal shards in three layers, one composition per night, idle drift and a pan cue between nights
-- Big Shoulders Display at weight 100 for night names, Albert Sans for everything read
-- Tungsten primary buttons; the gel never fills a control
-- 2 px corners everywhere; the only round shapes are radio dots and status lights
+**Key characteristics:**
+- One gel per weekday (Thursday violet, Friday amber, Saturday red, Sunday rose), one lit at a time, set by `gel-<day>` classes from the date (`gelOf`), never from a name
+- The fang (`frontend/src/assets/fang.jpg`), one grey photograph tinted by `mix-blend-mode: color`, framed per place by a pose class (`hero`, `side`, `crown`, `tip`, `about`, `login`, `a0` to `a3`)
+- The lamp: a dark sheet three times the room with a soft hole, moved on `transform` only, lerp 0.11 per frame; a tap jumps it; reduced motion parks it on the crown
+- The pointer dot: a bone dot that stands up into a capsule over anything pressable, mouse only
 
 ## Colors
 
-A near-black violet ground, warm tungsten text, and four night gels that light the room but never the controls.
+Near-black ink, bone text, four night gels. Gels light the object, the primary booking action, the rule under the first title, and "where you are" marks.
 
-### Primary
-- **Tungsten** (`tungsten`): all primary text, the solid button, the tick of a checkbox. The work light of the venue.
-- **Work light paper** (`work`): the guest ticket on the QR page, the only large light surface in the system.
+- **Ink #07070A** the page; **Surface #0F0F13** panels; **Raised #17171C** fields and pressed rows; **Line #3A3A43 / #26262D** hairlines
+- **Bone #ECE9E3** 16.6:1 on ink; **Soft #BDB9B1** 10.3:1; **Muted #8E8B85** 5.9:1
+- **Held / Paid / Error** state only, always with a word beside the dot
+- **Block** `color-mix(in oklab, gel-deep 50%, ink)`, declared with each gel class so it follows the night. Muted is lifted to Soft inside it (Muted fails 4.5:1 on the amber block)
+- **Work #F4F2EE** the QR ticket: the door scanner reads dark on light fastest
 
-### Secondary (the night gels)
-Each night sets three values on its root class (`gel-thu`, `gel-fri`, `gel-sat`, `gel-sun`, chosen by `gelOf(date)` in night.js):
-- **Deep** (`gel-*-deep`): the colour of the wash, the shards, headliner bars on the timeline, text selection.
-- **Bright** (`gel-*-bright`): the lit accents: the Roman II in the mark, focus rings, selected swatch top edge, big numbers, the radio dot, guestlist cutoff marker.
-- **Haze** (`gel-*-haze`): the floor of the room where the wash fades out.
-
-These are registered with `@property`, so a change of night cross-fades the light over 900 ms.
-
-### Tertiary (state)
-- **Held amber** (`held`): a table held while the guest pays.
-- **Paid green** (`paid`): a paid booking.
-- **Error coral** (`error`): field errors and invalid borders.
-- **Door results** (`door-let-in`, `door-stop`, `door-check`): full-panel LET IN, STOP and CHECK screens at the door, each with its own high-contrast text pair.
-
-### Neutral
-- **Blackout** (`blackout`): the ground of every page.
-- **Surface** (`surface`) and **Raised** (`raised`): panels, fields, the selected swatch and selected mode card.
-- **Line** (`line`) and **Soft line** (`line-soft`): borders and hairline dividers.
-- **Soft** (`soft`) and **Muted** (`muted`): secondary text and labels. Muted is the floor for readable text on blackout.
-
-### Named Rules
-**The One Gel Rule.** Only one night's gel is lit on a screen. Other nights appear only as their swatch's thin top edge.
-
-**The Work Light Rule.** Controls are tungsten or outline. A button filled with gel colour is a bug.
+**Named rules**
+- The gel marks the night, the one booking action on a screen (`btn gel`), and position; never a second action or decoration on controls
+- Bone text on a gel surface sits on the deep gel sunk at least 70% into ink, never on the bright gel
 
 ## Typography
 
-**Display Font:** Big Shoulders Display (with Arial Narrow fallback), self-hosted, variable 100 to 600
-**Body Font:** Albert Sans (with Helvetica Neue, Arial fallback), self-hosted, 400 and 500
+Cormorant Garamond (300 to 500, italic 400) and Jost (300 to 500), self-hosted in `public/fonts` and precached for the pass page.
 
-**Character:** tall, thin, condensed caps like a beam of light, set against a calm humanist sans that does all the reading. Both fonts ship from `public/fonts` so the pass and the door keep their type without signal.
+- **Night**: Cormorant 300, caps, tracking 0.2em (0.14em under 860px). Names of nights and page titles
+- **Kicker**: Cormorant italic 400, the line above a name (the date)
+- **Title**: Cormorant 400, section titles, always followed by the short rule
+- **Nav**: Jost 500, 11.5px caps, 0.22em, navigation only
+- **Body**: Jost 300, 15.5px, line height 1.75, measure 58ch
+- **Label**: Jost 12.5px, muted
 
-### Hierarchy
-- **Night name** (100, clamp 64 to 264 px, line-height .84, uppercase): the name of a night on the hero, event page and pass band. On phones the size follows the name's length (`--chars`) so long names never break mid-word.
-- **Headline** (300, clamp 44 to 72 px): section heads, page titles, dialogs.
-- **Title** (200, 34 to 42 px): DJ names on the timeline, big counts.
-- **Mark** (600, 21 px, .16em tracking, uppercase): THE FANGLLE with the II lit in the gel.
-- **Body** (400, 16 to 17 px, line-height 1.5 to 1.6, max about 60ch): all copy, fields, buttons (buttons at 500).
-- **Label** (500, 13 px, .12em tracking, uppercase, muted): kickers, field group names, column heads.
-
-### Named Rules
-**The Thin Beam Rule.** Display type is never heavier than 300 except the mark. No italics anywhere; `em` and `i` render upright.
+**Named rules**
+- Cormorant sets old-style figures; every display number uses `lining-nums` (a 0 must not read as an O)
+- No em dash anywhere in interface copy
 
 ## Layout
 
-A single container of 1312 px with 64 px gutters on desk and 16 px on phone. Sections are separated by generous air (140 px) rather than boxes or alternating backgrounds. Hero rooms fill the first viewport (at least 640 px) and put the content in the bottom third, under the rig.
+Full-bleed slabs with a fluid gutter (`clamp(16px, 5vw, 80px)`), section padding `clamp(56px, 7vw, 104px)`. The header floats over the first room: logo left, nav centred, a pill pair right; under 900px a burger opens a full-screen sheet. Breakpoints 760px (phone) and 860px (columns stack). 360px wide without horizontal scroll.
 
-- Breakpoints: 760 px (phone to tablet), 900 px (the top menu unfolds), 1100 px (two-column flows collapse). The manager panel adds 640, 960 and 1100 px for its sidebar and grids.
-- The night picker is always four equal columns, one per night, at every width. On phones the night names hide and the day and places carry it.
-- Booking and guestlist flows are a form column with a sticky night card beside it on desk, the card dropping below the form on phone.
-- The floor plan keeps its real proportions (1000 by 620) on desk; phones get a mini plan, zone tabs and table cards.
-- No horizontal page scroll at any width. Wide manager tables scroll inside their own frame.
+## Shapes and depth
 
-## Elevation & Depth
+Pills are the only rounded shape (buttons, chips, steppers, the toggle). Panels, fields, photos, tables and the ticket stay square. Depth comes from light, not shadow: the only shadow is the manager's detail drawer.
 
-Flat. Depth comes from light, not shadow: the gel wash, a soft volumetric beam, a haze band, and three layers of crystals at different scales and opacities. There are no drop shadows on panels. The only shadow is a dark text halo on copy that sits over the lit room, so a bright shard passing behind a thin letter never takes it under 4.5:1.
+## Motion
 
-Three light states only: lit (the gel room), dim (panels on blackout with gel hairlines), dark (blackout).
-
-## Shapes
-
-Sharp 2 px corners on every button, chip, field, card, badge, dialog and count. Crystals are flat triangles cut with `clip-path`, no bevels, gradients or fake glass. The only round shapes are the radio dot, the online status light and the door's ready light.
+- **Settle**: names arrive at 0.42em tracking and pull in, 1.4s, `cubic-bezier(.23,1,.32,1)`, 250ms in, once
+- **Rise**: 10px and fade, 800ms, staggered by `--i`
+- **Cut through black**: out 220 to 240ms, in 420 to 520ms, CSS transitions so a second click retargets
+- **Drift**: crops inside panels move 5% against the scroll via `animation-timeline: view()`, `translate` so the pose's transform stays
+- **Door verdict**: one 180ms rise, nothing else; the camera frame's gel line is the door's only idle motion
+- Reduced motion: no settle, rise or drift; the lamp parks; the dot hides; cuts become plain fades
 
 ## Components
 
-### Buttons
-- **Shape:** sharp (2 px), 52 px tall, 44 px for the small size.
-- **Solid:** tungsten fill, ink text, 500 weight. The single primary action on a screen.
-- **Line:** transparent with a 38% tungsten outline; on hover the outline goes full tungsten with a faint fill.
-- **Press:** scales to .97 in 160 ms. Disabled turns to a muted outline, never a faded gel.
-
-### Chips and swatches
-- **Chip:** outline, soft text; pressed state is raised fill with a gel-bright border. Used for filters and counts.
-- **Night swatch:** a column with a thin top edge in that night's gel, day, name in display type, and places left. The selected night is raised with a full-strength edge.
-
-### Cards and panels
-- **Corner:** 2 px. **Background:** surface. **Border:** soft line. **Padding:** 20 px (panels on the public site go to 40 px).
-- Panels below the hero stay dim; the gel shows only as hairlines and big numbers.
-
-### Inputs and fields
-- **Style:** surface fill, line border, 52 px tall, 17 px text, tungsten caret.
-- **Focus:** 2 px gel-bright outline with 2 px offset, on any focus (scripts move focus to the first error).
-- **Error:** coral border and a message under the field, linked with `aria-describedby`.
-- **Checkbox and radio:** drawn in the house kit: a 2 px square with a tungsten tick, a ring with a gel dot.
-
-### Navigation
-- Public: the mark on the left, text links (This week, Gallery, About, Find my QR) at 15 px soft, a scrim band behind them so links hold contrast on any gel. Under 900 px the links fold into a Menu that opens a full-width list in display type.
-- Manager: a dark sidebar in two groups (Tonight, Planning) with a gel-bright active edge and a tungsten count for held tables; on phones it becomes a scrolling top strip.
-
-### Crystals (signature)
-Three layers of flat shards per night, laid out deterministically from the night's key: Descent hangs from the rig, Second Wave alternates up and down, Fall Line runs on a diagonal with a white fall line, Afterglow is low converging beams on a white horizon. Idle: slow bob, sway and tilt, scaled by each shard's span, plus a glint pulse. Change of night: text out (260 ms), shards pan out (520 ms, front layer furthest), gel cross-fade (900 ms), new shards pan in (1000 ms, back layer first), name letters in (32 ms apart). With reduced motion, all of it becomes fades.
-
-### Guest pass
-A band of the night's room (seven shards, the night's name, doors time) above a light ticket: QR in ink on work-light paper, the entry code in Albert Sans 30 px with .16em tracking so it can be read out at the door.
-
-### Door result
-The whole left panel turns LET IN green, STOP red or CHECK amber, with a headline, the guest's name, kind and the last four digits of the phone, and one large action. Keyboard: 1 to 9 for people entering, Enter to let in, Esc to close.
+- **Buttons** `btn solid | gel | line | quiet`, 44px pills; `btn danger` outlined in error
+- **Go link** a hairline that grows into its gap on hover, then the words
+- **Night tabs** (`swatch`): day, name in Cormorant, status; the chosen one gets a gel line that draws from the left
+- **Lane**: hour by hour, every set a block on one axis from `laneOf` (F2 order); headliner on the sunk deep gel with a bright top line; a list on phones
+- **Floor plan**: furniture from `venue_tables`; a gel pool slides to the chosen table
+- **Fields**: square, raised, gel border on focus
+- **Guest pass**: gel halo, kicker, night name, gel rule, white ticket with one sweep of light on open
+- **Manager rail**: surface, gel glow at its head, current page marked by a gel inset line; nights as buttons underlined in their gel
+- **Door result**: full-screen green, red or amber with the verdict in Cormorant 500 caps, never colour alone
 
 ## Do's and Don'ts
 
-### Do:
-- **Do** take the night's colours from its gel class (`gel-thu` to `gel-sun`) through `gelOf(date)`; never hard-code a gel hex in a component.
-- **Do** keep primary buttons tungsten and secondary buttons outlined.
-- **Do** use 2 px corners on every new box, badge or count.
-- **Do** set night names in Big Shoulders Display 100, uppercase, and everything read in Albert Sans.
-- **Do** give text over the lit room the dark halo (`room-in`) and dim crystals behind flow titles.
-- **Do** honour `prefers-reduced-motion` in every new animation; fades only.
-- **Do** keep photo frames as labelled briefs until the owner adds real photos.
+Do keep hours, prices and names from the API; tint the one fang rather than add images; give every status a word; keep `/door` fast and legible over pretty.
 
-### Don't:
-- **Don't** fill a button, field or control with gel colour.
-- **Don't** light two gels at once on one screen.
-- **Don't** use drop shadows, glass blur, bevels or glow on panels; depth is light, not elevation.
-- **Don't** use pill shapes or round corners above 2 px.
-- **Don't** use italics, em dashes in interface text, or display type heavier than 300 outside the mark.
-- **Don't** invent photos, testimonials, press or visitor numbers.
+Don't put the gel on more than one action per screen; put bone text on a bright gel; round a panel; use a gradient wash, glassmorphism or a glow on controls; show a full phone number outside the manager's booking and guestlist lists (F14).

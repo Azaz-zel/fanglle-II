@@ -6,10 +6,9 @@ import { openDB } from 'idb';
 import { api } from './api.js';
 import { clock, dayLabel, dayParts, entryCode, gelOf, idr, PASS_KINDS, passOrCopy, passState, validUntil, waShare, ZONES } from './night.js';
 import { Button, Dialog, Mark } from './ui.jsx';
-import { Crystals } from './stage.jsx';
 import './pass.css';
 
-// Guest QR page (/p/:id, S5), docs/design/Pass.dc.html: the night's band in its gel, the QR on a white work-light card.
+// Guest QR page (/p/:id, S5), Sorot board Pass: a halo of the night's gel, its name, the QR on a white work-light card.
 // Its own chunk: qrcode loads only here, idb only here and at the door.
 
 // The build lives under /app/, the page under /p/. A worker at the site root has scope / without any server header.
@@ -136,14 +135,13 @@ function Ticket({ p, savedAt }) {
           No signal. Showing the copy saved on this phone at {savedTime(savedAt)}.{!stamp && ' It still works at the door.'}
         </div>
       )}
-      <div className="band wash">
-        <Crystals night={['thu', 'fri', 'sat', 'sun'].indexOf(gelOf(e.date))} count={7} reach={0.95} />
-        <div className="beam soft" />
-        <p className="night band-name">{e.name}</p>
-        <p className="band-when">
+      <div className="band">
+        <p className="kicker band-when">
           {dayParts(e.date).weekday} {dayParts(e.date).date} {dayParts(e.date).month}
-          {e.opens_at && ` · Doors ${clock(e.opens_at)}`}
+          {e.opens_at && `, doors ${clock(e.opens_at)}`}
         </p>
+        <p className="night band-name settle">{e.name}</p>
+        <hr className="rule gel" />
       </div>
       <div className="body">
         <p className="state" aria-live="polite">
