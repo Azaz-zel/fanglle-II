@@ -2,16 +2,17 @@ import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { openDB } from 'idb';
 import { api, errorText } from './api.js';
-import { dayLabel, offsetOf, wallClock } from './night.js';
+import { dayLabel, gelOf, offsetOf, wallClock } from './night.js';
 import { SignOut, Staff } from './staff.jsx';
 import {
   applyResults, checkIn, codeHash, guestLine, HOW, importKey, judge, keyAction, kindLabel, mergePasses, nightOf, normalizeCode,
   notOurs, pendingBy, readQr, remainingOf, search, sendQueue, shiftDate, syncLine, tally, typedCode, within,
   wrongCode, wrongNight,
 } from './door.js';
+import './door.css';
 
-// Door scanner (/door, S6): fanglle-pemindai-pintu-mockup.jsx on a phone (camera), fanglle-pemindai-pintu-desktop-mockup.jsx
-// on a wide screen (handheld scanner). Both also take a handheld scanner, a typed code and a name search. Rules: door.js.
+// Door scanner (/door, S6): docs/design/DoorPhone.dc.html on a phone (camera), DoorDesk.dc.html on a wide screen (handheld
+// scanner). Both also take a handheld scanner, a typed code and a name search. Rules: door.js.
 
 // Tonight's list, the public key, the log and the check-in queue, for a night without signal. Its own database: raising
 // the version of the pass page's 'fanglle' database would lock out a pass page still open on version 1.
@@ -37,6 +38,9 @@ const saved = {
       })
       .catch(() => {}),
 };
+
+// "Thursday 8 October" for the wide header, where there is room for it.
+const longDay = (iso) => new Date(`${iso}T12:00:00`).toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
 
 const zxing = () => import('@zxing/browser'); // the camera reader, only for the phone layout
 const WIDE = '(min-width: 900px)';
@@ -107,9 +111,17 @@ function Camera({ onRead }) {
   }, []);
 
   return (
-    <div className="cam">
+    <div className={`cam${error ? ' off' : ''}`}>
       <video ref={video} muted playsInline aria-hidden="true" />
-      {!error && <div className="frame" />}
+      {!error && (
+        <div className="frame">
+          <i />
+          <i />
+          <i />
+          <i />
+          <b />
+        </div>
+      )}
       <p role={error ? 'alert' : undefined}>{error || 'Hold the QR inside the frame'}</p>
     </div>
   );
@@ -151,6 +163,7 @@ function CodeForm({ id, label, labelClass, hint, find, lock, autoFocus, onFocus,
       </label>
       <input
         id={id}
+        className="input"
         name="code"
         value={code}
         placeholder="e.g. K7QM-4TXP"
@@ -171,7 +184,7 @@ function CodeForm({ id, label, labelClass, hint, find, lock, autoFocus, onFocus,
         onFocus={onFocus}
         onBlur={onBlur}
       />
-      <p id={`${id}-m`} className={msg || wait > 0 ? 'err' : 'hint'} role="status">
+      <p id={`${id}-m`} className={`${msg || wait > 0 ? 'err' : 'hint'} tnum`} role="status">
         {wait > 0 ? `Too many wrong codes. Try again in ${wait} seconds.` : msg || hint}
       </p>
       <button className="btn line" disabled={busy || wait > 0}>
@@ -229,8 +242,8 @@ function SearchBox({ id, label, labelClass, hint, placeholder, passes, pending, 
                     {p.phone_last4 && ` · phone ends ${p.phone_last4}`}
                   </small>
                 </span>
-                <small>
-                  {p.inside_count + (pending[p.public_id] ?? 0)}/{p.people} in
+                <small className="tnum">
+                  {p.inside_count + (pending[p.public_id] ?? 0)} of {p.people} in
                 </small>
               </button>
             </li>
@@ -248,20 +261,21 @@ function Log({ items, wide }) {
       {items.map((l) =>
         wide ? (
           <li key={l.id}>
-            <span className="at">{l.at}</span>
+            <span className="at tnum">{l.at}</span>
             <span>
               {l.name}
-              <br />
-              <span className="how">{l.how}</span>
+              <small>{l.how}</small>
             </span>
-            <span>{l.n} in</span>
+            <span className="n tnum">{l.n} in</span>
           </li>
         ) : (
           <li key={l.id}>
-            <span className="at">{l.at}</span>
+            <span className="at tnum">{l.at}</span>
             <span>
-              {l.name} · {l.n} in{l.override ? ' · manager' : ''}
+              {l.name}
+              {l.override ? ' · manager' : ''}
             </span>
+            <span className="n tnum">{l.n} in</span>
           </li>
         ),
       )}
@@ -274,36 +288,40 @@ function Result({ r, wide, blocked, count, setCount, most, manager, onLetIn, onO
   const n = most > 1 ? count : 1;
   return (
     <div className={`res r-${r.tone}`} ref={focusRef} tabIndex={-1} role="alert">
-      <div className="icon">{r.tone === 'ok' ? 'VALID' : r.tone === 'bad' ? 'STOP' : 'CHECK'}</div>
-      <h2 className="head">{r.title}</h2>
+      {/* The word, not only the colour, says what to do. */}
+      <span className="cue">{r.tone === 'ok' ? 'LET IN' : r.tone === 'bad' ? 'STOP' : 'CHECK'}</span>
+      <h2 className="d">{r.title}</h2>
       {blocked && (
         <p className="blocked" role="status">
-          A new QR was scanned. Let {g.holder_name ?? 'this guest'} in or cancel first, then scan again.
+          A new QR was scanned. Finish with {g.holder_name ?? 'this guest'} first, then scan again.
         </p>
       )}
       {r.tone === 'ok' ? (
         <>
-          <div className="gname">{g.holder_name ?? 'New signup'}</div>
-          <div className="gmeta">{guestLine(g)}</div>
-          <div className="idcheck">Check ID: name matches and 21 or over</div>
+          <p className="gname d">{g.holder_name ?? 'New signup'}</p>
+          <p className="gmeta">
+            {guestLine(g)}
+            {g.phone_last4 && ` · phone ends ${g.phone_last4}`}
+          </p>
+          <p className="idcheck">Check ID for everyone. 21 and over.</p>
           {most > 1 && (
-            <>
-              <div className="gmeta">How many are coming in now?</div>
+            <div>
+              <p className="cntl">People entering now</p>
               <div className="cnt" role="group" aria-label="People entering now">
                 {Array.from({ length: most }, (_, i) => i + 1).map((k) => (
-                  <button key={k} aria-pressed={count === k} onClick={() => setCount(k)}>
+                  <button key={k} className="tnum" aria-pressed={count === k} onClick={() => setCount(k)}>
                     {k}
                   </button>
                 ))}
               </div>
-            </>
+            </div>
           )}
           <div className="acts">
             <button className="btn go" onClick={() => onLetIn(n)}>
-              Let {n} in {wide && <kbd>Enter</kbd>}
+              {wide && <kbd>Enter</kbd>}Let in {n}
             </button>
             <button className="btn plain" onClick={onClose}>
-              Cancel {wide && <kbd>Esc</kbd>}
+              {wide && <kbd>Esc</kbd>}Not now
             </button>
           </div>
         </>
@@ -314,12 +332,13 @@ function Result({ r, wide, blocked, count, setCount, most, manager, onLetIn, onO
           {r.override && !manager && <p className="why">Only a manager's sign-in can let them in anyway.</p>}
           <div className="acts">
             {r.override && manager && (
-              <button className="btn plain" onClick={onOverride}>
-                Let in anyway (manager, logged)
+              <button className="btn go" onClick={onOverride}>
+                Let in anyway
               </button>
             )}
-            <button className="btn next" onClick={onClose}>
-              Scan next {wide && <kbd>Enter</kbd>}
+            {/* Beside a manager's override the way on is the outline; alone it is the main button. */}
+            <button className={`btn ${r.override && manager ? 'plain' : 'go'}`} onClick={onClose}>
+              {wide && <kbd>Esc</kbd>}Next scan
             </button>
           </div>
         </>
@@ -608,20 +627,20 @@ function Scanner({ me }) {
   const nums = ready && (
     <div className="nums" aria-label="Tonight">
       <div>
-        <strong>{t.inside}</strong>
-        <span>Inside</span>
+        <strong className="tnum">{t.inside}</strong>
+        <span>In</span>
       </div>
       <div>
-        <strong>
+        <strong className="tnum">
           {t.gl}/{t.glOf}
         </strong>
-        <span>Guestlist</span>
+        <span>Guestlist in</span>
       </div>
       <div>
-        <strong>
+        <strong className="tnum">
           {t.tb}/{t.tbOf}
         </strong>
-        <span>Tables</span>
+        <span>Tables in</span>
       </div>
     </div>
   );
@@ -643,13 +662,15 @@ function Scanner({ me }) {
   if (load.state === 'loading')
     body = (
       <div className="startwrap">
-        <p role="status">Loading tonight's list...</p>
+        <p className="label" role="status">
+          Loading tonight's list...
+        </p>
       </div>
     );
   else if (!ready)
     body = (
       <div className="startwrap">
-        <h1 className="head">{{ none: 'No event tonight', nosignal: 'No signal' }[load.state] ?? "The door didn't load"}</h1>
+        <h1 className="d">{{ none: 'No event tonight', nosignal: 'No signal' }[load.state] ?? "The door didn't load"}</h1>
         <p>
           {load.state === 'none'
             ? "There's no night on the calendar for today, so there's nothing to scan."
@@ -671,53 +692,76 @@ function Scanner({ me }) {
   else if (!started)
     body = (
       <div className="startwrap">
-        <h1 className="head">Start the door</h1>
+        <h1 className="d">Ready for the door</h1>
         <p>
           {wide
-            ? 'Turns on scan sounds and starts listening to the handheld scanner. Click once at the start of the night.'
-            : 'Allows the camera and the scan sounds. Tap once at the start of the night.'}
+            ? 'Click once to turn on the scan sounds and start listening to the handheld scanner. The list for tonight is saved on this computer, so scanning keeps working without signal.'
+            : 'Tap once to turn on the camera and the sounds. The list for tonight is saved on this phone, so scanning keeps working without signal.'}
         </p>
         <button className="btn solid" onClick={start}>
           Start scanning
         </button>
+        {/* Either way in counts as the first tap: sounds on, the handheld scanner listening. */}
+        {!wide && (
+          <div className="pair">
+            <button
+              className="btn line"
+              onClick={() => {
+                start();
+                setView('code');
+              }}
+            >
+              Type a code
+            </button>
+            <button
+              className="btn line"
+              onClick={() => {
+                start();
+                setView('search');
+              }}
+            >
+              Search by name
+            </button>
+          </div>
+        )}
       </div>
     );
   else if (wide)
     body = (
       <div className="dbody">
-        <section className="stage" aria-label="Scan result">
+        <section className="pane" aria-label="Scan result">
           {result ? (
             <Result r={result} {...resultProps} />
           ) : (
             <div className="idle">
-              <h1 className="head">Ready to scan</h1>
-              <div className="listen" role="status">
+              <h1 className="d">Ready to scan</h1>
+              <p className="listen" role="status">
                 <span className={`dot${typing ? ' amber' : ''}`} />
                 {typing
                   ? `Scanner paused while you type ${typing === 'code' ? 'a code' : 'in search'}. Press Esc to go back.`
-                  : 'Scanner listening. Scan any QR.'}
-              </div>
-              <p>The handheld scanner types the code and presses Enter by itself. Nothing needs to be clicked first.</p>
-              <div className="keys">
+                  : 'Listening for the scanner'}
+              </p>
+              <p>Point the scanner at the guest's QR. The result shows here. Press Enter to let a green result in.</p>
+              <p className="keys">
                 <span>
-                  <kbd>1-9</kbd>people coming in
+                  <kbd>1-9</kbd>People entering
                 </span>
                 <span>
-                  <kbd>Enter</kbd>let in
+                  <kbd>Enter</kbd>Let in
                 </span>
                 <span>
-                  <kbd>Esc</kbd>cancel
+                  <kbd>Esc</kbd>Close a result
                 </span>
-              </div>
+              </p>
             </div>
           )}
         </section>
         <aside className="aside">
-          <div className="panel">
+          <div className="dpanel">
             <CodeForm
               id="code"
               label="Type a code"
-              labelClass="ptitle"
+              labelClass="label"
               hint="When a QR won't scan. Check ID first."
               find={findCode}
               lock={lock}
@@ -725,11 +769,11 @@ function Scanner({ me }) {
               onBlur={() => setTyping(null)}
             />
           </div>
-          <div className="panel">
+          <div className="dpanel">
             <SearchBox
               id="q"
-              label="Search by name or phone"
-              labelClass="ptitle"
+              label="Search by name or last 4 digits of phone"
+              labelClass="label"
               placeholder="e.g. Ayu or 1234"
               hint="For a dead phone or a QR that won't scan. Check ID first."
               passes={night.passes}
@@ -742,8 +786,8 @@ function Scanner({ me }) {
               onBlur={() => setTyping(null)}
             />
           </div>
-          <div className="panel">
-            <h3 className="ptitle">Last check-ins</h3>
+          <div className="dpanel">
+            <h2 className="label">Last check-ins</h2>
             <Log items={log} wide />
           </div>
         </aside>
@@ -754,9 +798,10 @@ function Scanner({ me }) {
       <>
         {view === 'search' ? (
           <div className="dmain">
+            <h1 className="d">Search by name</h1>
             <SearchBox
               id="q"
-              label="Search by name or last 4 digits of phone"
+              label="Name or last 4 digits of phone"
               placeholder="e.g. Ayu or 1234"
               hint="Use this when a phone is dead or a QR won't scan. Check ID before letting anyone in."
               passes={night.passes}
@@ -770,9 +815,11 @@ function Scanner({ me }) {
           </div>
         ) : view === 'code' ? (
           <div className="dmain">
+            <h1 className="d">Type a code</h1>
             <CodeForm
               id="code"
               label="Code under the guest's QR"
+              labelClass="flabel"
               hint="8 characters, shown under their QR. Check ID before letting anyone in."
               find={findCode}
               lock={lock}
@@ -786,14 +833,13 @@ function Scanner({ me }) {
           <div className="dmain">
             <Camera onRead={camRead} />
             <div className="pair">
-              <button className="btn line" onClick={() => setView('search')}>
-                Search by name
-              </button>
               <button className="btn line" onClick={() => setView('code')}>
                 Type a code
               </button>
+              <button className="btn line" onClick={() => setView('search')}>
+                Search by name
+              </button>
             </div>
-            <p className="hint">A handheld scanner plugged into this device also works. Scan straight into this screen.</p>
             <Log items={log.slice(0, 5)} />
           </div>
         )}
@@ -802,16 +848,15 @@ function Scanner({ me }) {
     );
 
   return (
-    <div className={`doorapp${wide ? ' wide' : ''}`}>
-      <header className="top">
-        <div className="ttl">
-          <span className="t head">Door</span>
-          {night && (
-            <span className="n">
-              {night.event.name} · {dayLabel(night.event.date)}
-            </span>
-          )}
-        </div>
+    // The night's gel only colours the focus ring here; the door's own light is the tungsten work light.
+    <div className={`doorapp${wide ? ' wide' : ''}${night ? ` gel-${gelOf(night.event.date)}` : ''}`}>
+      <header className="dtop">
+        <span className="t d">Door</span>
+        {night && (
+          <span className="n">
+            {night.event.name} · {wide ? longDay(night.event.date) : dayLabel(night.event.date)}
+          </span>
+        )}
         {wide && nums}
         <SignOut role={me.role} />
       </header>

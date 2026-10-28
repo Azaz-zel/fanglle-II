@@ -57,6 +57,31 @@ class HardeningTest extends TestCase
         $this->hold()->assertConflict();
     }
 
+    public function test_behind_the_tunnel_each_guest_has_their_own_limit(): void
+    {
+        $viaTunnel = fn (string $guest) => $this->withServerVariables(['REMOTE_ADDR' => '127.0.0.1', 'HTTP_X_FORWARDED_FOR' => $guest]);
+        $hold = fn ($client) => $client->postJson('/api/table-bookings', [
+            'date' => '2026-09-25', 'table_code' => 'B5', 'party_size' => 4, 'name' => 'Made Wirawan',
+            'phone' => '081234567890', 'email' => 'made@example.com', 'age_confirmed' => true,
+        ]);
+
+        foreach (range(1, 10) as $_) {
+            $hold($viaTunnel('203.0.113.7'));
+        }
+        $hold($viaTunnel('203.0.113.7'))->assertTooManyRequests();
+        $hold($viaTunnel('198.51.100.9'))->assertConflict(); // a second guest through the same tunnel is not locked out
+        $hold($viaTunnel('9.9.9.9, 203.0.113.7'))->assertTooManyRequests(); // a forged X-Forwarded-For entry is ignored
+    }
+
+    public function test_a_forwarded_for_header_from_outside_the_machine_is_ignored(): void
+    {
+        foreach (range(1, 10) as $_) {
+            $this->hold('203.0.113.7');
+        }
+        $this->withServerVariables(['REMOTE_ADDR' => '203.0.113.7', 'HTTP_X_FORWARDED_FOR' => '198.51.100.9'])->postJson('/api/table-bookings', [])
+            ->assertTooManyRequests();
+    }
+
     public function test_the_eleventh_guestlist_signup_in_a_minute_from_one_ip_is_429(): void
     {
         foreach (range(1, 10) as $_) {

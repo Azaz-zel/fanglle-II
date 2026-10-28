@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<title>Gerak, cue cahaya</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="fanglle.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Albert+Sans:wght@400;500&amp;family=Big+Shoulders+Display:wght@100;200;300;400;600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#0C0A0E}
+a{color:#F1ECE4}a:hover{color:#FFFDF8}
+</style>
+</helmet>
+<div class="stage gel-thu" style="width: 1440px; min-height: 1900px; box-sizing: border-box; padding: 88px 96px 120px; background: var(--blackout); color: var(--tungsten); font-family: var(--body); display: flex; flex-direction: column; gap: 80px">
+  <section style="display: flex; flex-direction: column; gap: 14px">
+    <h1 class="night" style="font-size: 140px">Gerak</h1>
+    <p style="margin: 0; font-size: 19px; line-height: 1.55; color: var(--soft); max-width: 64ch">Gerak meniru panggung: cahaya naik, turun, dan berganti warna; kristal melayang dan berpindah saat malam berganti. Tombol dan teks tetap tenang. Klik setiap peraga untuk memutarnya.</p>
+  </section>
+
+  <section style="display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 40px; align-items: center">
+    <div class="{{cueClass}} stage" style="position: relative; height: 420px; overflow: hidden; border: 1px solid var(--line-soft)">
+      <div class="wash" style="position: absolute; inset: 0"></div>
+      <div style="position: absolute; inset: 0; pointer-events: none"><dc-import name="Crystals" night="{{cueIdx}}" solid="" count="10" reach="0.7" hint-size="100%,100%"></dc-import></div>
+      <div class="beam" style="animation: none"></div>
+      <div style="position: absolute; left: 32px; right: 32px; bottom: 28px; display: flex; flex-direction: column; gap: 22px">
+        <div class="{{outCls}}" style="min-height: 92px">
+          <sc-for list="{{cues}}" as="c" hint-placeholder-count="4">
+            <sc-if value="{{c.on}}" hint-placeholder-val="{{ false }}">
+              <span class="night" aria-label="{{c.name}}" style="display: block; font-size: 110px"><sc-for list="{{c.letters}}" as="l" hint-placeholder-count="6"><span class="letter" aria-hidden="true" style="--d: {{l.d}}">{{l.c}}</span></sc-for></span>
+            </sc-if>
+          </sc-for>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 2px">
+          <sc-for list="{{cues}}" as="c" hint-placeholder-count="4">
+            <button class="swatch" aria-pressed="{{c.on}}" onClick="{{c.pick}}" style="--sw: {{c.sw}}; padding: 12px 14px"><span class="day">{{c.day}}</span></button>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 12px">
+      <h2 class="d" style="font-size: 44px">Cue: ganti malam</h2>
+      <p style="margin: 0; font-size: 16px; line-height: 1.6; color: var(--soft)">Teks keluar dulu. Lalu kristal malam ini meluncur jauh ke kiri dan menghilang, lapisan depan paling jauh, sementara cahaya berganti warna. Kristal malam berikutnya masuk dari kanan dengan susunannya sendiri: Descent menggantung panjang, Second Wave bergelombang, Fall Line menukik dalam satu pita diagonal, Afterglow berupa berkas cahaya rendah yang berkumpul ke matahari yang baru tenggelam di kanan. Terakhir nama malam masuk huruf demi huruf. Mundur ke malam sebelumnya membalik arahnya.</p>
+      <dl style="display: grid; grid-template-columns: auto 1fr; gap: 6px 18px; margin: 8px 0 0; font-size: 15px">
+        <dt style="color: var(--muted)">Durasi</dt><dd class="tnum" style="margin: 0">Teks keluar 260 ms · kristal keluar 520 ms, masuk 1000 ms (belakang dulu, depan terakhir) · huruf 780 ms, jeda 32 ms per huruf</dd>
+        <dt style="color: var(--muted)">Kurva</dt><dd class="tnum" style="margin: 0">Keluar cubic-bezier(.55, 0, .8, .2), masuk cubic-bezier(.23, 1, .32, 1), cahaya cubic-bezier(.65, 0, .35, 1)</dd>
+        <dt style="color: var(--muted)">Teknik</dt><dd style="margin: 0">@property untuk warna gel; transform dan opacity untuk gerak kristal, clip-path untuk bentuknya</dd>
+        <dt style="color: var(--muted)">Kurangi gerak</dt><dd class="tnum" style="margin: 0">240 ms, kristal berganti dengan memudar dan tidak melayang, teks hanya memudar</dd>
+      </dl>
+    </div>
+  </section>
+
+  <section style="display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 40px; align-items: center">
+    <button onClick="{{replayEnter}}" aria-label="Putar ulang masuk halaman" style="position: relative; height: 420px; overflow: hidden; border: 1px solid var(--line-soft); background: var(--blackout); padding: 0; cursor: pointer; text-align: left; color: inherit">
+      <sc-if value="{{showEnter}}" hint-placeholder-val="{{ true }}">
+        <div class="wash" style="position: absolute; inset: 0"></div>
+        <div style="position: absolute; inset: 0; pointer-events: none"><dc-import name="Crystals" night="0" solid="" count="10" reach="0.7" hint-size="100%,100%"></dc-import></div>
+        <div class="beam"></div>
+        <div class="haze"></div>
+        <div class="house"></div>
+        <div style="position: absolute; left: 32px; bottom: 32px; display: flex; flex-direction: column">
+          <span class="label rise" style="--i: 0; color: var(--soft)">Thursday 8 October · Doors 3 pm</span>
+          <span class="night rise" style="--i: 1; font-size: 110px; margin-top: 12px">Descent</span>
+          <span class="rise" style="--i: 2; margin-top: 14px; font-size: 18px; color: var(--soft)">Ilse Varga, with Rafi Hartono</span>
+        </div>
+      </sc-if>
+    </button>
+    <div style="display: flex; flex-direction: column; gap: 12px">
+      <h2 class="d" style="font-size: 44px">Cue: masuk halaman</h2>
+      <p style="margin: 0; font-size: 16px; line-height: 1.6; color: var(--soft)">Urutan yang sama di setiap halaman publik. Konten tetap bisa dipakai selama cue berjalan.</p>
+      <ol style="margin: 8px 0 0; padding-left: 20px; display: flex; flex-direction: column; gap: 6px; font-size: 15px">
+        <li class="tnum">Lampu ruangan turun, gel naik: 900 ms</li>
+        <li class="tnum">Sorot menyala: 800 ms, mulai 650 ms</li>
+        <li class="tnum">Teks naik 14 px: 620 ms, jeda 70 ms per baris</li>
+        <li class="tnum">Kristal jatuh dari rig: 1300 ms, jeda 55 ms per kristal</li>
+        <li>Setelah itu tiap kristal terus naik turun, bergeser kiri kanan, dan miring pada porosnya sendiri, tidak seirama dengan tetangganya. Lapisan depan bergerak paling jauh, belakang paling tenang (7 sampai 26 detik per siklus). Serpihan terang berdenyut lembut. Kabut bergeser pelan 30 detik. Semuanya berhenti bila gerak dikurangi</li>
+      </ol>
+    </div>
+  </section>
+
+  <section style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px">
+    <div style="border: 1px solid var(--line-soft); padding: 28px; display: flex; flex-direction: column; gap: 18px; align-items: flex-start">
+      <h2 class="d" style="font-size: 32px">Tekan</h2>
+      <button class="btn btn-work">Book a table</button>
+      <p class="tnum" style="margin: 0; font-size: 15px; color: var(--muted)">Mengecil ke 0,97 selama 160 ms, ease-out. Tanpa pantulan.</p>
+    </div>
+    <div style="border: 1px solid var(--line-soft); padding: 28px; display: flex; flex-direction: column; gap: 18px; align-items: flex-start">
+      <h2 class="d" style="font-size: 32px">Pilih meja</h2>
+      <button onClick="{{toggleTable}}" aria-pressed="{{tableOn}}" style="{{tableStyle}}">S3</button>
+      <p class="tnum" style="margin: 0; font-size: 15px; color: var(--muted)">Meja menyala dengan gel penuh dan pendar lembut, 300 ms. Satu-satunya yang bersinar.</p>
+    </div>
+    <div style="border: 1px solid var(--line-soft); padding: 28px; display: flex; flex-direction: column; gap: 18px; align-items: flex-start">
+      <h2 class="d" style="font-size: 32px">Angka di tempat</h2>
+      <span class="d tnum" style="font-size: 72px; font-weight: 200; line-height: .9; color: var(--gel-bright)">{{clock}}</span>
+      <p style="margin: 0; font-size: 15px; color: var(--muted)">Angka tabular berganti tanpa bergeser. Pembaca layar tidak diumumkan tiap detik.</p>
+    </div>
+  </section>
+
+  <section style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px">
+    <div style="border: 1px solid var(--line-soft); padding: 28px; display: flex; flex-direction: column; gap: 12px">
+      <h2 class="d" style="font-size: 32px">Tanpa gerak</h2>
+      <ul style="margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 8px; font-size: 16px; line-height: 1.5; color: var(--soft)">
+        <li>Hasil pindai di pintu muncul seketika. Kecepatan lebih penting.</li>
+        <li>Pengelola: hanya perubahan keadaan (panel detail, baris baru), di bawah 220 ms.</li>
+        <li>Pintasan keyboard tidak pernah dianimasikan.</li>
+      </ul>
+    </div>
+    <div style="border: 1px solid var(--line-soft); padding: 28px; display: flex; flex-direction: column; gap: 12px">
+      <h2 class="d" style="font-size: 32px">Di kode</h2>
+      <ul style="margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 8px; font-size: 16px; line-height: 1.5; color: var(--soft)">
+        <li>Cue cahaya, kristal, dan masuk halaman: CSS (transform, opacity, clip-path), jalan di luar thread utama.</li>
+        <li>Langkah pesan meja, dialog, dan panel: paket motion (AnimatePresence), transform dan opacity saja.</li>
+        <li>Semua menghormati prefers-reduced-motion.</li>
+      </ul>
+    </div>
+  </section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1900}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { cue: 0, out: false, showEnter: true, table: false, left: 892 }; }
+  go(k) {
+    if (k === this.state.cue || this.state.out) return;
+    this.setState({ out: true });
+    clearTimeout(this.sw);
+    this.sw = setTimeout(() => this.setState({ cue: k, out: false }), 260);
+  }
+  componentDidMount() { this.tick = setInterval(() => this.setState({ left: this.state.left > 0 ? this.state.left - 1 : 900 }), 1000); }
+  componentWillUnmount() { clearInterval(this.tick); clearTimeout(this.again); clearTimeout(this.sw); }
+  renderVals() {
+    const C = [['thu', 'Kamis', '#9A93FF', 'Descent'], ['fri', 'Jumat', '#F5AE4E', 'Second Wave'], ['sat', 'Sabtu', '#FF6676', 'Fall Line'], ['sun', 'Minggu', '#F4A3C0', 'Afterglow']];
+    const s = this.state;
+    const on = s.table;
+    return {
+      cueClass: 'gel-' + C[s.cue][0],
+      cueIdx: s.cue,
+      outCls: s.out ? 'swap-out' : '',
+      cues: C.map(([k, day, sw, name], i) => ({ day, sw, name, on: i === s.cue, letters: [...name].map((c, j) => ({ c: c === ' ' ? '\u00a0' : c, d: 120 + j * 32 })), pick: () => this.go(i) })),
+      showEnter: s.showEnter,
+      replayEnter: () => { this.setState({ showEnter: false }); this.again = setTimeout(() => this.setState({ showEnter: true }), 40); },
+      tableOn: on,
+      toggleTable: () => this.setState({ table: !on }),
+      tableStyle: `width: 96px; height: 96px; border-radius: 50%; font: 500 18px var(--body); cursor: pointer; transition: background-color 300ms ease, border-color 300ms ease, color 300ms ease, box-shadow 300ms ease; ${on ? 'background: var(--gel-bright); border: 1px solid var(--gel-bright); color: #0C0A0E; box-shadow: 0 0 40px color-mix(in oklab, var(--gel-bright) 50%, transparent)' : 'background: rgba(241,236,228,.07); border: 1px solid rgba(241,236,228,.6); color: #F1ECE4'}`,
+      clock: String(Math.floor(s.left / 60)).padStart(2, '0') + ':' + String(s.left % 60).padStart(2, '0'),
+    };
+  }
+}
+</script>
+</body>
+</html>

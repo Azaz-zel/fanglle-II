@@ -65,7 +65,8 @@ test('the service worker precaches the /p/:id shell and fonts, and no admin, doo
   const sw = readFileSync(new URL('../sw.js', app), 'utf8');
   const urls = [...sw.matchAll(/url:"([^"]+)"/g)].map((m) => m[1]).sort();
   const shell = [...graph([entry, 'src/Pass.jsx'])].flatMap((k) => [manifest[k].file, ...(manifest[k].css ?? [])]);
-  const fonts = readdirSync(new URL('fonts/', app)).filter((f) => f.endsWith('.woff2')).map((f) => `/app/fonts/${f}`);
+  // The faces styles.css uses; older faces may still sit in public/fonts without being precached.
+  const fonts = readdirSync(new URL('fonts/', app)).filter((f) => /^(cormorant|jost)-.*\.woff2$/.test(f)).map((f) => `/app/fonts/${f}`);
   expect(urls).toEqual(['/p', ...shell.map((f) => `/app/${f}`), ...fonts].sort());
   expect(sw.includes('allowlist:[/^\\/p\\//]')).toBe(true); // offline navigations to /p/* get the cached page
 });

@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Table bookings</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="fanglle.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Albert+Sans:wght@400;500&amp;family=Big+Shoulders+Display:wght@100;200;300;400;600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#0C0A0E}
+a{color:#F1ECE4}a:hover{color:#FFFDF8}
+</style>
+</helmet>
+<div class="stage gel-thu" style="position: relative; width: 1440px; height: 1000px; overflow: hidden; background: var(--blackout); color: var(--tungsten); font-family: var(--body); display: grid; grid-template-columns: 248px minmax(0, 1fr)">
+  <nav aria-label="Manager" style="background: var(--surface); border-right: 1px solid var(--line-soft); padding: 22px 14px; display: flex; flex-direction: column; gap: 2px">
+    <span class="mark" style="padding: 4px 10px 26px">The Fanglle <span class="ii">II</span></span>
+    <span class="label" style="padding: 10px 10px 6px">Tonight</span>
+    <a href="AdminOverview.dc.html" style="display: flex; align-items: center; min-height: 44px; padding: 0 12px; border-radius: 2px; color: var(--soft); text-decoration: none">Overview</a>
+    <a href="AdminBookings.dc.html" aria-current="page" style="display: flex; align-items: center; justify-content: space-between; min-height: 44px; padding: 0 12px; border-radius: 2px; background: var(--raised); text-decoration: none; box-shadow: inset 2px 0 0 var(--gel-bright)">Table bookings<span class="tnum" style="font-size: 12px; min-width: 22px; padding: 1px 7px; border-radius: 10px; background: var(--tungsten); color: var(--ink); text-align: center">1</span></a>
+    <a href="AdminOverview.dc.html" style="display: flex; align-items: center; min-height: 44px; padding: 0 12px; border-radius: 2px; color: var(--soft); text-decoration: none">Guestlist</a>
+    <a href="DoorDesk.dc.html" style="display: flex; align-items: center; min-height: 44px; padding: 0 12px; border-radius: 2px; color: var(--soft); text-decoration: none">Door log</a>
+    <span class="label" style="padding: 18px 10px 6px">Planning</span>
+    <a href="AdminOverview.dc.html" style="display: flex; align-items: center; min-height: 44px; padding: 0 12px; border-radius: 2px; color: var(--soft); text-decoration: none">Events</a>
+    <a href="AdminOverview.dc.html" style="display: flex; align-items: center; min-height: 44px; padding: 0 12px; border-radius: 2px; color: var(--soft); text-decoration: none">Team</a>
+    <span style="flex: 1"></span>
+    <a href="Login.dc.html" style="display: flex; align-items: center; min-height: 44px; padding: 0 12px; border: 1px solid var(--line); border-radius: 2px; color: var(--soft); text-decoration: none">Sign out</a>
+  </nav>
+
+  <div style="min-width: 0">
+    <div style="display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 16px 32px; border-bottom: 1px solid var(--line-soft); font-size: 15px; color: var(--muted)">
+      <span>This week, 8 to 11 October</span>
+      <span class="tnum">10:44 pm</span>
+    </div>
+    <main style="padding: 32px; display: flex; flex-direction: column; gap: 20px; max-width: 1120px">
+      <h1 class="d" style="font-size: 52px">Table bookings</h1>
+      <div style="display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-end">
+        <div role="group" aria-label="Night" style="display: flex; gap: 6px; flex-wrap: wrap">
+          <button class="btn btn-sm btn-work" aria-pressed="true">All nights</button>
+          <button class="btn btn-sm btn-line" aria-pressed="false">Thu 8</button>
+          <button class="btn btn-sm btn-line" aria-pressed="false">Fri 9</button>
+          <button class="btn btn-sm btn-line" aria-pressed="false">Sat 10</button>
+          <button class="btn btn-sm btn-line" aria-pressed="false">Sun 11</button>
+        </div>
+        <div style="flex: 1; min-width: 240px" class="field"><label for="bk-search" class="vh" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%)">Search bookings</label><input id="bk-search" class="input" placeholder="Search by name, code or last 4 digits" style="min-height: 44px"></div>
+      </div>
+
+      <div style="border: 1px solid var(--line-soft); background: var(--surface); overflow-x: auto">
+        <table style="width: 100%; border-collapse: collapse; min-width: 760px; font-size: 15px">
+          <thead>
+            <tr style="text-align: left; color: var(--muted); font-size: 13px">
+              <th style="padding: 12px 16px; border-bottom: 1px solid var(--line); font-weight: 500">Code</th>
+              <th style="padding: 12px 16px; border-bottom: 1px solid var(--line); font-weight: 500">Night</th>
+              <th style="padding: 12px 16px; border-bottom: 1px solid var(--line); font-weight: 500">Table</th>
+              <th style="padding: 12px 16px; border-bottom: 1px solid var(--line); font-weight: 500">Guest</th>
+              <th style="padding: 12px 16px; border-bottom: 1px solid var(--line); font-weight: 500; text-align: right">Deposit</th>
+              <th style="padding: 12px 16px; border-bottom: 1px solid var(--line); font-weight: 500">Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="background: var(--raised)"><td class="tnum" style="padding: 12px 16px; border-bottom: 1px solid var(--line-soft)">F2-9TXA</td><td style="padding: 12px 16px; border-bottom: 1px solid var(--line-soft)">Thu 8</td><td style="padding: 12px 16px; border-bottom: 1px solid var(--line-soft)">B2<small style="display: block; color: var(--muted); font-size: 13px">Booth</small></td><td style="padding: 12px 16px; border-bottom: 1px solid var(--line-soft)">Kadek Arya<small class="tnum" style="display: block; color: var(--muted); font-size: 13px">ends 5521</small></td><td class="tnum" style="padding: 12px 16px; border-bottom: 1px solid var(--line-soft); text-align: right">IDR 7,500,000</td><td style="padding: 12px 16px; border-bottom: 1px solid var(--line-soft)"><span style="font-size: 13px; padding: 3px 10px; border-radius: 2px; border: 1px solid var(--held); color: var(--held)">On hold, 6 min</span></td></tr>
+            <tr><td class="tnum" style="padding: 12px 16px; border-bottom: 1px solid var(--line-soft)">F2-7K2Q</td><td style="padding: 12px 16px; border-bottom: 1px solid var(--line-soft)">Thu 8</td><td style="padding: 12px 16px; border-bottom: 1px solid var(--line-soft)">S1<small style="display: block; color: var(--muted); font-size: 13px">Stage front</small></td><td style="padding: 12px 16px; border-bottom: 1px solid var(--line-soft)">Bayu Pratama<small class="tnum" style="display: block; color: var(--muted); font-size: 13px">ends 0421</small></td><td class="tnum" style="padding: 12px 16px; border-bottom: 1px solid var(--line-soft); text-align: right">IDR 5,000,000</td><td style="padding: 12px 16px; border-bottom: 1px solid var(--line-soft)"><span style="font-size: 13px; padding: 3px 10px; border-radius: 2px; background: var(--raised); color: var(--paid)">Paid</span></td></tr>
+            <tr><td class="tnum" style="padding: 12px 16px; border-bottom: 1px solid var(--line-soft)">F2-3MWD</td><td style="padding: 12px 16px; border-bottom: 1px solid var(--line-soft)">Thu 8</td><td style="padding: 12px 16px; border-bottom: 1px solid var(--line-soft)">B4<small style="display: block; color: var(--muted); font-size: 13px">Booth</small></td><td style="padding: 12px 16px; border-bottom: 1px solid var(--line-soft)">Dimitri Halim<small class="tnum" style="display: block; color: var(--muted); font-size: 13px">ends 7702</small></td><td class="tnum" style="padding: 12px 16px; border-bottom: 1px solid var(--line-soft); text-align: right">IDR 7,500,000</td><td style="padding: 12px 16px; border-bottom: 1px solid var(--line-soft)"><span style="font-size: 13px; padding: 3px 10px; border-radius: 2px; background: var(--raised); color: var(--paid)">Paid</span></td></tr>
+            <tr><td class="tnum" style="padding: 12px 16px; border-bottom: 1px solid var(--line-soft)">F2-R6YD</td><td style="padding: 12px 16px; border-bottom: 1px solid var(--line-soft)">Thu 8</td><td style="padding: 12px 16px; border-bottom: 1px solid var(--line-soft)">T2<small style="display: block; color: var(--muted); font-size: 13px">Bar</small></td><td style="padding: 12px 16px; border-bottom: 1px solid var(--line-soft)">Rina Kusuma<small class="tnum" style="display: block; color: var(--muted); font-size: 13px">ends 6612</small></td><td class="tnum" style="padding: 12px 16px; border-bottom: 1px solid var(--line-soft); text-align: right">IDR 2,500,000</td><td style="padding: 12px 16px; border-bottom: 1px solid var(--line-soft)"><span style="font-size: 13px; padding: 3px 10px; border-radius: 2px; background: var(--raised); color: var(--paid)">Paid</span></td></tr>
+            <tr><td class="tnum" style="padding: 12px 16px; border-bottom: 1px solid var(--line-soft)">F2-QH4N</td><td style="padding: 12px 16px; border-bottom: 1px solid var(--line-soft)">Thu 8</td><td style="padding: 12px 16px; border-bottom: 1px solid var(--line-soft)">S2<small style="display: block; color: var(--muted); font-size: 13px">Stage front</small></td><td style="padding: 12px 16px; border-bottom: 1px solid var(--line-soft)">Putu Eka<small class="tnum" style="display: block; color: var(--muted); font-size: 13px">ends 1186</small></td><td class="tnum" style="padding: 12px 16px; border-bottom: 1px solid var(--line-soft); text-align: right; color: var(--muted)">IDR 5,000,000</td><td style="padding: 12px 16px; border-bottom: 1px solid var(--line-soft)"><span style="font-size: 13px; padding: 3px 10px; border-radius: 2px; color: var(--muted); border: 1px solid var(--line)">Released, not paid</span></td></tr>
+            <tr><td class="tnum" style="padding: 12px 16px; border-bottom: 1px solid var(--line-soft)">F2-C8RV</td><td style="padding: 12px 16px; border-bottom: 1px solid var(--line-soft)">Fri 9</td><td style="padding: 12px 16px; border-bottom: 1px solid var(--line-soft)">S3<small style="display: block; color: var(--muted); font-size: 13px">Stage front</small></td><td style="padding: 12px 16px; border-bottom: 1px solid var(--line-soft)">Laras Wibowo<small class="tnum" style="display: block; color: var(--muted); font-size: 13px">ends 9034</small></td><td class="tnum" style="padding: 12px 16px; border-bottom: 1px solid var(--line-soft); text-align: right">IDR 8,000,000</td><td style="padding: 12px 16px; border-bottom: 1px solid var(--line-soft)"><span style="font-size: 13px; padding: 3px 10px; border-radius: 2px; background: var(--raised); color: var(--paid)">Paid</span></td></tr>
+            <tr><td class="tnum" style="padding: 12px 16px; border-bottom: 1px solid var(--line-soft)">F2-M2JE</td><td style="padding: 12px 16px; border-bottom: 1px solid var(--line-soft)">Fri 9</td><td style="padding: 12px 16px; border-bottom: 1px solid var(--line-soft)">B5<small style="display: block; color: var(--muted); font-size: 13px">Booth</small></td><td style="padding: 12px 16px; border-bottom: 1px solid var(--line-soft)">Gede Mahendra<small class="tnum" style="display: block; color: var(--muted); font-size: 13px">ends 6250</small></td><td class="tnum" style="padding: 12px 16px; border-bottom: 1px solid var(--line-soft); text-align: right">IDR 12,000,000</td><td style="padding: 12px 16px; border-bottom: 1px solid var(--line-soft)"><span style="font-size: 13px; padding: 3px 10px; border-radius: 2px; background: var(--raised); color: var(--paid)">Paid</span></td></tr>
+            <tr><td class="tnum" style="padding: 12px 16px; border-bottom: 1px solid var(--line-soft)">F2-W7PT</td><td style="padding: 12px 16px; border-bottom: 1px solid var(--line-soft)">Sun 11</td><td style="padding: 12px 16px; border-bottom: 1px solid var(--line-soft)">T1<small style="display: block; color: var(--muted); font-size: 13px">Bar</small></td><td style="padding: 12px 16px; border-bottom: 1px solid var(--line-soft)">Clara Tan<small class="tnum" style="display: block; color: var(--muted); font-size: 13px">ends 3047</small></td><td class="tnum" style="padding: 12px 16px; border-bottom: 1px solid var(--line-soft); text-align: right">IDR 2,000,000</td><td style="padding: 12px 16px; border-bottom: 1px solid var(--line-soft)"><span style="font-size: 13px; padding: 3px 10px; border-radius: 2px; background: var(--raised); color: var(--paid)">Paid</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </main>
+  </div>
+
+  <div aria-hidden="true" style="position: absolute; inset: 0; background: rgba(12,10,14,.7)"></div>
+  <aside role="dialog" aria-modal="true" aria-labelledby="dr-t" style="position: absolute; top: 0; right: 0; bottom: 0; width: 440px; background: var(--surface); border-left: 1px solid var(--line); display: flex; flex-direction: column; overflow-y: auto">
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; padding: 24px; border-bottom: 1px solid var(--line)">
+      <div>
+        <p class="label">Descent · Thu 8 Oct</p>
+        <h2 id="dr-t" class="d" style="font-size: 44px; margin-top: 6px">Table B2</h2>
+        <span style="display: inline-block; margin-top: 10px; font-size: 13px; padding: 3px 10px; border-radius: 2px; border: 1px solid var(--held); color: var(--held)">On hold, 6 min left to pay</span>
+      </div>
+      <button class="btn btn-line btn-sm">Close</button>
+    </div>
+    <div style="padding: 24px; display: flex; flex-direction: column; gap: 22px">
+      <dl style="display: grid; grid-template-columns: auto 1fr; gap: 10px 18px; margin: 0; font-size: 15px">
+        <dt style="color: var(--muted)">Guest</dt><dd style="margin: 0">Kadek Arya</dd>
+        <dt style="color: var(--muted)">Phone</dt><dd class="tnum" style="margin: 0">ends 5521</dd>
+        <dt style="color: var(--muted)">Email</dt><dd style="margin: 0">kadek.arya@mail.com</dd>
+        <dt style="color: var(--muted)">Group</dt><dd style="margin: 0">10 people</dd>
+        <dt style="color: var(--muted)">Minimum spend</dt><dd class="tnum" style="margin: 0">IDR 15,000,000</dd>
+        <dt style="color: var(--muted)">Deposit</dt><dd class="tnum" style="margin: 0">IDR 7,500,000, not paid yet</dd>
+      </dl>
+      <a class="btn btn-line" href="https://wa.me/" style="align-self: flex-start">Message on WhatsApp</a>
+      <div>
+        <p class="label" style="margin-bottom: 12px">History</p>
+        <ol style="list-style: none; margin: 0 0 0 4px; padding: 0; border-left: 1px solid var(--line)">
+          <li style="position: relative; padding: 0 0 14px 18px; font-size: 15px"><span style="position: absolute; left: -4px; top: 7px; width: 7px; height: 7px; border-radius: 50%; background: var(--muted)"></span><span class="tnum" style="color: var(--muted)">10:38 pm</span> Held from the floor plan</li>
+          <li style="position: relative; padding: 0 0 14px 18px; font-size: 15px"><span style="position: absolute; left: -4px; top: 7px; width: 7px; height: 7px; border-radius: 50%; background: var(--muted)"></span><span class="tnum" style="color: var(--muted)">10:38 pm</span> Payment link sent</li>
+          <li style="position: relative; padding: 0 0 0 18px; font-size: 15px"><span style="position: absolute; left: -4px; top: 7px; width: 7px; height: 7px; border-radius: 50%; background: var(--held)"></span><span class="tnum" style="color: var(--held)">10:53 pm</span> Table goes back on the plan if unpaid</li>
+        </ol>
+      </div>
+      <button class="btn btn-wide" style="background: transparent; color: var(--error); border-color: var(--error)">Release the table now</button>
+    </div>
+  </aside>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1000}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

@@ -51,14 +51,21 @@ export function readout(h, now) {
   return `${h.hour} to the next hour: ${h.total} arrived. ${h.guestlist} from the guestlist, ${h.tables} from tables.`;
 }
 
-// "Needs you": nights this week nearly out of guestlist places, paid tables not here yet, overrides tonight.
-// t: GET /admin/tonight. events: GET /admin/events. now: the club's clock.
+// The night on screen against the night happening now (t.tonight, F2): 'tonight', 'ahead' or 'past'.
+export const whenOf = (t) => (t.event.date === t.tonight ? 'tonight' : t.event.date > t.tonight ? 'ahead' : 'past');
+
+// The clock the pages read the night on screen by. now: the club's clock. A night ahead hasn't started (12:00 opens a night,
+// F2); a past one is over (11:59 closes it). So its timeline, arrivals and guestlist read as all to come, or all done.
+export const nightClock = (t, now) => ({ tonight: now, ahead: '12:00', past: '11:59' })[whenOf(t)];
+
+// "Needs you": nights from tonight on nearly out of guestlist places, paid tables not here yet, overrides.
+// t: GET /admin/tonight. events: GET /admin/events. now: nightClock.
 export function attention(t, events, now) {
   const out = [];
-  const date = t.event.date;
-  for (const e of events.filter((x) => x.date >= date).slice(0, 7)) {
+  const when = whenOf(t);
+  for (const e of events.filter((x) => x.date >= t.tonight).slice(0, 7)) {
     if (e.signed < e.guestlist_quota * 0.9) continue;
-    const who = e.date === date ? "Tonight's" : dayParts(e.date).weekday;
+    const who = e.date === t.tonight ? "Tonight's" : dayParts(e.date).weekday;
     out.push({
       key: `gl-${e.date}`,
       title: `${who} guestlist ${e.signed >= e.guestlist_quota ? 'is full' : 'almost full'}`,
@@ -67,7 +74,7 @@ export function attention(t, events, now) {
       to: ['/admin/events', { state: { date: e.date } }],
     });
   }
-  if (t.tables.to_arrive > 0) {
+  if (t.tables.to_arrive > 0 && when !== 'ahead') {
     const head = earliest(headliners(t.event.lineup).map((s) => s.starts_at));
     const started = head && nightMinutes(now) >= nightMinutes(head);
     out.push({
@@ -82,7 +89,7 @@ export function attention(t, events, now) {
   if (o.count > 0)
     out.push({
       key: 'overrides',
-      title: `${plural(o.count, 'manager override')} tonight`,
+      title: `${plural(o.count, 'manager override')}${when === 'tonight' ? ' tonight' : ''}`,
       sub: `${o.latest.holder_name}, ${plural(o.latest.count, 'person', 'people')} at ${hhmm(o.latest.scanned_at)}`,
       action: 'Open door log',
       to: ['/admin/door?overrides=1'],

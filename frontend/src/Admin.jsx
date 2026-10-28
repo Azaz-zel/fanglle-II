@@ -2,18 +2,18 @@ import { useEffect, useState } from 'react';
 import { Link, NavLink, Route, Routes } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import Events from './AdminEvents.jsx';
-import { Bookings, clubNow, DoorLog, Drawer, Guestlist, Overview, tonightQuery } from './AdminNight.jsx';
+import { Bookings, clubNow, DoorLog, Drawer, eventsQuery, Guestlist, nightQuery, Overview } from './AdminNight.jsx';
 import Team from './AdminTeam.jsx';
-import { dayLabel } from './night.js';
+import { clock, dayParts, gelOf } from './night.js';
 import { SignOut, Staff } from './staff.jsx';
 import { Mark } from './ui.jsx';
+import './admin.css';
 
 // Manager region: /admin/*. Door staff are sent to /door by Staff.
-// The side menu lists only pages that exist.
+// The side menu lists only pages that exist, in the two groups of the Sorot board AdminOverview.
 const NAV = [
-  ['Tonight', [['/admin', 'Overview']]],
-  ['Operations', [['/admin/tables', 'Table bookings'], ['/admin/guestlist', 'Guestlist'], ['/admin/door', 'Door log']]],
-  ['Setup', [['/admin/events', 'Events'], ['/admin/team', 'Team']]],
+  ['Night', [['/admin', 'Overview'], ['/admin/tables', 'Table bookings'], ['/admin/guestlist', 'Guestlist'], ['/admin/door', 'Door log']]],
+  ['Planning', [['/admin/events', 'Events'], ['/admin/team', 'Team']]],
 ];
 
 // Re-render now and then, so the club's clock and the held-table minutes keep moving between refreshes.
@@ -26,7 +26,9 @@ function useTick(ms) {
 }
 
 function Shell({ me }) {
-  const night = useQuery(tonightQuery);
+  const [date, setDate] = useState(null); // the night picked in the top bar; null is the server's choice
+  const night = useQuery(nightQuery(date));
+  const events = useQuery(eventsQuery);
   const [drawer, setDrawer] = useState(null);
   const [flash, setFlash] = useState('');
   useTick(30_000);
@@ -39,22 +41,25 @@ function Shell({ me }) {
 
   const t = night.data;
   const held = t?.held?.length ?? 0;
-  const page = { night, open: setDrawer };
+  const page = { night, open: setDrawer, at: drawer };
 
+  const nights = events.data?.events ?? (t?.event ? [t.event] : []);
+
+  // The whole panel is lit by the picked night's gel; with no night at all it keeps Thursday's, the default.
   return (
-    <div className="app">
+    <div className={`app gel-${t?.event ? gelOf(t.event.date) : 'thu'}`}>
       <nav className="side" aria-label="Manager">
-        <span className="brand head">
+        <span className="mark">
           <Mark />
         </span>
         {NAV.map(([group, items]) => (
           <div key={group} className="navgrp">
-            <div className="grp">{group}</div>
+            <div className="label grp">{group}</div>
             {items.map(([to, label]) => (
               <NavLink key={to} className="navbtn" to={to} end={to === '/admin'}>
                 {label}
                 {to === '/admin/tables' && held > 0 && (
-                  <span className="count" aria-label={`${held} held`}>
+                  <span className="count tnum" aria-label={`${held} held`}>
                     {held}
                   </span>
                 )}
@@ -67,15 +72,33 @@ function Shell({ me }) {
       </nav>
       <div className="main">
         <div className="topbar">
-          <span>Signed in as {me.name}</span>
-          {t?.event && (
-            <span>
-              {dayLabel(t.event.date)} · {clubNow(t)}
-            </span>
+          {!t?.event ? (
+            <span />
+          ) : (
+            <div className="nights" role="group" aria-label="Night">
+              {nights.map((n) => {
+                const d = dayParts(n.date);
+                return (
+                  <button key={n.date} type="button" className={`gel-${gelOf(n.date)}`} aria-pressed={n.date === (date ?? t.event.date)} onClick={() => setDate(n.date)}>
+                    <span className="tnum">
+                      {d.day} {d.date} {d.month}
+                      {n.date === t.tonight && ', tonight'}
+                    </span>
+                    <b>{n.name}</b>
+                  </button>
+                );
+              })}
+            </div>
           )}
+          <span className="tnum">
+            Signed in as {me.name}, {me.role}
+            {t?.event && ` · ${clock(clubNow(t))}`}
+          </span>
         </div>
         <main className="content">
-          <div role="status">{flash && <div className="flash">{flash}</div>}</div>
+          <div role="status" className="flashbox">
+            {flash && <div className="flash">{flash}</div>}
+          </div>
           <Routes>
             <Route index element={<Overview {...page} />} />
             <Route path="tables" element={<Bookings {...page} />} />
@@ -86,8 +109,8 @@ function Shell({ me }) {
             <Route
               path="*"
               element={
-                <div className="fail">
-                  <h1 className="title head">Page not found</h1>
+                <div className="nothing">
+                  <h1 className="d title">Page not found</h1>
                   <Link className="btn line" to="/admin">
                     Go to the overview
                   </Link>

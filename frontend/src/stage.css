@@ -1,0 +1,60 @@
+/* The lit object (stage.jsx): the fang, the gel tint, the lamp, and the cut through black between nights. Loaded with stage.jsx, so
+   only the chunks that draw the object carry it. */
+
+.room{position:relative;overflow:hidden;isolation:isolate;background:var(--blackout)}
+.lit{position:absolute;inset:0;overflow:hidden;background:var(--blackout);isolation:isolate;pointer-events:none}
+.lit .dip{position:absolute;inset:0}
+.lit .obj{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;user-select:none}
+/* The photo's own black is not our ink: fade its edges out so the light never finds a rectangle. */
+.obj.hero,.obj.about,.obj.login{-webkit-mask-image:radial-gradient(circle closest-side at 50% 50%,#000 64%,transparent 100%);
+  mask-image:radial-gradient(circle closest-side at 50% 50%,#000 64%,transparent 100%)}
+.lit .tint{position:absolute;inset:0;background:var(--gel-bright);mix-blend-mode:color;opacity:.5;transition:--gel-bright 600ms var(--ease-in-out)}
+.lit .floor{position:absolute;left:0;right:0;bottom:0;height:42%;background:linear-gradient(to top,var(--blackout) 18%,rgba(7,7,10,0))}
+/* The lamp: a sheet three times the room with a soft hole in the middle. Only its transform moves (stage.jsx). */
+.lit .shade{position:absolute;left:-100%;top:-100%;width:300%;height:300%;will-change:transform;
+  background:radial-gradient(circle at 50% 50%,rgba(7,7,10,0) 0,rgba(7,7,10,.08) 6%,rgba(7,7,10,.62) 13%,rgba(7,7,10,.93) 21%,#07070A 30%)}
+.room > .lit{z-index:-1}
+
+/* Poses: how each place frames the same fang. The hero turns a little for each night, while it is dipped out. */
+.obj.hero{object-fit:contain;height:74%;top:5%}
+[data-night="fri"] .obj.hero{transform:scale(1.06) rotate(-6deg) translateX(-2%)}
+[data-night="sat"] .obj.hero{transform:scale(1.1) rotate(7deg) translateX(2%)}
+[data-night="sun"] .obj.hero{transform:scale(.94) rotate(3deg)}
+.obj.side{object-position:50% 22%;transform:scale(1.25);transform-origin:50% 20%}
+.obj.crown{object-position:62% 6%;transform:scale(1.9);transform-origin:62% 0}
+.obj.tip{object-position:46% 60%;transform:scale(1.5) rotate(-12deg);transform-origin:46% 60%}
+.obj.about{object-fit:contain;object-position:50% 10%;height:84%;transform:rotate(-14deg);opacity:.9}
+.obj.login{object-fit:contain;height:86%;top:7%}
+.obj.a0{object-position:50% 10%;transform:scale(1.7);transform-origin:50% 0}
+.obj.a1{object-position:30% 90%;transform:scale(2) rotate(-10deg);transform-origin:30% 90%}
+.obj.a2{object-position:75% 55%;transform:scale(2.3) rotate(6deg);transform-origin:75% 55%}
+.obj.a3{object-position:40% 40%;transform:scale(1.5)}
+@media (max-width:759px){.obj.hero{height:66%;top:9%}}
+
+/* The cut through black: copy and object leave fast, the gel changes in the dark, the new night comes up slower. CSS transitions,
+   so a fast second click retargets instead of queueing. */
+.dip,.swap{transition:opacity 520ms var(--ease-out),transform 420ms var(--ease-out)}
+.dip.out,.swap.out{opacity:0;transition-duration:240ms,220ms}
+.swap.out{transform:translateY(6px)}
+
+/* Panels drift: the crop inside a panel moves a little slower than the page. translate, so a pose's transform stays. */
+@supports (animation-timeline:view()){
+  @media (prefers-reduced-motion:no-preference){
+    .drift .obj{animation:drift linear both;animation-timeline:view()}
+    @keyframes drift{from{translate:0 -5%}to{translate:0 5%}}
+    .wake{animation:wake linear both;animation-timeline:view();animation-range:entry 0% cover 40%}
+    @keyframes wake{from{opacity:.25}}
+  }
+}
+
+/* The pointer dot (stage.jsx Dot). */
+.dot{position:fixed;left:0;top:0;width:14px;height:40px;margin:-20px 0 0 -7px;background:rgba(236,233,227,.92);pointer-events:none;z-index:50;
+  will-change:transform;transform:translate3d(-100px,-100px,0);clip-path:inset(13px 0 round 7px);transition:clip-path 300ms var(--ease-out)}
+.dot.tall{clip-path:inset(0 round 7px)}
+@media (hover:none),(pointer:coarse),(prefers-reduced-motion:reduce){.dot{display:none}}
+
+@media (prefers-reduced-motion:reduce){
+  .dip,.swap{transition:opacity 200ms ease}
+  .swap.out{transform:none}
+  .lit .tint{transition:none}
+}

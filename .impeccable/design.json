@@ -1,0 +1,618 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-07T14:51:49+00:00",
+  "title": "Design System: The Fanglle II",
+  "extensions": {
+    "colorMeta": {
+      "blackout": {
+        "role": "neutral",
+        "displayName": "Blackout",
+        "canonical": "#0C0A0E",
+        "tonalRamp": [
+          "#0C0A0E",
+          "#262429",
+          "#434146",
+          "#636065",
+          "#848187",
+          "#A6A4A9",
+          "#CBC8CE",
+          "#F0EDF3"
+        ]
+      },
+      "surface": {
+        "role": "neutral",
+        "displayName": "Surface",
+        "canonical": "#16131A",
+        "tonalRamp": [
+          "#0C0A10",
+          "#27232B",
+          "#444048",
+          "#635F68",
+          "#84808A",
+          "#A7A3AD",
+          "#CBC7D1",
+          "#F0ECF7"
+        ]
+      },
+      "raised": {
+        "role": "neutral",
+        "displayName": "Raised",
+        "canonical": "#211D26",
+        "tonalRamp": [
+          "#0D0911",
+          "#27232C",
+          "#44404A",
+          "#635F6A",
+          "#85808B",
+          "#A7A2AE",
+          "#CCC6D3",
+          "#F1ECF8"
+        ]
+      },
+      "line": {
+        "role": "neutral",
+        "displayName": "Line",
+        "canonical": "#3A3441",
+        "tonalRamp": [
+          "#0E0813",
+          "#28222E",
+          "#453F4C",
+          "#645E6C",
+          "#867F8E",
+          "#A9A1B1",
+          "#CDC5D6",
+          "#F2EBFC"
+        ]
+      },
+      "line-soft": {
+        "role": "neutral",
+        "displayName": "Soft line",
+        "canonical": "#26212C",
+        "tonalRamp": [
+          "#0D0912",
+          "#27222E",
+          "#453F4B",
+          "#645E6B",
+          "#857F8D",
+          "#A8A2B0",
+          "#CCC6D5",
+          "#F2EBFA"
+        ]
+      },
+      "tungsten": {
+        "role": "primary",
+        "displayName": "Tungsten",
+        "canonical": "#F1ECE4",
+        "tonalRamp": [
+          "#0E0B06",
+          "#28241F",
+          "#45413B",
+          "#65615A",
+          "#86827A",
+          "#A9A49D",
+          "#CDC8C1",
+          "#F3EEE6"
+        ]
+      },
+      "soft": {
+        "role": "neutral",
+        "displayName": "Soft",
+        "canonical": "#CFC7BD",
+        "tonalRamp": [
+          "#0F0A05",
+          "#2A241C",
+          "#474139",
+          "#676057",
+          "#888178",
+          "#ABA49A",
+          "#D0C8BE",
+          "#F5EDE3"
+        ]
+      },
+      "muted": {
+        "role": "neutral",
+        "displayName": "Muted",
+        "canonical": "#9E968C",
+        "tonalRamp": [
+          "#100A04",
+          "#2A241C",
+          "#484138",
+          "#676057",
+          "#898177",
+          "#ACA499",
+          "#D0C8BD",
+          "#F6EDE2"
+        ]
+      },
+      "work": {
+        "role": "primary",
+        "displayName": "Work light paper",
+        "canonical": "#F7F3EC",
+        "tonalRamp": [
+          "#0D0B07",
+          "#282520",
+          "#45423C",
+          "#64615B",
+          "#85827C",
+          "#A8A49E",
+          "#CCC9C2",
+          "#F2EEE7"
+        ]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Ink",
+        "canonical": "#0C0A0E",
+        "tonalRamp": [
+          "#0C0A0E",
+          "#262429",
+          "#434146",
+          "#636065",
+          "#848187",
+          "#A6A4A9",
+          "#CBC8CE",
+          "#F0EDF3"
+        ]
+      },
+      "held": {
+        "role": "tertiary",
+        "displayName": "Held amber",
+        "canonical": "#F0B55A",
+        "tonalRamp": [
+          "#130900",
+          "#342102",
+          "#593B05",
+          "#81580D",
+          "#AD7600",
+          "#D2993B",
+          "#F9BD63",
+          "#FFEBD0"
+        ]
+      },
+      "paid": {
+        "role": "tertiary",
+        "displayName": "Paid green",
+        "canonical": "#6FD49A",
+        "tonalRamp": [
+          "#000F06",
+          "#012E18",
+          "#044F2E",
+          "#0A7445",
+          "#2E9862",
+          "#57BD84",
+          "#7DE2A7",
+          "#C5FFDA"
+        ]
+      },
+      "error": {
+        "role": "tertiary",
+        "displayName": "Error coral",
+        "canonical": "#FF8F8F",
+        "tonalRamp": [
+          "#1E0002",
+          "#4C010D",
+          "#7A1321",
+          "#A03A3F",
+          "#C65C5F",
+          "#EE8080",
+          "#FFB2B0",
+          "#FEE9E8"
+        ]
+      },
+      "gel-thu-deep": {
+        "role": "secondary",
+        "displayName": "Thursday gel, deep",
+        "canonical": "#2B21B0",
+        "tonalRamp": [
+          "#050131",
+          "#160472",
+          "#2A1FAE",
+          "#4249D5",
+          "#5E6FFD",
+          "#899DFC",
+          "#B8C6FE",
+          "#E9EEFF"
+        ]
+      },
+      "gel-thu-bright": {
+        "role": "secondary",
+        "displayName": "Thursday gel, bright",
+        "canonical": "#9A93FF",
+        "tonalRamp": [
+          "#0B002D",
+          "#25006B",
+          "#3E2C8F",
+          "#5B4FB4",
+          "#7A71DA",
+          "#9C96FD",
+          "#C3C2FE",
+          "#ECEDFF"
+        ]
+      },
+      "gel-thu-haze": {
+        "role": "secondary",
+        "displayName": "Thursday gel, haze",
+        "canonical": "#120F2B",
+        "tonalRamp": [
+          "#0A0621",
+          "#22213E",
+          "#3F3E5E",
+          "#5E5D80",
+          "#7E7EA2",
+          "#A1A1C7",
+          "#C5C5EC",
+          "#ECEDFF"
+        ]
+      },
+      "gel-fri-deep": {
+        "role": "secondary",
+        "displayName": "Friday gel, deep",
+        "canonical": "#B4600E",
+        "tonalRamp": [
+          "#170600",
+          "#3B1B01",
+          "#653303",
+          "#924C08",
+          "#BE691E",
+          "#E58C48",
+          "#FEB785",
+          "#FFEADC"
+        ]
+      },
+      "gel-fri-bright": {
+        "role": "secondary",
+        "displayName": "Friday gel, bright",
+        "canonical": "#F5AE4E",
+        "tonalRamp": [
+          "#140800",
+          "#352001",
+          "#5B3A04",
+          "#84560B",
+          "#B07414",
+          "#DA9530",
+          "#FEBA62",
+          "#FEEBD5"
+        ]
+      },
+      "gel-fri-haze": {
+        "role": "secondary",
+        "displayName": "Friday gel, haze",
+        "canonical": "#22140A",
+        "tonalRamp": [
+          "#140802",
+          "#302117",
+          "#4F3E33",
+          "#6F5D51",
+          "#917E72",
+          "#B4A194",
+          "#D9C5B7",
+          "#FFEADC"
+        ]
+      },
+      "gel-sat-deep": {
+        "role": "secondary",
+        "displayName": "Saturday gel, deep",
+        "canonical": "#A30F25",
+        "tonalRamp": [
+          "#1E0002",
+          "#4C010A",
+          "#7F0218",
+          "#AF212F",
+          "#D84B4F",
+          "#FD7474",
+          "#FFB2AE",
+          "#FEE9E7"
+        ]
+      },
+      "gel-sat-bright": {
+        "role": "secondary",
+        "displayName": "Saturday gel, bright",
+        "canonical": "#FF6676",
+        "tonalRamp": [
+          "#1E0003",
+          "#4C0011",
+          "#7F0023",
+          "#B21539",
+          "#DB4459",
+          "#FC737F",
+          "#FFB1B4",
+          "#FEE8E9"
+        ]
+      },
+      "gel-sat-haze": {
+        "role": "secondary",
+        "displayName": "Saturday gel, haze",
+        "canonical": "#210A0F",
+        "tonalRamp": [
+          "#180408",
+          "#361D21",
+          "#55393E",
+          "#76585D",
+          "#98797E",
+          "#BC9BA0",
+          "#E2BFC4",
+          "#FFE8EB"
+        ]
+      },
+      "gel-sun-deep": {
+        "role": "secondary",
+        "displayName": "Sunday gel, deep",
+        "canonical": "#9C3F66",
+        "tonalRamp": [
+          "#1D000C",
+          "#490126",
+          "#731843",
+          "#983C63",
+          "#BE5E84",
+          "#E580A7",
+          "#FFAECA",
+          "#FEE8EF"
+        ]
+      },
+      "gel-sun-bright": {
+        "role": "secondary",
+        "displayName": "Sunday gel, bright",
+        "canonical": "#F4A3C0",
+        "tonalRamp": [
+          "#1D000C",
+          "#470426",
+          "#6A2643",
+          "#8E4662",
+          "#B36784",
+          "#D88AA6",
+          "#FDAFCA",
+          "#FFE7EF"
+        ]
+      },
+      "gel-sun-haze": {
+        "role": "secondary",
+        "displayName": "Sunday gel, haze",
+        "canonical": "#1F0F17",
+        "tonalRamp": [
+          "#14060D",
+          "#301F27",
+          "#4F3C45",
+          "#6F5A64",
+          "#917B85",
+          "#B59EA8",
+          "#D9C2CC",
+          "#FEE7F1"
+        ]
+      },
+      "door-let-in": {
+        "role": "tertiary",
+        "displayName": "Door let in",
+        "canonical": "#0F6B38",
+        "tonalRamp": [
+          "#001004",
+          "#002E13",
+          "#005027",
+          "#1C7340",
+          "#449660",
+          "#69BA82",
+          "#8DDFA5",
+          "#C6FFD5"
+        ]
+      },
+      "door-stop": {
+        "role": "tertiary",
+        "displayName": "Door stop",
+        "canonical": "#A3162F",
+        "tonalRamp": [
+          "#1E0003",
+          "#4B020F",
+          "#7E0620",
+          "#AE2437",
+          "#D64C57",
+          "#FE7179",
+          "#FEB2B2",
+          "#FFE8E8"
+        ]
+      },
+      "door-check": {
+        "role": "tertiary",
+        "displayName": "Door check",
+        "canonical": "#C77A12",
+        "tonalRamp": [
+          "#140800",
+          "#381E00",
+          "#5F3701",
+          "#8A5204",
+          "#B76F0A",
+          "#E09135",
+          "#FFB971",
+          "#FFEBD8"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "night": {
+        "displayName": "Night name",
+        "purpose": "The name of a night on the hero, event page and pass band."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Section heads, page titles, dialogs."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "DJ names and big counts."
+      },
+      "mark": {
+        "displayName": "Mark",
+        "purpose": "THE FANGLLE II logo, the II in the gel."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "All copy, fields and buttons."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Kickers, group names, column heads."
+      }
+    },
+    "shadows": [
+      {
+        "name": "room-halo",
+        "value": "0 1px 3px rgba(12,10,14,.55), 0 2px 26px rgba(12,10,14,.75)",
+        "purpose": "Text shadow on copy over the lit room, keeps thin letters above 4.5:1 when a shard passes behind."
+      }
+    ],
+    "motion": [
+      {
+        "name": "ease-out",
+        "value": "cubic-bezier(.23,1,.32,1)",
+        "purpose": "Entrances, presses, dialogs."
+      },
+      {
+        "name": "ease-cue",
+        "value": "cubic-bezier(.65,0,.35,1)",
+        "purpose": "Lighting cues: the gel cross-fade and crystal pans."
+      },
+      {
+        "name": "cue",
+        "value": "900ms",
+        "purpose": "Gel cross-fade on a change of night."
+      },
+      {
+        "name": "swap-out",
+        "value": "260ms",
+        "purpose": "Text leaving before a change of night."
+      },
+      {
+        "name": "pan-out",
+        "value": "520ms",
+        "purpose": "Crystals leaving, front layer furthest."
+      },
+      {
+        "name": "pan-in",
+        "value": "1000ms",
+        "purpose": "Crystals arriving, back layer first."
+      },
+      {
+        "name": "letter-step",
+        "value": "32ms",
+        "purpose": "Delay between letters of a night name."
+      },
+      {
+        "name": "press",
+        "value": "160ms scale(.97)",
+        "purpose": "Button press feedback."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "phone",
+        "value": "760px"
+      },
+      {
+        "name": "menu",
+        "value": "900px"
+      },
+      {
+        "name": "desk",
+        "value": "1100px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Solid Button",
+      "kind": "button",
+      "refersTo": "button-solid",
+      "description": "The work light: the one primary action on a screen.",
+      "html": "<button class=\"ds-btn-solid\">Book a table</button>",
+      "css": ".ds-btn-solid{display:inline-flex;align-items:center;justify-content:center;min-height:52px;padding:0 28px;border-radius:2px;border:1px solid #F1ECE4;background:#F1ECE4;color:#0C0A0E;font:500 16px/1.2 'Albert Sans',Arial,sans-serif;cursor:pointer;transition:transform 160ms cubic-bezier(.23,1,.32,1),background-color 200ms ease}.ds-btn-solid:hover{background:#FFFDF8;border-color:#FFFDF8}.ds-btn-solid:active{transform:scale(.97)}.ds-btn-solid:focus-visible{outline:2px solid #9A93FF;outline-offset:3px}"
+    },
+    {
+      "name": "Line Button",
+      "kind": "button",
+      "refersTo": "button-line",
+      "description": "Secondary action, outlined in tungsten.",
+      "html": "<button class=\"ds-btn-line\">Join the guestlist</button>",
+      "css": ".ds-btn-line{display:inline-flex;align-items:center;justify-content:center;min-height:52px;padding:0 28px;border-radius:2px;border:1px solid rgba(241,236,228,.38);background:transparent;color:#F1ECE4;font:500 16px/1.2 'Albert Sans',Arial,sans-serif;cursor:pointer;transition:transform 160ms cubic-bezier(.23,1,.32,1),border-color 200ms ease,background-color 200ms ease}.ds-btn-line:hover{border-color:#F1ECE4;background:rgba(241,236,228,.06)}.ds-btn-line:active{transform:scale(.97)}.ds-btn-line:focus-visible{outline:2px solid #9A93FF;outline-offset:3px}"
+    },
+    {
+      "name": "Text Field",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Surface field with a gel focus ring and tungsten caret.",
+      "html": "<label class=\"ds-field\"><span>Full name</span><input placeholder=\"As on your ID\"></label>",
+      "css": ".ds-field{display:flex;flex-direction:column;gap:8px;font:500 14px/1.3 'Albert Sans',Arial,sans-serif;color:#CFC7BD}.ds-field input{min-height:52px;padding:0 16px;background:#16131A;border:1px solid #3A3441;border-radius:2px;color:#F1ECE4;caret-color:#F1ECE4;font:400 17px 'Albert Sans',Arial,sans-serif;transition:border-color 200ms ease}.ds-field input::placeholder{color:#8A8279}.ds-field input:focus{outline:2px solid #9A93FF;outline-offset:2px}"
+    },
+    {
+      "name": "Filter Chip",
+      "kind": "chip",
+      "refersTo": "chip",
+      "description": "Outline chip; pressed is raised with a gel edge.",
+      "html": "<button class=\"ds-chip\" aria-pressed=\"true\">Held, unpaid <em>1</em></button> <button class=\"ds-chip\">Arrived <em>0</em></button>",
+      "css": ".ds-chip{min-height:44px;padding:6px 14px;border-radius:2px;border:1px solid #3A3441;background:transparent;color:#CFC7BD;font:400 15px 'Albert Sans',Arial,sans-serif;cursor:pointer;transition:border-color 200ms ease,background-color 200ms ease,color 200ms ease}.ds-chip em{font-style:normal;color:#9E968C;margin-left:6px}.ds-chip[aria-pressed=true]{background:#211D26;color:#F1ECE4;border-color:#9A93FF}.ds-chip:hover{border-color:#9E968C}.ds-chip:focus-visible{outline:2px solid #9A93FF;outline-offset:3px}"
+    },
+    {
+      "name": "Night Swatch",
+      "kind": "custom",
+      "description": "One night in the picker: gel edge on top, day, name, places left.",
+      "html": "<div class=\"ds-swatches\"><button class=\"ds-sw on\" style=\"--g:#9A93FF\"><span>THU 8</span><b>DESCENT</b><small>196 places left</small></button><button class=\"ds-sw\" style=\"--g:#F5AE4E\"><span>FRI 9</span><b>SECOND WAVE</b><small>200 places left</small></button></div>",
+      "css": ".ds-swatches{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:2px;background:#0C0A0E}.ds-sw{display:flex;flex-direction:column;align-items:flex-start;gap:4px;padding:18px 20px;border:0;border-top:2px solid color-mix(in srgb,var(--g) 45%,transparent);background:transparent;color:#9E968C;text-align:left;cursor:pointer;font:400 14px 'Albert Sans',Arial,sans-serif}.ds-sw span{font-weight:500;font-size:13px;letter-spacing:.12em}.ds-sw b{font:300 30px/1 'Big Shoulders Display','Arial Narrow',sans-serif;color:var(--g)}.ds-sw.on{background:#211D26;border-top-color:var(--g);color:#F1ECE4}.ds-sw:focus-visible{outline:2px solid var(--g);outline-offset:3px}"
+    },
+    {
+      "name": "Lit Room",
+      "kind": "card",
+      "description": "A night wash: gel at the rig fading to haze, with the night name in thin display caps.",
+      "html": "<div class=\"ds-room\"><p>THURSDAY 8 OCT · DOORS 3 PM</p><h1>DESCENT</h1><p class=\"who\">Ilse Varga, with Rafi Hartono</p></div>",
+      "css": ".ds-room{position:relative;padding:120px 32px 32px;background:radial-gradient(120% 80% at 50% 0,#2B21B0 0%,#120F2B 55%,#0C0A0E 100%);color:#F1ECE4;font-family:'Albert Sans',Arial,sans-serif}.ds-room p{font-weight:500;font-size:13px;letter-spacing:.12em;color:#CFC7BD}.ds-room h1{font:100 96px/.84 'Big Shoulders Display','Arial Narrow',sans-serif;text-transform:uppercase;margin:14px 0 18px}.ds-room .who{letter-spacing:0;font-weight:400;font-size:17px}"
+    },
+    {
+      "name": "Navigation",
+      "kind": "nav",
+      "description": "Public header over the room: mark with the gel II, quiet text links.",
+      "html": "<nav class=\"ds-nav\"><a class=\"ds-mark\" href=\"#\">THE FANGLLE <span>II</span></a><a href=\"#\">This week</a><a href=\"#\">Gallery</a><a href=\"#\">About</a><a href=\"#\">Find my QR</a></nav>",
+      "css": ".ds-nav{display:flex;align-items:center;gap:32px;height:76px;padding:0 24px;background:linear-gradient(180deg,rgba(12,10,14,.72),rgba(12,10,14,0))}.ds-nav a{color:#CFC7BD;text-decoration:none;font:400 15px 'Albert Sans',Arial,sans-serif;transition:color 200ms ease}.ds-nav a:hover{color:#F1ECE4}.ds-nav a:focus-visible{outline:2px solid #9A93FF;outline-offset:3px}.ds-nav .ds-mark{margin-right:auto;font:600 21px/1 'Big Shoulders Display','Arial Narrow',sans-serif;letter-spacing:.16em;color:#F1ECE4}.ds-mark span{color:#9A93FF}"
+    }
+  ],
+  "narrative": {
+    "northStar": "Gel dan Kabut (the gel and the haze)",
+    "overview": "Every night of the week has its own light. A page is a hazy room washed by the gel of the night on stage: strongest at the rig at the top, falling away into blackout. Only one gel is lit at a time. Changing nights is a lighting cue, not a slide change: the text leaves, the crystals pan out of the room, the gel cross-fades, the next night's crystals pan in, and its name arrives letter by letter.\n\nThe controls are not part of the show. Buttons, fields and the ticket are lit by the work light (tungsten), never by the gel, so the colour on stage always means \"which night\" and never \"click here\". Luxury comes from restraint: thin tall type, sharp 2 px corners, near-black ground, and motion that has a cause. There are no photos yet; photo frames carry a labelled brief until the owner's photos arrive.\n\nThe same world runs through three regions. The public site (persuade) carries the full room. The guest pass (offline) carries a band of the night's room above a light ticket. The door scanner and the manager panel (operate) keep the gel as a thin accent and a single washed band; at the door, speed and contrast beat the look.",
+    "keyCharacteristics": [
+      "One gel per weekday (Thursday blue, Friday amber, Saturday red, Sunday rose), one on stage at a time",
+      "Flat geometric crystal shards in three layers, one composition per night, idle drift and a pan cue between nights",
+      "Big Shoulders Display at weight 100 for night names, Albert Sans for everything read",
+      "Tungsten primary buttons; the gel never fills a control",
+      "2 px corners everywhere; the only round shapes are radio dots and status lights"
+    ],
+    "rules": [
+      {
+        "name": "The One Gel Rule",
+        "body": "Only one night's gel is lit on a screen. Other nights appear only as their swatch's thin top edge.",
+        "section": "colors"
+      },
+      {
+        "name": "The Work Light Rule",
+        "body": "Controls are tungsten or outline. A button filled with gel colour is a bug.",
+        "section": "colors"
+      },
+      {
+        "name": "The Thin Beam Rule",
+        "body": "Display type is never heavier than 300 except the mark. No italics anywhere; `em` and `i` render upright.",
+        "section": "typography"
+      }
+    ],
+    "dos": [
+      "**Do** take the night's colours from its gel class (`gel-thu` to `gel-sun`) through `gelOf(date)`; never hard-code a gel hex in a component.",
+      "**Do** keep primary buttons tungsten and secondary buttons outlined.",
+      "**Do** use 2 px corners on every new box, badge or count.",
+      "**Do** set night names in Big Shoulders Display 100, uppercase, and everything read in Albert Sans.",
+      "**Do** give text over the lit room the dark halo (`room-in`) and dim crystals behind flow titles.",
+      "**Do** honour `prefers-reduced-motion` in every new animation; fades only.",
+      "**Do** keep photo frames as labelled briefs until the owner adds real photos."
+    ],
+    "donts": [
+      "**Don't** fill a button, field or control with gel colour.",
+      "**Don't** light two gels at once on one screen.",
+      "**Don't** use drop shadows, glass blur, bevels or glow on panels; depth is light, not elevation.",
+      "**Don't** use pill shapes or round corners above 2 px.",
+      "**Don't** use italics, em dashes in interface text, or display type heavier than 300 outside the mark.",
+      "**Don't** invent photos, testimonials, press or visitor numbers."
+    ]
+  }
+}

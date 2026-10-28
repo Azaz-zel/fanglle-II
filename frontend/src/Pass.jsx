@@ -1,13 +1,15 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useParams } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
+import { Link, useParams } from 'react-router-dom';
+import { useQueries, useQuery } from '@tanstack/react-query';
 import QRCode from 'qrcode';
 import { openDB } from 'idb';
 import { api } from './api.js';
-import { dayLabel, entryCode, idr, PASS_KINDS, passOrCopy, passState, validUntil, ZONES } from './night.js';
+import { clock, dayLabel, dayParts, entryCode, gelOf, idr, PASS_KINDS, passOrCopy, passState, validUntil, waShare, ZONES } from './night.js';
 import { Button, Dialog, Mark } from './ui.jsx';
+import './pass.css';
 
-// Guest QR page (/p/:id, S5), from fanglle-qr-tamu-mockup.jsx. Its own chunk: qrcode loads only here, idb only here and at the door.
+// Guest QR page (/p/:id, S5), Sorot board Pass: a halo of the night's gel, its name, the QR on a white work-light card.
+// Its own chunk: qrcode loads only here, idb only here and at the door.
 
 // The build lives under /app/, the page under /p/. A worker at the site root has scope / without any server header.
 if (import.meta.env.PROD) navigator.serviceWorker?.register('/sw.js').catch(() => {});
@@ -31,7 +33,7 @@ function Qr({ text, label }) {
   }, [text]);
   return (
     <svg className="qr" viewBox={`-2 -2 ${size + 4} ${size + 4}`} role="img" aria-label={label} shapeRendering="crispEdges">
-      <path d={d} fill="#0C0812" />
+      <path d={d} fill="#0C0A0E" />
     </svg>
   );
 }
@@ -75,7 +77,7 @@ function KeepAwake() {
     <>
       <p className="hint">At the door, turn your screen brightness up. The scanner reads it faster.</p>
       <Button
-        variant="line"
+        className="wide"
         disabled={want}
         aria-pressed={want}
         onClick={() => {
@@ -98,12 +100,12 @@ function SaveToHome() {
   const [open, setOpen] = useState(false);
   return (
     <>
-      <Button variant="line" onClick={() => setOpen(true)}>
+      <Button variant="line" className="wide" onClick={() => setOpen(true)}>
         Save to home screen
       </Button>
       <Dialog open={open} onClose={() => setOpen(false)} aria-labelledby="save-t">
-        <div className="tag">Save to home screen</div>
-        <h2 id="save-t" className="head">
+        <p className="label">Save to home screen</p>
+        <h2 id="save-t">
           Open it without signal
         </h2>
         <p>Saved to your home screen, this page opens even when the club has no signal.</p>
@@ -133,6 +135,14 @@ function Ticket({ p, savedAt }) {
           No signal. Showing the copy saved on this phone at {savedTime(savedAt)}.{!stamp && ' It still works at the door.'}
         </div>
       )}
+      <div className="band">
+        <p className="kicker band-when">
+          {dayParts(e.date).weekday} {dayParts(e.date).date} {dayParts(e.date).month}
+          {e.opens_at && `, doors ${clock(e.opens_at)}`}
+        </p>
+        <p className="night band-name settle">{e.name}</p>
+        <hr className="rule gel" />
+      </div>
       <div className="body">
         <p className="state" aria-live="polite">
           {line.map((s, i) => (i % 2 ? <strong key={i}>{s}</strong> : s))}
@@ -142,12 +152,12 @@ function Ticket({ p, savedAt }) {
           <Qr text={p.qr} label={stamp ? 'QR no longer valid' : `Entry QR for ${p.holder_name}`} />
           {stamp && (
             <div className="stamp">
-              <strong className="head">{stamp[0]}</strong>
+              <strong className="d">{stamp[0]}</strong>
               <span>{stamp[1]}</span>
             </div>
           )}
           <div className="who">
-            <h1 className="nm">{p.holder_name}</h1>
+            <h1 className="nm d">{p.holder_name}</h1>
             {who && <div className="ct">{who}</div>}
           </div>
           {/* A dead code at the door only starts an argument, so it goes with the QR. */}
@@ -165,10 +175,6 @@ function Ticket({ p, savedAt }) {
         )}
 
         <dl className="facts">
-          <dt>Night</dt>
-          <dd>
-            {e.name}, {dayLabel(e.date)}
-          </dd>
           {p.kind === 'table' && (
             <>
               <dt>Table</dt>
@@ -201,13 +207,13 @@ function Failed({ q }) {
   if (e.status === 404)
     return (
       <div className="center" role="alert">
-        <h1 className="head">This link doesn't open a QR</h1>
+        <h1 className="d">This link doesn't open a QR</h1>
         <p>It may be incomplete or copied wrong. Open the link from the email we sent, or ask the organiser to share it again.</p>
       </div>
     );
   return (
     <div className="center" role="alert">
-      <h1 className="head">{e.status ? "This QR didn't load" : 'No signal'}</h1>
+      <h1 className="d">{e.status ? "This QR didn't load" : 'No signal'}</h1>
       <p>{e.status ? e.message : "This phone hasn't saved this QR yet. Open the link again when you have signal."}</p>
       <Button variant="line" onClick={() => q.refetch()}>
         Try again
@@ -216,22 +222,71 @@ function Failed({ q }) {
   );
 }
 
+const passQuery = (id) => ({
+  queryKey: ['pass', id],
+  queryFn: () => passOrCopy(id, { fetchPass: (i) => api(`/api/passes/${encodeURIComponent(i)}`, { guest: true }), store }),
+  networkMode: 'always', // offline is exactly when this query must still run and read the saved copy
+});
+
+// Guestlist with one QR each (F9): the success screen shows every QR on its work-light card, so the organiser can screenshot
+// each one and send it on. The same query as /p/:id, so each pass is also saved on this phone for the night with no signal.
+export function QrSheet({ passes, e }) {
+  const qs = useQueries({ queries: passes.map((x) => passQuery(x.pass_url.split('/').pop())) });
+  return (
+    <ul className="qrsheet">
+      {passes.map(({ holder_name, pass_url }, i) => {
+        const p = qs[i].data?.pass;
+        return (
+          <li key={pass_url}>
+            <div className="ticket">
+              {p ? (
+                <Qr text={p.qr} label={`Entry QR for ${holder_name}`} />
+              ) : qs[i].isError ? (
+                <p className="ct">This QR didn't load here. Its link still opens it.</p>
+              ) : (
+                <div className="wait" role="status" aria-label={`Loading ${holder_name}'s QR`} />
+              )}
+              <div className="who">
+                <p className="nm d">{holder_name}</p>
+                <div className="ct">
+                  {e.name}, {dayLabel(e.date)}. Valid until {clock(e.guestlist_cutoff)}.
+                </div>
+              </div>
+              {p && (
+                <p className="entry">
+                  <span>Can't scan? Give the door this code</span>
+                  <strong>{entryCode(p.entry_code)}</strong>
+                </p>
+              )}
+            </div>
+            {i === 0 ? (
+              <Link className="btn sm solid" to={pass_url}>
+                Open my QR
+              </Link>
+            ) : (
+              <a className="btn sm line" href={waShare(holder_name, e, window.location.origin + pass_url)} target="_blank" rel="noopener noreferrer" aria-label={`Share on WhatsApp, for ${holder_name}`}>
+                Share on WhatsApp
+              </a>
+            )}
+          </li>
+        );
+      })}
+    </ul>
+  );
+}
+
 export default function Pass() {
   const { id } = useParams();
-  const q = useQuery({
-    queryKey: ['pass', id],
-    queryFn: () => passOrCopy(id, { fetchPass: (i) => api(`/api/passes/${encodeURIComponent(i)}`, { guest: true }), store }),
-    networkMode: 'always', // offline is exactly when this query must still run and read the saved copy
-  });
+  const q = useQuery(passQuery(id));
   const p = q.data?.pass;
 
   return (
-    <div className="pass">
+    <div className={`pass stage gel-${p ? gelOf(p.event.date) : 'thu'}`}>
       <header className="top">
-        <span className="mark head">
+        <span className="mark">
           <Mark />
         </span>
-        {p && <span className="kind">{PASS_KINDS[p.kind]}</span>}
+        {p && <span className="label">{PASS_KINDS[p.kind]}</span>}
       </header>
       <main>
         {p ? (

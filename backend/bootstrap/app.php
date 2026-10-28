@@ -26,6 +26,9 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->statefulApi();
+        // The cloudflared tunnel runs on this machine, so the guest's IP comes from its X-Forwarded-For. Nothing else is trusted.
+        // shortcut: loopback only; add the tunnel's address here if cloudflared ever runs on another machine.
+        $middleware->trustProxies(at: ['127.0.0.1', '::1']);
         $middleware->append(SecurityHeaders::class);
         $middleware->alias(['role' => EnsureRole::class]);
         // The role check runs before records are looked up, so door staff get 403 on admin routes, never a 404 that confirms a booking code.

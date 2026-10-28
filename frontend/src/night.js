@@ -16,10 +16,12 @@ export const clock = (t) => {
 
 // Noon avoids the date slipping a day in any timezone.
 // en-US names: en-GB writes September as "Sept", the mockup writes "Sep".
+// Formatters are built once: toLocaleDateString with options builds a new one per call, and on a phone that was most of a
+// change of night on Home.
+const [DAY, WEEKDAY, MONTH] = [{ weekday: 'short' }, { weekday: 'long' }, { month: 'short' }].map((o) => new Intl.DateTimeFormat('en-US', o));
 export const dayParts = (iso) => {
   const d = new Date(`${iso}T12:00:00`);
-  const f = (o) => d.toLocaleDateString('en-US', o);
-  return { date: String(d.getDate()), day: f({ weekday: 'short' }), weekday: f({ weekday: 'long' }), month: f({ month: 'short' }) };
+  return { date: String(d.getDate()), day: DAY.format(d), weekday: WEEKDAY.format(d), month: MONTH.format(d) };
 };
 // "Thu 24 Sep"
 export const dayLabel = (iso) => {
@@ -27,7 +29,16 @@ export const dayLabel = (iso) => {
   return `${p.day} ${p.date} ${p.month}`;
 };
 
-export const idr = (n) => `IDR ${Number(n).toLocaleString('en-US')}`;
+const NUM = new Intl.NumberFormat('en-US');
+export const idr = (n) => `IDR ${NUM.format(Number(n))}`;
+
+// The gel that lights a night: one per weekday the club opens, Thursday's for any other day. Drives the gel-* classes
+// (styles.css) and the crystal composition (stage.jsx), so the look follows the date, never a name or a hard-coded night.
+export const NIGHT_KEYS = ['thu', 'fri', 'sat', 'sun'];
+export const gelOf = (iso) => {
+  const k = dayParts(iso).day.toLowerCase();
+  return NIGHT_KEYS.includes(k) ? k : 'thu';
+};
 
 // The club's wall clock. The offset comes from a server timestamp ("…+08:00"), so the device's own zone never matters.
 export const offsetOf = (iso) => {
@@ -70,6 +81,29 @@ export function lineupWarnings(rows, close, opens) {
 }
 
 // Table booking (S3). A table is booked, held by someone else, too small for the group, or free.
+// Hour by hour (Public.jsx Lane): each set's place on one hour axis in percent, and the whole hours under it. Sets that end
+// "earlier" than they start run past the end of the night's day (F2).
+const at = (m) => `${String(Math.floor(m / 60) % 24).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`;
+export function laneOf(lineup) {
+  const sets = [...lineup].sort((a, b) => nightMinutes(a.starts_at) - nightMinutes(b.starts_at));
+  const end = (s) => {
+    const a = nightMinutes(s.starts_at);
+    const b = nightMinutes(s.ends_at);
+    return b > a ? b : b + 1440;
+  };
+  const a0 = Math.floor(nightMinutes(sets[0].starts_at) / 60) * 60;
+  const a1 = Math.ceil(Math.max(...sets.map(end)) / 60) * 60;
+  const pc = (m) => +(((m - a0) / (a1 - a0)) * 100).toFixed(2);
+  const hours = [];
+  for (let m = a0; m < a1; m += 60) hours.push(at(m));
+  return {
+    from: at(a0),
+    to: at(a1),
+    hours,
+    sets: sets.map((s) => ({ ...s, left: pc(nightMinutes(s.starts_at)), width: +(pc(end(s)) - pc(nightMinutes(s.starts_at))).toFixed(2) })),
+  };
+}
+
 export const tableState = (t, party) =>
   t.status === 'booked' ? 'booked' : t.status === 'held' ? 'held' : t.capacity < party ? 'small' : 'free';
 

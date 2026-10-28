@@ -1,6 +1,6 @@
 // S7 manager's night: the logic behind the overview, the lists and the booking panel.
 import { expect, test } from 'vitest';
-import { attention, bookingLog, bookingRows, lastSeen, minsLeft, pickHour, readout, signupLine, signupRows, timeline, whatsApp } from './tonight.js';
+import { attention, bookingLog, bookingRows, lastSeen, minsLeft, nightClock, pickHour, readout, signupLine, signupRows, timeline, whatsApp } from './tonight.js';
 
 const EVENT = {
   date: '2026-09-25', opens_at: '15:00', guestlist_cutoff: '23:00', close_time: '04:00',
@@ -36,6 +36,7 @@ test('arrivals: the bar for the hour now, and what an hour to come says', () => 
 
 test('needs you: a nearly full night this week, paid tables still out, overrides with the latest one', () => {
   const t = {
+    tonight: '2026-09-25',
     event: EVENT,
     tables: { to_arrive: 2 },
     overrides: { count: 1, latest: { holder_name: 'Ayu Pratiwi', count: 2, scanned_at: '2026-09-25T23:12:00+08:00' } },
@@ -51,6 +52,22 @@ test('needs you: a nearly full night this week, paid tables still out, overrides
     ['1 manager override tonight', 'Ayu Pratiwi, 2 people at 23:12'],
   ]);
   expect(attention({ ...t, tables: { to_arrive: 0 }, overrides: { count: 0 } }, [], '23:34')).toEqual([]);
+  // The same night seen from the Thursday before: its tables can't be late yet, and Thursday's full list is still tonight's.
+  expect(attention({ ...t, tonight: '2026-09-24' }, events, '12:00').map(({ title }) => title)).toEqual([
+    "Tonight's guestlist is full",
+    'Saturday guestlist almost full',
+    '1 manager override',
+  ]);
+});
+
+test('a night ahead reads as all to come, a past one as all done, tonight by the club clock', () => {
+  const t = { tonight: '2026-09-25', event: EVENT };
+  expect(nightClock(t, '23:34')).toBe('23:34');
+  const ahead = { tonight: '2026-09-24', event: EVENT };
+  expect(timeline(EVENT, nightClock(ahead, '23:34')).map((m) => m.state)).toEqual(['next', '', '', '']);
+  expect(readout({ hour: '15:00', total: 0 }, nightClock(ahead, '23:34'))).toBe("15:00 hasn't happened yet.");
+  const past = { tonight: '2026-09-29', event: EVENT };
+  expect(timeline(EVENT, nightClock(past, '23:34')).every((m) => m.state === 'done')).toBe(true);
 });
 
 test('booking panel: held, paid, arrivals counted up, and how it ended', () => {

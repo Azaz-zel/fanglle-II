@@ -63,7 +63,7 @@ class SeedTest extends TestCase
         $slots = Event::where('name', 'Second Wave')->first()->lineupSlots;
 
         $this->assertSame(['22:00', '23:30', '00:30', '02:30', '03:30'], $slots->map(fn ($s) => substr($s->starts_at, 0, 5))->all());
-        $this->assertSame(['Bayu Kencana', 'Lintang'], $slots->where('role', LineupRole::GuestStar)->pluck('performer')->values()->all());
+        $this->assertSame(['Future', 'Lil Baby'], $slots->where('role', LineupRole::GuestStar)->pluck('performer')->values()->all());
         $this->assertSame([0, 1, 2, 3, 4], $slots->pluck('position')->all());
     }
 }

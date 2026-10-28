@@ -2,16 +2,24 @@ import { useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { api, errorText } from './api.js';
-import { dayLabel, headliners, hhmm, idr, nightMinutes, offsetOf, others, wallClock, ZONES } from './night.js';
+import { clock, dayLabel, dayParts, headliners, hhmm, idr, nightMinutes, offsetOf, others, wallClock, ZONES } from './night.js';
 import { Badge, Chip, Confirm, Dialog } from './ui.jsx';
 import {
-  arrivalOf, attention, bookingLog, bookingRows, HOW, minsLeft, pickHour, readout, signupLine, signupRows, STATUS, timeline, whatsApp,
+  arrivalOf, attention, bookingLog, bookingRows, HOW, minsLeft, nightClock, pickHour, readout, signupLine, signupRows, STATUS, timeline, whatsApp, whenOf,
 } from './tonight.js';
 
-// Manager's night (S7): Overview, Table bookings, Guestlist, Door log and the detail panel, from fanglle-pengelola-mockup.jsx.
-// Every number comes from GET /api/admin/tonight and the night's three lists; they refresh every 30 seconds.
+// Manager's night (S7): Overview, Table bookings, Guestlist, Door log and the detail panel. Look from the Sorot boards AdminOverview
+// and AdminBookings; Guestlist and Door log follow the bookings page. Every number comes from GET /api/admin/tonight and
+// the night's three lists; they refresh every 30 seconds.
 
-export const tonightQuery = { queryKey: ['admin', 'tonight'], queryFn: () => api('/api/admin/tonight'), refetchInterval: 30_000 };
+// date: the night picked in the top bar; null lets the server choose tonight, else the next night, else the last one. The
+// night on screen stays up while the next one loads.
+export const nightQuery = (date) => ({
+  queryKey: ['admin', 'tonight', date],
+  queryFn: () => api(`/api/admin/tonight${date ? `?date=${date}` : ''}`),
+  refetchInterval: 30_000,
+  placeholderData: (prev) => prev,
+});
 // what: table-bookings | guestlist | check-ins
 const listQuery = (date, what) => ({
   queryKey: ['admin', what, date],
@@ -19,7 +27,7 @@ const listQuery = (date, what) => ({
   enabled: !!date,
   refetchInterval: 30_000,
 });
-const eventsQuery = { queryKey: ['admin-events'], queryFn: () => api('/api/admin/events') }; // shared with Events
+export const eventsQuery = { queryKey: ['admin-events'], queryFn: () => api('/api/admin/events') }; // shared with Events and the night picker
 export const clubNow = (t) => wallClock(Date.now(), offsetOf(t.now));
 
 export const Skel = ({ label }) => (
@@ -32,25 +40,25 @@ export const Skel = ({ label }) => (
 
 export const Failed = ({ q, what }) => (
   <div className="error" role="alert">
-    {what} didn't load. {errorText(q.error)}
-    <br />
-    <button className="act" onClick={() => q.refetch()}>
+    <p>
+      {what} didn't load. {errorText(q.error)}
+    </p>
+    <button className="btn line sm" onClick={() => q.refetch()}>
       Try again
     </button>
   </div>
 );
 
-// Every page is about tonight. Before the answer, after a failed first answer, or with no event tonight, it says so.
+// Every page is about the night picked in the top bar. Before the answer, after a failed first answer, or with no night set up
+// at all, it says so.
 function Night({ night, children }) {
-  if (night.isPending) return <Skel label="Loading tonight" />;
-  if (!night.data) return <Failed q={night} what="Tonight" />;
+  if (night.isPending) return <Skel label="Loading the night" />;
+  if (!night.data) return <Failed q={night} what="The night" />;
   if (!night.data.event)
     return (
-      <div className="fail">
-        <h1 className="title head">
-          No event <span className="two">tonight</span>
-        </h1>
-        <p className="sub">Nights are set up in Events. Once tonight has one, this page fills in.</p>
+      <div className="nothing">
+        <h1 className="d title">No nights yet</h1>
+        <p className="sub">Nights are set up in Events. Once there is one, this page fills in.</p>
         <Link className="btn line" to="/admin/events">
           Open Events
         </Link>
@@ -65,6 +73,15 @@ const Meter = ({ part, of }) => (
   </span>
 );
 
+// Page heading: the italic line above when there is one, the display title, and the line under it when there is one.
+const Head = ({ kicker, title, children }) => (
+  <div className="ph">
+    {kicker && <p className="kicker">{kicker}</p>}
+    <h1 className="night title">{title}</h1>
+    {children && <p className="sub">{children}</p>}
+  </div>
+);
+
 export function Overview({ night, open }) {
   const nav = useNavigate();
   const events = useQuery(eventsQuery);
@@ -74,7 +91,9 @@ export function Overview({ night, open }) {
     <Night night={night}>
       {(t) => {
         const e = t.event;
-        const now = clubNow(t);
+        const when = whenOf(t);
+        const now = nightClock(t, clubNow(t));
+        const day = dayParts(e.date);
         const heads = headliners(e.lineup).map((s) => s.performer);
         const rest = others(e.lineup);
         const held = t.held[0];
@@ -82,109 +101,67 @@ export function Overview({ night, open }) {
         const max = Math.max(1, ...t.arrivals.map((h) => h.total));
         const every = t.arrivals.length > 12 ? 2 : 1; // a long night labels every other hour; each bar still names its hour
         const needs = attention(t, events.data?.events ?? [], now);
+        // From docs/design/AdminOverview.dc.html: the night card under the night's gel, what needs a decision beside it, three
+        // tiles, then the arrivals chart. The held table that used to sit in the night card leads "Needs you".
         return (
           <>
-            <div>
-              <h1 className="title head">
-                {e.name} <span className="two">tonight</span>
-              </h1>
-              <p className="sub">
-                {dayLabel(e.date)} · {heads.join(' and ') || 'Line-up to come'}
-                {rest.length > 0 && ` with ${rest.join(', ')}`}
-              </p>
-            </div>
+            <Head kicker={`${when === 'tonight' ? 'Tonight, ' : ''}${day.weekday} ${day.date} ${day.month}`} title={e.name}>
+              {when === 'ahead' ? `Still to come. Doors at ${clock(e.opens_at)}.` : when === 'past' && 'This night is over.'}
+            </Head>
             <div className="over">
-              <section className="hero" aria-labelledby="h-in">
-                <div>
-                  <div className="k" id="h-in">
-                    Inside right now
-                  </div>
-                  <div className="bignum">
-                    <strong>{t.inside}</strong>
-                    <span>of {t.capacity} capacity</span>
-                  </div>
+              <section className="nightcard" aria-labelledby="h-night">
+                <div className="band">
+                  <h2 id="h-night" className="d">
+                    {heads.join(' and ') || 'Line-up to come'}
+                  </h2>
+                  {rest.length > 0 && <span>with {rest.join(', ')}</span>}
                 </div>
-                <div className="capbar" role="img" aria-label={`${Math.round((t.inside / t.capacity) * 100)} percent full`}>
-                  <i style={{ width: `${Math.min(100, (t.inside / t.capacity) * 100)}%` }} />
-                </div>
-                <div className="tline" aria-label="Tonight's timeline">
-                  {timeline(e, now).map((m, i) => (
-                    <div key={i} className={`tstep ${m.state}`}>
-                      <b>{m.time}</b>
-                      {m.label}
-                    </div>
-                  ))}
-                </div>
-                {held && (
-                  <div className="urgent">
-                    <div>
-                      Table {held.table_code} is held but not paid
-                      <small>
-                        {held.name} · released automatically in {minsLeft(held.held_until)} min
-                      </small>
-                    </div>
-                    <button className="act" onClick={() => open({ kind: 'booking', id: held.code })}>
-                      Review
-                    </button>
+                <div className="nbody">
+                  <p className="inside">
+                    <strong className="d tnum">{t.inside}</strong>
+                    <span>
+                      {{ tonight: 'inside right now', ahead: 'inside', past: 'came in' }[when]}, of {t.capacity} capacity
+                    </span>
+                  </p>
+                  <div className="capbar" role="img" aria-label={`${Math.round((t.inside / t.capacity) * 100)} percent full`}>
+                    <i style={{ width: `${Math.min(100, (t.inside / t.capacity) * 100)}%` }} />
                   </div>
-                )}
+                  <ol className="marks" aria-label="The night's timeline">
+                    {timeline(e, now).map((m, i) => (
+                      <li key={i} className={m.state || undefined}>
+                        <b className="tnum">{clock(m.time)}</b>
+                        {m.label}
+                      </li>
+                    ))}
+                  </ol>
+                </div>
               </section>
-              <div className="minis">
-                <Link className="mini" to="/admin/guestlist">
-                  <span className="k">Guestlist</span>
-                  <span className="v">
-                    {t.guestlist.arrived} <span className="of">of {t.guestlist.signed} arrived</span>
-                  </span>
-                  <Meter part={t.guestlist.arrived} of={t.guestlist.signed} />
-                  <span className="go">Open guestlist</span>
-                </Link>
-                <Link className="mini" to="/admin/tables">
-                  <span className="k">Tables</span>
-                  <span className="v">
-                    {t.tables.booked} <span className="of">of {t.tables.total} booked</span>
-                  </span>
-                  <span className="n">
-                    {t.tables.to_arrive} paid {t.tables.to_arrive === 1 ? 'table' : 'tables'} still to arrive
-                  </span>
-                  <span className="go">Open table bookings</span>
-                </Link>
-                <Link className="mini" to="/admin/tables">
-                  <span className="k">Deposits tonight</span>
-                  <span className="v money">{idr(t.deposits)}</span>
-                  <span className="n">Test mode, no real payments</span>
-                  <span className="go">See who paid</span>
-                </Link>
-              </div>
-            </div>
-            <div className="duo">
-              <section className="card" aria-labelledby="c-arr">
-                <h2 id="c-arr">When did people arrive? Every hour, tonight</h2>
-                <div className="chart" role="group" aria-label="Arrivals per hour. Choose a bar for details.">
-                  {t.arrivals.map((h, i) => (
-                    <button key={h.hour} className="barbtn" aria-pressed={sel === i} aria-label={`${h.hour}: ${h.total} arrived`} onClick={() => setBar(i)}>
-                      <b>{h.total || ''}</b>
-                      <i style={{ height: `${(h.total / max) * 110}px` }} />
-                      <span>{i % every ? '' : h.hour}</span>
-                    </button>
-                  ))}
-                </div>
-                <p className="readout" aria-live="polite">
-                  {readout(t.arrivals[sel], now)}
-                </p>
-              </section>
-              <section className="card" aria-labelledby="c-att">
+              <section className="box" aria-labelledby="c-att">
                 <h2 id="c-att">Needs you</h2>
-                {needs.length === 0 ? (
+                {!held && needs.length === 0 ? (
                   <p className="sub">Nothing needs you right now.</p>
                 ) : (
                   <ul className="attn">
+                    {held && (
+                      <li>
+                        <div>
+                          Table {held.table_code} is held but not paid
+                          <small className="hold tnum">
+                            {held.name} · released automatically in {minsLeft(held.held_until)} min
+                          </small>
+                        </div>
+                        <button className="btn line sm" onClick={() => open({ kind: 'booking', id: held.code })}>
+                          Review
+                        </button>
+                      </li>
+                    )}
                     {needs.map((a) => (
                       <li key={a.key}>
                         <div>
                           <span className={a.flag ? 'flag' : undefined}>{a.title}</span>
-                          {a.sub && <small>{a.sub}</small>}
+                          {a.sub && <small className="tnum">{a.sub}</small>}
                         </div>
-                        <button className="act" onClick={() => nav(...a.to)}>
+                        <button className="btn line sm" onClick={() => nav(...a.to)}>
                           {a.action}
                         </button>
                       </li>
@@ -193,6 +170,47 @@ export function Overview({ night, open }) {
                 )}
               </section>
             </div>
+            <div className="tiles">
+              <Link className="tile" to="/admin/tables">
+                <span className="k">Tables</span>
+                <span className="v d tnum">
+                  {t.tables.booked} <span className="of">of {t.tables.total} booked</span>
+                </span>
+                <span className="n tnum">
+                  {t.tables.to_arrive} paid {t.tables.to_arrive === 1 ? 'table' : 'tables'} still to arrive
+                </span>
+                <span className="go">Open table bookings</span>
+              </Link>
+              <Link className="tile" to="/admin/guestlist">
+                <span className="k">Guestlist</span>
+                <span className="v d tnum">
+                  {t.guestlist.arrived} <span className="of">of {t.guestlist.signed} arrived</span>
+                </span>
+                <Meter part={t.guestlist.arrived} of={t.guestlist.signed} />
+                <span className="go">Open guestlist</span>
+              </Link>
+              <Link className="tile" to="/admin/tables">
+                <span className="k">Deposits</span>
+                <span className="v d tnum money">{idr(t.deposits)}</span>
+                <span className="n">Test mode, no real payments</span>
+                <span className="go">See who paid</span>
+              </Link>
+            </div>
+            <section className="box" aria-labelledby="c-arr">
+              <h2 id="c-arr">When did people arrive? Every hour{when === 'tonight' && ', tonight'}</h2>
+              <div className="bars" role="group" aria-label="Arrivals per hour. Choose a bar for details.">
+                {t.arrivals.map((h, i) => (
+                  <button key={h.hour} className="barbtn" aria-pressed={sel === i} aria-label={`${h.hour}: ${h.total} arrived`} onClick={() => setBar(i)}>
+                    <b className="tnum">{h.total || ''}</b>
+                    <i style={{ height: `${(h.total / max) * 110}px` }} />
+                    <span className="tnum">{i % every ? '' : h.hour}</span>
+                  </button>
+                ))}
+              </div>
+              <p className="readout" aria-live="polite">
+                {readout(t.arrivals[sel], now)}
+              </p>
+            </section>
           </>
         );
       }}
@@ -202,7 +220,17 @@ export function Overview({ night, open }) {
 
 const BOOKING_CHIPS = [['all', 'All'], ['held', 'Held, unpaid'], ['paid', 'Paid, not arrived'], ['arrived', 'Arrived'], ['released', 'Released'], ['no_show', 'No-show']];
 
-export function Bookings({ night, open }) {
+// "Clear filters" under an empty filtered list.
+const NoMatch = ({ text, clear }) => (
+  <div className="empty">
+    <p>{text}</p>
+    <button className="btn line sm" onClick={clear}>
+      Clear filters
+    </button>
+  </div>
+);
+
+export function Bookings({ night, open, at }) {
   const [params, setParams] = useSearchParams();
   const status = params.get('status') ?? 'all';
   const [q, setQ] = useState('');
@@ -217,31 +245,9 @@ export function Bookings({ night, open }) {
         const rows = bookingRows(all, { status, q, sort });
         return (
           <>
-            <div>
-              <h1 className="title head">
-                Table <span className="two">bookings</span>
-              </h1>
-              <p className="sub">
-                {t.event.name}, {dayLabel(t.event.date)}. Most urgent first.
-              </p>
-            </div>
-            <div className="toolbar">
-              <div className="grow">
-                <label className="lab" htmlFor="bq">
-                  Search
-                </label>
-                <input id="bq" className="search" placeholder="Guest, table or booking code" value={q} onChange={(e) => setQ(e.target.value)} />
-              </div>
-              <div className="sortby">
-                <label className="lab" htmlFor="bs">
-                  Sort by
-                </label>
-                <select id="bs" className="select" value={sort} onChange={(e) => setSort(e.target.value)}>
-                  <option value="urgency">Needs action first</option>
-                  <option value="table">Table number</option>
-                </select>
-              </div>
-            </div>
+            <Head title="Table bookings">
+              {t.event.name}, {dayLabel(t.event.date)}. Most urgent first.
+            </Head>
             <div className="chips" role="group" aria-label="Filter by status">
               {BOOKING_CHIPS.map(([k, l]) => (
                 <Chip key={k} pressed={status === k} count={list.data && (k === 'all' ? all.length : list.data.counts[k])} onClick={() => setStatus(k)}>
@@ -249,69 +255,83 @@ export function Bookings({ night, open }) {
                 </Chip>
               ))}
             </div>
+            <div className="toolbar">
+              <div className="fill">
+                <label className="lab" htmlFor="bq">
+                  Search
+                </label>
+                <input id="bq" className="input" placeholder="Guest, table or booking code" value={q} onChange={(e) => setQ(e.target.value)} />
+              </div>
+              <div className="sortby">
+                <label className="lab" htmlFor="bs">
+                  Sort by
+                </label>
+                <select id="bs" className="input" value={sort} onChange={(e) => setSort(e.target.value)}>
+                  <option value="urgency">Needs action first</option>
+                  <option value="table">Table number</option>
+                </select>
+              </div>
+            </div>
             <div className="tablewrap">
               {list.isPending ? (
-                <Skel label="Loading tonight's table bookings" />
+                <Skel label="Loading the table bookings" />
               ) : !list.data ? (
-                <Failed q={list} what="Tonight's bookings" />
+                <Failed q={list} what="The bookings" />
               ) : all.length === 0 ? (
-                <div className="empty">No table bookings for tonight yet.</div>
+                <div className="empty">No table bookings for this night yet.</div>
               ) : rows.length === 0 ? (
-                <div className="empty">
-                  No bookings match these filters.
-                  <br />
-                  <button
-                    className="act"
-                    onClick={() => {
-                      setQ('');
-                      setStatus('all');
-                    }}
-                  >
-                    Clear filters
-                  </button>
-                </div>
+                <NoMatch
+                  text="No bookings match these filters."
+                  clear={() => {
+                    setQ('');
+                    setStatus('all');
+                  }}
+                />
               ) : (
                 <table>
                   <thead>
                     <tr>
-                      <th>Status</th>
-                      <th className="c">Table</th>
+                      <th>Booking</th>
+                      <th>Table</th>
                       <th>Guest</th>
                       <th className="c">Arrived</th>
-                      <th>Deposit</th>
-                      <th>Booking</th>
-                      <th className="c">
+                      <th className="r">Deposit</th>
+                      <th>Status</th>
+                      <th>
                         <span className="vh">Actions</span>
                       </th>
                     </tr>
                   </thead>
                   <tbody>
-                    {rows.map((b) => (
-                      <tr key={b.code}>
-                        <td>
-                          <Badge tone={STATUS[b.status][1]}>
-                            {STATUS[b.status][0]}
-                            {b.status === 'held' && ` · ${minsLeft(b.held_until)} min`}
-                          </Badge>
-                        </td>
-                        <td className="c">
-                          {b.table_code}
-                          <small>{ZONES[b.zone]}</small>
-                        </td>
-                        <td>
-                          {b.name}
-                          <small>Phone ends {b.phone_last4}</small>
-                        </td>
-                        <td className="c">{b.status === 'released' || b.status === 'no_show' ? '·' : `${b.inside_count} / ${b.party_size}`}</td>
-                        <td>{idr(b.deposit)}</td>
-                        <td>{b.code}</td>
-                        <td className="c">
-                          <button className="act" onClick={() => open({ kind: 'booking', id: b.code })} aria-label={`Details, ${b.name}, table ${b.table_code}`}>
-                            Details
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
+                    {rows.map((b) => {
+                      const gone = b.status === 'released' || b.status === 'no_show';
+                      return (
+                        <tr key={b.code} className={at?.kind === 'booking' && at.id === b.code ? 'on' : undefined}>
+                          <td className="tnum">{b.code}</td>
+                          <td>
+                            {b.table_code}
+                            <small>{ZONES[b.zone]}</small>
+                          </td>
+                          <td>
+                            {b.name}
+                            <small className="tnum">Phone ends {b.phone_last4}</small>
+                          </td>
+                          <td className="c tnum">{gone ? '·' : `${b.inside_count} / ${b.party_size}`}</td>
+                          <td className={`r tnum${gone ? ' dim' : ''}`}>{idr(b.deposit)}</td>
+                          <td>
+                            <Badge tone={STATUS[b.status][1]}>
+                              {STATUS[b.status][0]}
+                              {b.status === 'held' && ` · ${minsLeft(b.held_until)} min`}
+                            </Badge>
+                          </td>
+                          <td className="r">
+                            <button className="btn line sm" onClick={() => open({ kind: 'booking', id: b.code })} aria-label={`Details, ${b.name}, table ${b.table_code}`}>
+                              Details
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               )}
@@ -327,7 +347,7 @@ const MODES = [['all', 'All'], ['group', 'Group QR'], ['personal', 'Personal QR'
 const ARRIVALS = [['any', 'All'], ['none', 'Not yet'], ['part', 'Partly in'], ['all', 'All in']];
 const ARRIVAL_BADGE = { all: ['All in', 'in'], part: [null, 'held'], none: ['Not yet', 'off'] };
 
-export function Guestlist({ night, open }) {
+export function Guestlist({ night, open, at }) {
   const nav = useNavigate();
   const [mode, setMode] = useState('all');
   const [arrival, setArrival] = useState('any');
@@ -344,34 +364,21 @@ export function Guestlist({ night, open }) {
         const cutoff = t.event.guestlist_cutoff;
         return (
           <>
-            <div>
-              <h1 className="title head">
-                Guest<span className="two">list</span>
-              </h1>
-              <p className="sub">
-                {t.event.name} · free entry {nightMinutes(clubNow(t)) >= nightMinutes(cutoff) ? 'closed at' : 'until'} {cutoff}
-              </p>
-            </div>
+            <Head title="Guestlist">
+              {t.event.name} · free entry {nightMinutes(nightClock(t, clubNow(t))) >= nightMinutes(cutoff) ? 'closed at' : 'until'} {clock(cutoff)}
+            </Head>
             {s && (
               <div className="summary">
-                <span>
+                <span className="tnum">
                   {s.signed} of {s.quota} places taken
                 </span>
                 <Meter part={s.signed} of={s.quota} />
-                <button className="act" onClick={() => nav('/admin/events', { state: { date: t.event.date } })}>
+                <button className="btn line sm" onClick={() => nav('/admin/events', { state: { date: t.event.date } })}>
                   Change places or closing time
                 </button>
               </div>
             )}
             <div className="toolbar">
-              <div className="grow">
-                <label className="lab" htmlFor="gq">
-                  Search
-                </label>
-                <input id="gq" className="search" placeholder="Name or last 4 digits of phone" value={q} onChange={(e) => setQ(e.target.value)} />
-              </div>
-            </div>
-            <div className="toolbar wide">
               <div>
                 <span className="lab" id="qt">
                   QR type
@@ -396,38 +403,38 @@ export function Guestlist({ night, open }) {
                   ))}
                 </div>
               </div>
+              <div className="fill">
+                <label className="lab" htmlFor="gq">
+                  Search
+                </label>
+                <input id="gq" className="input" placeholder="Name or last 4 digits of phone" value={q} onChange={(e) => setQ(e.target.value)} />
+              </div>
             </div>
             <div className="tablewrap">
               {list.isPending ? (
-                <Skel label="Loading tonight's guestlist" />
+                <Skel label="Loading the guestlist" />
               ) : !list.data ? (
-                <Failed q={list} what="Tonight's guestlist" />
+                <Failed q={list} what="The guestlist" />
               ) : all.length === 0 ? (
-                <div className="empty">No one has signed up for tonight yet.</div>
+                <div className="empty">No one has signed up for this night yet.</div>
               ) : rows.length === 0 ? (
-                <div className="empty">
-                  No one on tonight's list matches these filters.
-                  <br />
-                  <button
-                    className="act"
-                    onClick={() => {
-                      setMode('all');
-                      setArrival('any');
-                      setQ('');
-                    }}
-                  >
-                    Clear filters
-                  </button>
-                </div>
+                <NoMatch
+                  text="No one on this list matches these filters."
+                  clear={() => {
+                    setMode('all');
+                    setArrival('any');
+                    setQ('');
+                  }}
+                />
               ) : (
                 <table>
                   <thead>
                     <tr>
-                      <th>Arrival</th>
                       <th>Name</th>
-                      <th className="c">QR type</th>
+                      <th>QR type</th>
                       <th className="c">People</th>
-                      <th className="c">
+                      <th>Arrival</th>
+                      <th>
                         <span className="vh">Actions</span>
                       </th>
                     </tr>
@@ -436,18 +443,18 @@ export function Guestlist({ night, open }) {
                     {rows.map((g) => {
                       const [label, tone] = ARRIVAL_BADGE[arrivalOf(g)];
                       return (
-                        <tr key={g.id}>
+                        <tr key={g.id} className={at?.kind === 'guest' && at.id === g.id ? 'on' : undefined}>
+                          <td>
+                            {g.name}
+                            <small className="tnum">Phone ends {g.phone_last4}</small>
+                          </td>
+                          <td>{g.qr_mode === 'group' ? 'Group' : 'Personal'}</td>
+                          <td className="c tnum">{g.party_size}</td>
                           <td>
                             <Badge tone={tone}>{label ?? `${g.inside} of ${g.party_size} in`}</Badge>
                           </td>
-                          <td>
-                            {g.name}
-                            <small>Phone ends {g.phone_last4}</small>
-                          </td>
-                          <td className="c">{g.qr_mode === 'group' ? 'Group' : 'Personal'}</td>
-                          <td className="c">{g.party_size}</td>
-                          <td className="c">
-                            <button className="act" onClick={() => open({ kind: 'guest', id: g.id })} aria-label={`Details, ${g.name}`}>
+                          <td className="r">
+                            <button className="btn line sm" onClick={() => open({ kind: 'guest', id: g.id })} aria-label={`Details, ${g.name}`}>
                               Details
                             </button>
                           </td>
@@ -478,12 +485,7 @@ export function DoorLog({ night }) {
         const n = list.data?.counts;
         return (
           <>
-            <div>
-              <h1 className="title head">
-                Door <span className="two">log</span>
-              </h1>
-              <p className="sub">Every check-in tonight, newest first.</p>
-            </div>
+            <Head title="Door log">Every check-in, newest first.</Head>
             <div className="chips" role="group" aria-label="Show">
               <Chip pressed={show === 'all'} count={n?.total} onClick={() => setParams({}, { replace: true })}>
                 Everything
@@ -500,16 +502,16 @@ export function DoorLog({ night }) {
             </div>
             <div className="tablewrap">
               {list.isPending ? (
-                <Skel label="Loading tonight's door log" />
+                <Skel label="Loading the door log" />
               ) : !list.data ? (
                 <Failed q={list} what="The door log" />
               ) : rows.length === 0 ? (
-                <div className="empty">{show === 'all' ? 'No one has checked in tonight yet.' : 'None tonight.'}</div>
+                <div className="empty">{show === 'all' ? 'No one has checked in yet.' : 'None.'}</div>
               ) : (
                 <table>
                   <thead>
                     <tr>
-                      <th className="c">Time</th>
+                      <th>Time</th>
                       <th>Guest</th>
                       <th className="c">People</th>
                       <th>How they got in</th>
@@ -518,9 +520,9 @@ export function DoorLog({ night }) {
                   <tbody>
                     {rows.map((c) => (
                       <tr key={c.id}>
-                        <td className="c">{hhmm(c.scanned_at)}</td>
+                        <td className="tnum">{hhmm(c.scanned_at)}</td>
                         <td>{c.holder_name}</td>
-                        <td className="c">{c.count}</td>
+                        <td className="c tnum">{c.count}</td>
                         <td className={c.method === 'override' || c.conflict ? 'flag' : undefined}>
                           {HOW[c.method]}
                           {c.table_code && ` · table ${c.table_code}`}
@@ -595,12 +597,13 @@ export function Drawer({ at, date, onClose, flash }) {
     <Dialog open onClose={onClose} className="drawer" aria-labelledby="dr-t">
       <div className="dh">
         <div>
-          <div className="sub">{booking ? `Booking ${at.id}` : x ? (x.qr_mode === 'group' ? 'Group QR' : 'Personal QR') : 'Guestlist'}</div>
-          <h2 id="dr-t" className="head">
+          <p className="label">{booking ? `Booking ${at.id}` : x ? (x.qr_mode === 'group' ? 'Group QR' : 'Personal QR') : 'Guestlist'}</p>
+          <h2 id="dr-t" className="d">
             {booking ? (x ? `Table ${x.table_code}` : 'Booking') : (x?.name ?? 'Guest')}
           </h2>
+          {booking && x && <Badge tone={STATUS[x.status][1]}>{STATUS[x.status][0]}</Badge>}
         </div>
-        <button className="act" onClick={onClose}>
+        <button className="btn line sm" onClick={onClose}>
           Close
         </button>
       </div>
@@ -610,38 +613,34 @@ export function Drawer({ at, date, onClose, flash }) {
         ) : !list.data ? (
           <Failed q={list} what="These details" />
         ) : !x ? (
-          <p className="sub">{booking ? "This booking isn't on tonight's list any more." : "This guest isn't on tonight's list any more."}</p>
+          <p className="sub">{booking ? "This booking isn't on this night's list any more." : "This guest isn't on this night's list any more."}</p>
         ) : (
           <>
             {booking ? (
-              <dl className="facts">
-                <dt>Status</dt>
-                <dd>
-                  <Badge tone={STATUS[x.status][1]}>{STATUS[x.status][0]}</Badge>
-                </dd>
+              <dl className="dfacts">
                 <dt>Guest</dt>
                 <dd>{x.name}</dd>
                 <dt>Phone</dt>
-                <dd>ends {x.phone_last4}</dd>
+                <dd className="tnum">ends {x.phone_last4}</dd>
                 <dt>Zone</dt>
                 <dd>{ZONES[x.zone]}</dd>
                 <dt>Arrived</dt>
-                <dd>
+                <dd className="tnum">
                   {x.inside_count} of {x.party_size}
                 </dd>
                 <dt>Deposit</dt>
-                <dd>{idr(x.deposit)}</dd>
+                <dd className="tnum">{idr(x.deposit)}</dd>
               </dl>
             ) : (
-              <dl className="facts">
+              <dl className="dfacts">
                 <dt>People</dt>
-                <dd>{x.party_size}</dd>
+                <dd className="tnum">{x.party_size}</dd>
                 <dt>Arrived</dt>
-                <dd>
+                <dd className="tnum">
                   {x.inside} of {x.party_size}
                 </dd>
                 <dt>Phone</dt>
-                <dd>ends {x.phone_last4}</dd>
+                <dd className="tnum">ends {x.phone_last4}</dd>
                 {names.length > 0 && (
                   <>
                     <dt>Other names</dt>
@@ -650,40 +649,44 @@ export function Drawer({ at, date, onClose, flash }) {
                 )}
               </dl>
             )}
-            <div>
-              <div className="lab">What happened</div>
-              <ul className="tl">
-                {(booking ? bookingLog(x) : [signupLine(x)]).map((l) => (
-                  <li key={l}>{l}</li>
-                ))}
-              </ul>
-            </div>
             <div className="drow">
-              {booking && x.status === 'held' && (
-                <button className="act danger" onClick={() => setAsk('release')}>
-                  Release table now
-                </button>
-              )}
-              {booking && x.status === 'paid' && (
-                <button className="act danger" onClick={() => setAsk('noshow')}>
-                  Mark no-show
-                </button>
-              )}
-              {!booking && x.inside === 0 && (
-                <button className="act danger" onClick={() => setAsk('remove')}>
-                  Remove from list
-                </button>
-              )}
-              {/* The full number is only used by WhatsApp, not shown on this screen (the mockup's note). */}
-              <a className="act" href={whatsApp(x.phone)} target="_blank" rel="noreferrer">
+              {/* The full number is only used by WhatsApp, not shown on this screen (F14). */}
+              <a className="btn line" href={whatsApp(x.phone)} target="_blank" rel="noreferrer">
                 Message on WhatsApp
               </a>
               {!booking && (
-                <button className="act" onClick={resend}>
+                <button className="btn line" onClick={resend}>
                   Resend QR
                 </button>
               )}
             </div>
+            <div>
+              <p className="label">What happened</p>
+              <ol className="hist">
+                {/* Every line starts with its "HH:MM", set apart in muted figures as in the design. */}
+                {(booking ? bookingLog(x) : [signupLine(x)]).map((l) => (
+                  <li key={l}>
+                    <span className="tnum">{l.slice(0, 5)}</span>
+                    {l.slice(5)}
+                  </li>
+                ))}
+              </ol>
+            </div>
+            {booking && x.status === 'held' && (
+              <button className="btn wide danger" onClick={() => setAsk('release')}>
+                Release table now
+              </button>
+            )}
+            {booking && x.status === 'paid' && (
+              <button className="btn wide danger" onClick={() => setAsk('noshow')}>
+                Mark no-show
+              </button>
+            )}
+            {!booking && x.inside === 0 && (
+              <button className="btn wide danger" onClick={() => setAsk('remove')}>
+                Remove from list
+              </button>
+            )}
           </>
         )}
       </div>

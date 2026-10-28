@@ -2,10 +2,28 @@ import { useEffect, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { api, errorText } from './api.js';
-import { Button, Solo } from './ui.jsx';
+import { Button, Mark } from './ui.jsx';
+import { Lit } from './stage.jsx';
+import './admin.css';
 
 // ?next= is honoured only inside the staff regions; anything else (other hosts, //host, public pages) goes home.
 const staffPath = (p) => /^\/(admin|door)(?=[/?#]|$)/.test(p || '');
+
+// Sorot board Login: the fang in the dark on one side, the logo, title and form on the other. There is no night yet before
+// signing in, so it is Thursday's gel, the default.
+const Gate = ({ children }) => (
+  <main className="signin gel-thu">
+    <div className="signin-lit">
+      <Lit pose="login" />
+    </div>
+    <div className="sheet">
+      <span className="mark">
+        <Mark />
+      </span>
+      {children}
+    </div>
+  </main>
+);
 
 export default function Login() {
   const navigate = useNavigate();
@@ -15,6 +33,7 @@ export default function Login() {
   const [form, setForm] = useState({ email: useLocation().state?.email ?? '', password: '' }); // email: from the invite page
   const [fail, setFail] = useState(null);
   const [busy, setBusy] = useState(false);
+  const [shown, setShown] = useState(false); // the design's "Show" on the password
   const formRef = useRef(null);
 
   useEffect(() => {
@@ -41,9 +60,8 @@ export default function Login() {
   }
 
   const errs = fail?.errors || {};
-  const field = (key, label, type, autoComplete) => (
-    <div className="field">
-      <label htmlFor={`l-${key}`}>{label}</label>
+  const field = (key, label, type, autoComplete) => {
+    const input = (
       <input
         id={`l-${key}`}
         type={type}
@@ -54,25 +72,45 @@ export default function Login() {
         aria-describedby={errs[key] ? `le-${key}` : undefined}
         onChange={(e) => setForm({ ...form, [key]: e.target.value })}
       />
-      {errs[key] && <span id={`le-${key}`} className="err">{errs[key].join(' ')}</span>}
-    </div>
-  );
+    );
+    return (
+      <div className="field">
+        <label htmlFor={`l-${key}`}>{label}</label>
+        {key === 'password' ? (
+          <div className="pw">
+            {input}
+            <button type="button" className="show" aria-pressed={shown} aria-label="Show password" onClick={() => setShown(!shown)}>
+              {shown ? 'Hide' : 'Show'}
+            </button>
+          </div>
+        ) : (
+          input
+        )}
+        {errs[key] && <span id={`le-${key}`} className="err">{errs[key].join(' ')}</span>}
+      </div>
+    );
+  };
 
   return (
-    <Solo>
-      <h1 className="head">{out ? 'Signed out' : 'Sign in'}</h1>
-      {out === 'manager' && <p className="sub">Door devices use their own account, so scanning at the door keeps working.</p>}
+    <Gate>
+      <h1 className="d">{out ? 'Signed out' : 'Staff sign in'}</h1>
+      <p className="sub">
+        {out === 'manager' ? 'Door devices use their own account, so scanning at the door keeps working.' : 'For the door team and managers.'}
+      </p>
       <form ref={formRef} onSubmit={submit} noValidate>
         {field('email', 'Email', 'email', 'username')}
-        {field('password', 'Password', 'password', 'current-password')}
+        {field('password', 'Password', shown ? 'text' : 'password', 'current-password')}
         {fail?.message && (
           <p className="err" role="alert" tabIndex={-1}>
             {fail.message}
           </p>
         )}
-        <Button type="submit">{busy ? 'Signing in...' : out ? 'Sign in again' : 'Sign in'}</Button>
+        <Button type="submit" className="wide">
+          {busy ? 'Signing in...' : out ? 'Sign in again' : 'Sign in'}
+        </Button>
+        <p className="help">Forgot your password? Ask a manager to send you a new link.</p>
       </form>
-    </Solo>
+    </Gate>
   );
 }
 
@@ -105,27 +143,27 @@ export function Invite() {
 
   if (done)
     return (
-      <Solo>
-        <h1 className="head">Password set</h1>
+      <Gate>
+        <h1 className="d">Password set</h1>
         <p className="sub">
           Sign in with {done.email} to open {done.role === 'manager' ? 'the manager panel' : 'the door scanner'}.
         </p>
-        <Link className="btn solid" to="/login" state={{ email: done.email }}>
+        <Link className="btn solid wide" to="/login" state={{ email: done.email }}>
           Sign in
         </Link>
-      </Solo>
+      </Gate>
     );
 
   // A link that is unknown, used or expired won't work however often it is tried.
   if (fail?.status === 404 || fail?.status === 410)
     return (
-      <Solo>
-        <h1 className="head">{fail.status === 410 ? 'This link has run out' : "This link doesn't work"}</h1>
+      <Gate>
+        <h1 className="d">{fail.status === 410 ? 'This link has run out' : "This link doesn't work"}</h1>
         <p className="sub" role="alert">
           {fail.message}
         </p>
         <p className="sub">A manager can send a new one from the Team page.</p>
-      </Solo>
+      </Gate>
     );
 
   const errs = fail?.errors || {};
@@ -142,6 +180,11 @@ export function Invite() {
         aria-describedby={errs[key] ? `ve-${key}` : key === 'password' ? 'v-hint' : undefined}
         onChange={(e) => setForm({ ...form, [key]: e.target.value })}
       />
+      {key === 'password' && (
+        <p id="v-hint" className="help">
+          At least 10 characters.
+        </p>
+      )}
       {errs[key] && (
         <span id={`ve-${key}`} className="err">
           {errs[key].join(' ')}
@@ -151,22 +194,21 @@ export function Invite() {
   );
 
   return (
-    <Solo>
-      <h1 className="head">Set your password</h1>
+    <Gate>
+      <h1 className="d">Set your password</h1>
       <p className="sub">You'll use it to sign in to The Fanglle II.</p>
       <form ref={formRef} onSubmit={submit} noValidate>
         {field('password', 'New password')}
-        <p id="v-hint" className="hintline">
-          At least 10 characters.
-        </p>
         {field('password_confirmation', 'Type it again')}
         {fail?.message && (
           <p className="err" role="alert" tabIndex={-1}>
             {fail.message}
           </p>
         )}
-        <Button type="submit">{busy ? 'Saving...' : 'Set password'}</Button>
+        <Button type="submit" className="wide">
+          {busy ? 'Saving...' : 'Set password'}
+        </Button>
       </form>
-    </Solo>
+    </Gate>
   );
 }

@@ -63,24 +63,24 @@ class AdminEventsTest extends TestCase
         $this->signUp('2026-09-25', 4);
 
         $this->asManager()->getJson('/api/admin/events')->assertOk()->assertExactJson(['events' => [
-            ['date' => '2026-09-24', 'name' => 'Descent', 'genre' => 'Melodic techno', 'guestlist_quota' => 200, 'signed' => 0],
-            ['date' => '2026-09-25', 'name' => 'Second Wave', 'genre' => 'Afro house', 'guestlist_quota' => 200, 'signed' => 4],
-            ['date' => '2026-09-26', 'name' => 'Fall Line', 'genre' => 'Tech house', 'guestlist_quota' => 250, 'signed' => 0],
-            ['date' => '2026-09-27', 'name' => 'Afterglow', 'genre' => 'Deep house', 'guestlist_quota' => 200, 'signed' => 0],
+            ['date' => '2026-09-24', 'name' => 'Descent', 'genre' => 'R&B', 'guestlist_quota' => 200, 'signed' => 0],
+            ['date' => '2026-09-25', 'name' => 'Second Wave', 'genre' => 'Hip-hop', 'guestlist_quota' => 200, 'signed' => 4],
+            ['date' => '2026-09-26', 'name' => 'Fall Line', 'genre' => 'Rage', 'guestlist_quota' => 250, 'signed' => 0],
+            ['date' => '2026-09-27', 'name' => 'Afterglow', 'genre' => 'Trap', 'guestlist_quota' => 200, 'signed' => 0],
         ]]);
     }
 
     public function test_detail_has_everything_the_form_edits(): void
     {
         $this->asManager()->getJson('/api/admin/events/2026-09-24')->assertOk()->assertExactJson([
-            'date' => '2026-09-24', 'name' => 'Descent', 'genre' => 'Melodic techno',
+            'date' => '2026-09-24', 'name' => 'Descent', 'genre' => 'R&B',
             'blurb' => 'Long, slow builds and a room that gets darker as it gets louder.',
             'guestlist_quota' => 200, 'opens_at' => '15:00', 'guestlist_cutoff' => '23:00', 'close_time' => '04:00',
             'min_spend' => ['stage' => 10000000, 'booth' => 15000000, 'bar' => 5000000],
             'lineup' => [
-                ['performer' => 'Rafi Hartono', 'role' => 'warm_up', 'starts_at' => '22:00', 'ends_at' => '00:00'],
-                ['performer' => 'Ilse Varga', 'role' => 'headliner', 'starts_at' => '00:00', 'ends_at' => '03:00'],
-                ['performer' => 'Rafi Hartono', 'role' => 'closing', 'starts_at' => '03:00', 'ends_at' => '04:00'],
+                ['performer' => 'Don Toliver', 'role' => 'warm_up', 'starts_at' => '22:00', 'ends_at' => '00:00'],
+                ['performer' => 'The Weeknd', 'role' => 'headliner', 'starts_at' => '00:00', 'ends_at' => '03:00'],
+                ['performer' => 'Metro Boomin', 'role' => 'closing', 'starts_at' => '03:00', 'ends_at' => '04:00'],
             ],
             'signed' => 0,
         ]);

@@ -83,8 +83,8 @@ function InviteForm({ onDone, onCancel }) {
   );
 
   return (
-    <form ref={ref} className="card form invite" onSubmit={send} noValidate>
-      <h2 className="head">Invite to the team</h2>
+    <form ref={ref} className="box form" onSubmit={send} noValidate>
+      <h2 className="d">Invite to the team</h2>
       {field('name', 'Name', (p) => <input {...p} autoFocus autoComplete="off" />)}
       {field('email', 'Email', (p) => <input {...p} type="email" autoComplete="off" />)}
       {field('role', 'Role', (p) => (
@@ -105,7 +105,7 @@ function InviteForm({ onDone, onCancel }) {
         <button type="button" className="btn line" onClick={onCancel}>
           Cancel
         </button>
-        <span className="hintline">They set their own password from the email. The link works for 48 hours.</span>
+        <span className="help">They set their own password from the email. The link works for 48 hours.</span>
       </div>
     </form>
   );
@@ -144,19 +144,17 @@ export default function Team({ flash }) {
   const staff = list.data?.staff ?? [];
   return (
     <>
-      <div>
-        <h1 className="title head">
-          <span className="two">Team</span>
-        </h1>
+      <div className="ph">
+        <h1 className="d title">Team</h1>
         <p className="sub">Who can sign in, and what they can do.</p>
       </div>
       <div className="roles">
-        <div className="card">
-          <b>Manager</b>
+        <div className="box">
+          <h2 className="d">Manager</h2>
           <p>Everything in this panel: bookings, guestlist, events and the team.</p>
         </div>
-        <div className="card">
-          <b>Door staff</b>
+        <div className="box">
+          <h2 className="d">Door staff</h2>
           <p>The door scanner only. Every check-in is logged under their name.</p>
         </div>
       </div>
@@ -188,9 +186,9 @@ export default function Team({ flash }) {
               <tr>
                 <th>Person</th>
                 <th>Role</th>
-                <th className="c">Status</th>
+                <th>Status</th>
                 <th>Last sign-in</th>
-                <th className="c">
+                <th>
                   <span className="vh">Actions</span>
                 </th>
               </tr>
@@ -207,7 +205,7 @@ export default function Team({ flash }) {
                       ROLE_LABEL[s.role]
                     ) : (
                       <select
-                        className="select role"
+                        className="input role"
                         aria-label={`Role for ${s.name}`}
                         value={s.role}
                         disabled={busy === s.id}
@@ -225,19 +223,19 @@ export default function Team({ flash }) {
                       </select>
                     )}
                   </td>
-                  <td className="c">
+                  <td>
                     <Badge tone={STAFF_STATUS[s.status][1]}>{STAFF_STATUS[s.status][0]}</Badge>
                   </td>
-                  <td>{lastSeen(s)}</td>
-                  <td className="c">
+                  <td className="tnum">{lastSeen(s)}</td>
+                  <td>
                     <div className="rowacts">
-                      {s.you && <span className="hintline">This is you</span>}
+                      {s.you && <span className="help">This is you</span>}
                       {!s.you && s.status === 'active' && (
                         <>
-                          <button className="act" onClick={() => setAsk({ kind: 'reset', s })}>
+                          <button className="btn line sm" onClick={() => setAsk({ kind: 'reset', s })}>
                             Reset password
                           </button>
-                          <button className="act danger" onClick={() => setAsk({ kind: 'disable', s })}>
+                          <button className="btn sm danger" onClick={() => setAsk({ kind: 'disable', s })}>
                             Disable
                           </button>
                         </>
@@ -245,25 +243,25 @@ export default function Team({ flash }) {
                       {s.status === 'invited' && (
                         <>
                           <button
-                            className="act"
+                            className="btn line sm"
                             disabled={busy === s.id}
                             onClick={() => act(s, () => api(`/api/admin/staff/${s.id}/resend-invite`, { method: 'POST' }), `Invite sent again to ${s.email}.`)}
                           >
                             Resend invite
                           </button>
                           {s.invite_url && (
-                            <button className="act" onClick={() => copyLink(s)}>
+                            <button className="btn line sm" onClick={() => copyLink(s)}>
                               Copy link
                             </button>
                           )}
-                          <button className="act danger" onClick={() => setAsk({ kind: 'uninvite', s })}>
+                          <button className="btn sm danger" onClick={() => setAsk({ kind: 'uninvite', s })}>
                             Cancel invite
                           </button>
                         </>
                       )}
                       {s.status === 'disabled' && (
                         <button
-                          className="act"
+                          className="btn line sm"
                           disabled={busy === s.id}
                           onClick={() => act(s, () => api(`/api/admin/staff/${s.id}/enable`, { method: 'POST' }), `${s.name} can sign in again.`)}
                         >

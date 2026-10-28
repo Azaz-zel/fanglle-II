@@ -1,0 +1,253 @@
+/* Manager region, Sorot: boards AdminOverview, AdminBookings, AdminDoorLog, AdminEvents, AdminTeam and Login.
+   Every rule sits under .app (the panel, /admin/*) or .signin (/login and /invite/:token), so nothing here reaches the public
+   site, the guest's pass or the door, and their unscoped names (.panel, .lost, .lineup) never reach in here.
+   The picked night's gel lights the rail and marks where you are; the rest stays quiet. Motion here only follows a change of
+   state (detail panel, new row, message, dialog): under 220 ms, ease-out, CSS only. */
+
+/* Frame: the rail and the main column. Below 960px the rail is a row on top that scrolls sideways inside itself. */
+.app{min-height:100vh;min-height:100dvh;display:grid;grid-template-columns:minmax(0,1fr);align-content:start}
+.app .side{position:relative;display:flex;align-items:center;gap:4px;overflow-x:auto;padding:10px 14px;background:var(--surface);border-bottom:1px solid var(--line-soft)}
+/* The night's gel, a soft glow at the head of the rail. */
+.app .side::before{content:"";position:absolute;left:-40%;top:-120px;width:180%;height:300px;pointer-events:none;
+  background:radial-gradient(closest-side,color-mix(in oklab,var(--gel-bright) 22%,transparent),transparent)}
+.app .side>*{position:relative}
+.app .side .mark{flex:none;padding:0 14px 0 4px;font-size:14px}
+.app .navgrp{display:contents}
+.app .grp{display:none;font-size:11.5px;letter-spacing:.02em;color:var(--muted)}
+.app .navbtn{flex:none;display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:44px;padding:0 12px;
+  color:var(--soft);font-size:14.5px;text-decoration:none;white-space:nowrap;transition:background-color 160ms var(--ease-out),color 160ms var(--ease-out)}
+.app .navbtn[aria-current="page"]{background:var(--raised);color:var(--tungsten);box-shadow:inset 0 -2px 0 var(--gel-bright)}
+.app .count{min-width:22px;height:22px;padding:0 6px;border-radius:999px;background:var(--held);color:var(--ink);font-size:12px;font-weight:500;
+  display:inline-flex;align-items:center;justify-content:center}
+.app .spacer{flex:1 0 8px}
+/* SignOut (staff.jsx) renders <button class="out">. */
+.app .out{flex:none;display:flex;align-items:center;min-height:44px;padding:0 12px;border:0;background:transparent;color:var(--soft);font-size:14.5px;text-align:left;
+  white-space:nowrap;cursor:pointer;transition:color 160ms var(--ease-out)}
+.app .side .err{flex:none;padding:0 4px}
+@media (min-width:960px){
+  .app{grid-template-columns:252px minmax(0,1fr);align-content:stretch}
+  .app .side{position:sticky;top:0;height:100vh;height:100dvh;flex-direction:column;align-items:stretch;gap:4px;overflow:hidden auto;padding:26px 16px;
+    border-bottom:0;border-right:1px solid var(--line-soft)}
+  .app .side .mark{padding:0 12px 18px}
+  .app .grp{display:block;padding:20px 12px 6px}
+  .app .navbtn[aria-current="page"]{box-shadow:inset 2px 0 0 var(--gel-bright)}
+  .app .out{margin-top:16px}
+  .app .side .err{padding:8px 4px 0}
+}
+@media (hover:hover) and (pointer:fine){
+  .app .navbtn:hover,.app .out:hover{color:var(--tungsten)}
+}
+
+.app .main{min-width:0}
+.app .topbar{display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:8px 24px;padding:14px 16px 0;border-bottom:1px solid var(--line-soft);
+  font-size:12.5px;color:var(--muted)}
+.app .topbar>.tnum{padding-bottom:14px}
+.app .content{display:flex;flex-direction:column;gap:28px;max-width:1180px;padding:28px 16px 56px}
+/* The night picker: one button per night, the picked one underlined in its gel. */
+.app .nights{display:flex;gap:2px;overflow-x:auto;max-width:100%;scrollbar-width:thin}
+.app .nights button{flex:none;display:flex;flex-direction:column;align-items:flex-start;gap:2px;min-width:104px;padding:8px 12px 10px;background:none;border:0;
+  border-bottom:2px solid transparent;color:var(--muted);font-size:12.5px;text-align:left;cursor:pointer;transition:color 200ms ease,border-color 200ms ease}
+.app .nights b{font:400 18px/1.15 var(--display);color:var(--soft);white-space:nowrap}
+.app .nights button[aria-pressed="true"]{border-bottom-color:var(--gel-bright);color:var(--soft)}
+.app .nights button[aria-pressed="true"] b{color:var(--tungsten)}
+@media (hover:hover) and (pointer:fine){.app .nights button:hover b{color:var(--tungsten)}}
+@media (min-width:640px){
+  .app .topbar{padding:18px 32px 0}
+  .app .content{padding:30px clamp(32px,3.5vw,52px) 72px}
+}
+
+/* Page heads and the states every page shares */
+.app .ph{display:flex;flex-direction:column;gap:6px;padding-bottom:22px;border-bottom:1px solid var(--line-soft)}
+.app .ph .kicker{font-size:19px}
+.app .title{font-family:var(--display);font-weight:300;text-transform:uppercase;letter-spacing:.2em;line-height:1.02;font-size:clamp(30px,3.4vw,52px);overflow-wrap:anywhere}
+.app .ph .sub{font-size:14px}
+.app .nothing{display:flex;flex-direction:column;align-items:flex-start;gap:16px}
+.app .empty,.app .error{display:flex;flex-direction:column;align-items:center;gap:14px;padding:36px 20px;text-align:center;color:var(--muted)}
+.app .error{color:var(--tungsten)}
+.app .flag{color:var(--error)}
+.app .ok{color:var(--paid);font-size:14px}
+
+/* Messages after an action: a pill at the foot of the screen, so the page under it never jumps. */
+.app .flashbox{position:fixed;left:16px;right:16px;bottom:24px;z-index:10;display:flex;justify-content:center;pointer-events:none}
+.app .flash{pointer-events:auto;max-width:560px;padding:12px 20px;background:var(--tungsten);color:var(--ink);border-radius:999px;font-size:14px;
+  transition:opacity 180ms var(--ease-out),transform 180ms var(--ease-out)}
+@starting-style{.app .flash{opacity:0;transform:translateY(8px)}}
+@media (min-width:960px){.app .flashbox{left:284px;right:32px}}
+
+/* Boxes: square slabs with a hairline. */
+.app .box,.app .nightcard,.app .tablewrap{background:var(--surface);border:1px solid var(--line-soft)}
+.app .box{padding:22px 20px}
+.app .box h2:not(.d){font:400 22px/1.2 var(--display);color:var(--tungsten);margin-bottom:14px}
+@media (min-width:640px){.app .box{padding:24px 28px}}
+
+/* Overview: the night's card on its gel block, "Needs you" beside it */
+.app .over{display:grid;grid-template-columns:minmax(0,1fr);gap:16px}
+@media (min-width:1100px){.app .over{grid-template-columns:minmax(0,7fr) minmax(0,5fr)}}
+.app .nightcard{overflow:hidden}
+.app .band{display:flex;flex-direction:column;gap:4px;padding:20px;background:var(--block)}
+.app .band h2{font-size:26px;overflow-wrap:anywhere}
+.app .band span{font-size:14px;color:var(--soft)}
+.app .nbody{display:flex;flex-direction:column;gap:20px;padding:20px}
+@media (min-width:640px){.app .band{padding:22px 28px}.app .nbody{padding:24px 28px}}
+.app .inside{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 14px}
+.app .inside strong{font-size:clamp(56px,10vw,84px);font-weight:300;line-height:.9}
+.app .inside span{font-size:14px;color:var(--muted)}
+.app .capbar{height:4px;background:var(--raised)}
+.app .capbar i{display:block;height:100%;background:var(--gel-bright)}
+.app .marks{list-style:none;display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:12px 8px;padding-top:16px;border-top:1px solid var(--line-soft);
+  font-size:12.5px;color:var(--muted)}
+.app .marks b{display:block;font:400 20px/1.2 var(--display);color:var(--tungsten)}
+.app .marks .done b{color:var(--muted);text-decoration:line-through}
+.app .marks .next b{color:var(--gel-bright)}
+.app .attn{list-style:none}
+.app .attn li{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center;padding:16px 0;border-top:1px solid var(--line-soft);font-size:15px}
+.app .attn li:first-child{border-top:0;padding-top:0}
+.app .attn small{display:block;font-size:12.5px;color:var(--muted)}
+.app .attn small.hold{color:var(--held)}
+
+/* The figures: one number each, a hairline between, each a link to the page behind it */
+.app .tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));border-bottom:1px solid var(--line-soft)}
+.app .tile{display:flex;flex-direction:column;gap:6px;padding:4px 20px 24px;color:var(--tungsten);text-decoration:none;border-left:1px solid var(--line-soft)}
+.app .tile:first-child{border-left:0;padding-left:0}
+.app .tile .k{font-size:12.5px;color:var(--muted)}
+.app .tile .v{font-size:46px;line-height:1;overflow-wrap:anywhere}
+.app .tile .v.money{font-size:30px;line-height:1.2}
+.app .tile .of{font-size:22px;color:var(--muted)}
+.app .tile .n{font-size:12.5px;color:var(--soft)}
+.app .tile .go{margin-top:auto;padding:8px 0 0;font-size:12.5px;color:var(--soft)}
+.app .meter{display:block;height:3px;margin:6px 0 2px;background:var(--raised)}
+.app .meter i{display:block;height:100%;background:var(--gel-bright)}
+
+/* Arrivals chart: one button per hour, bars in the gel; the chosen one at full strength. */
+.app .bars{display:flex;align-items:flex-end;gap:6px;height:180px;padding-bottom:10px;overflow:auto hidden}
+@media (min-width:640px){.app .bars{gap:10px}}
+.app .barbtn{flex:1 0 44px;height:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:6px;padding:0;background:transparent;
+  border:0;color:var(--soft);cursor:pointer}
+.app .barbtn:focus-visible{outline-offset:-2px}
+.app .barbtn b{font-weight:400;font-size:12px}
+.app .barbtn i{display:block;width:100%;max-width:64px;min-height:2px;background:color-mix(in oklab,var(--gel-bright) 45%,var(--surface));transform-origin:bottom;
+  animation:grow 600ms var(--ease-out) backwards;transition:background-color 160ms var(--ease-out)}
+@keyframes grow{from{transform:scaleY(0)}}
+.app .barbtn[aria-pressed="true"] i{background:var(--gel-bright)}
+.app .barbtn span{font-size:12px;color:var(--muted);min-height:1.5em}
+@media (hover:hover) and (pointer:fine){.app .barbtn[aria-pressed="false"]:hover i{background:color-mix(in oklab,var(--gel-bright) 70%,var(--surface))}}
+.app .readout{margin-top:14px;padding-top:12px;border-top:1px solid var(--line-soft);font-size:14px;color:var(--soft)}
+
+/* Filters: pressed is bone */
+.app .chips{display:flex;flex-wrap:wrap;gap:6px}
+.app .toolbar{display:flex;flex-wrap:wrap;align-items:flex-end;gap:16px 24px}
+.app .toolbar .fill{flex:1 1 240px;min-width:0}
+.app .sortby{flex:0 1 220px;min-width:0}
+.app .summary{display:flex;flex-wrap:wrap;align-items:center;gap:12px 18px;font-size:14px;color:var(--soft)}
+.app .summary .meter{width:220px;max-width:100%;margin:0}
+
+/* Tables scroll sideways inside their box; relative keeps the hidden "Actions" header in there too. */
+.app .tablewrap{position:relative;overflow-x:auto}
+.app .tablewrap table{width:100%;min-width:720px;border-collapse:collapse;font-size:14px}
+/* Booking codes and times stay on one line; the table scrolls sideways on a phone instead. */
+.app .tablewrap td.tnum:first-child{white-space:nowrap}
+.app .tablewrap th{padding:12px 14px;border-bottom:1px solid var(--line);text-align:left;font-size:12px;font-weight:500;color:var(--muted);white-space:nowrap}
+.app .tablewrap td{padding:14px;border-bottom:1px solid var(--line-soft);vertical-align:middle;color:var(--soft)}
+.app .tablewrap td:first-child{color:var(--tungsten)}
+.app .tablewrap tr:last-child td{border-bottom:0}
+.app .tablewrap td small{display:block;font-size:12.5px;color:var(--muted)}
+.app .tablewrap .c{text-align:center}
+.app .tablewrap .r{text-align:right}
+.app .tablewrap .dim{color:var(--muted)}
+.app .tablewrap .input{min-height:44px;font-size:14px}
+.app .tablewrap tbody tr{transition:background-color 160ms var(--ease-out),opacity 180ms var(--ease-out)}
+@starting-style{.app .tablewrap tbody tr{opacity:0}}
+.app .tablewrap tr.on{background:var(--raised)}
+.app .tablewrap tr.on td:first-child{box-shadow:inset 2px 0 0 var(--gel-bright)}
+@media (hover:hover) and (pointer:fine){.app .tablewrap tbody tr:hover{background:var(--raised)}}
+
+/* Detail panel: a native modal <dialog> on the right edge (focus kept inside, Escape and the backdrop close it). It slides in. */
+.app .dlg{transition-duration:200ms}
+.app .dlg.drawer{margin:0 0 0 auto;width:min(440px,100%);height:100%;max-height:none;padding:0;border:0;border-left:1px solid var(--line);
+  box-shadow:-24px 0 60px rgba(0,0,0,.5);transition-timing-function:var(--ease-drawer)}
+.app .dlg.drawer[open]{gap:0;overflow-y:auto}
+@starting-style{.app .dlg.drawer[open]{opacity:0;transform:translateX(104%)}}
+.app .dlg.drawer::backdrop{background:rgba(7,7,10,.6)}
+.app .dh{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;padding:28px 24px 22px;border-bottom:1px solid var(--line-soft)}
+.app .dh h2{margin-top:6px;font-size:32px;overflow-wrap:anywhere}
+.app .dh .badge{margin-top:10px}
+.app .db{display:flex;flex-direction:column;gap:22px;padding:24px}
+.app .dfacts{display:grid;grid-template-columns:110px minmax(0,1fr);gap:12px 16px;font-size:14.5px}
+.app .dfacts dt{color:var(--muted)}
+.app .dfacts dd{overflow-wrap:anywhere}
+.app .hist{list-style:none;margin:12px 0 0 4px;border-left:1px solid var(--line)}
+.app .hist li{position:relative;padding:0 0 14px 18px;font-size:14px}
+.app .hist li:last-child{padding-bottom:0}
+.app .hist li::before{content:"";position:absolute;left:-4px;top:8px;width:7px;height:7px;border-radius:50%;background:var(--muted)}
+.app .hist li span{color:var(--muted)}
+
+/* Team */
+.app .roles{display:grid;grid-template-columns:minmax(0,1fr);gap:16px}
+@media (min-width:760px){.app .roles{grid-template-columns:1fr 1fr}}
+.app .roles h2{font-size:24px}
+.app .roles p{margin-top:8px;font-size:14px;color:var(--muted)}
+.app .rowacts{display:flex;flex-wrap:wrap;justify-content:flex-end;align-items:center;gap:6px}
+.app .tablewrap .role{width:auto;min-width:150px}
+
+/* Events: the nights on the left, the open one's form on the right */
+.app .evgrid{display:grid;grid-template-columns:minmax(0,1fr);gap:16px}
+@media (min-width:1100px){.app .evgrid{grid-template-columns:minmax(220px,290px) minmax(0,1fr);align-items:start}}
+.app .newbtn{margin-bottom:10px;border-style:dashed}
+.app .newbtn[aria-pressed="true"]{border-style:solid;border-color:var(--tungsten)}
+.app .evlist{list-style:none;display:flex;flex-direction:column;gap:2px}
+.app .evitem{display:block;width:100%;min-height:56px;padding:10px 12px;border:0;background:transparent;color:var(--soft);text-align:left;cursor:pointer;
+  font:400 20px/1.2 var(--display);transition:background-color 160ms var(--ease-out),color 160ms var(--ease-out)}
+.app .evitem small{display:block;font:400 12.5px/1.4 var(--body);color:var(--muted)}
+.app .evitem[aria-current="true"]{background:var(--raised);color:var(--tungsten);box-shadow:inset 2px 0 0 var(--gel-bright)}
+@media (hover:hover) and (pointer:fine){.app .evitem:hover{color:var(--tungsten)}}
+
+/* Forms in a box (event editor, team invite) */
+.app .form{display:grid;grid-template-columns:minmax(0,1fr);gap:18px;container-type:inline-size}
+@media (min-width:760px){.app .form{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}}
+.app .form > h2{grid-column:1/-1;font-size:clamp(26px,5vw,34px);overflow-wrap:anywhere}
+.app .form .full{grid-column:1/-1}
+.app .form .actions{flex-direction:row;flex-wrap:wrap;align-items:center;gap:12px}
+.app .form .actions .err{flex-basis:100%}
+.app .form legend{margin-bottom:10px;font-size:13px;color:var(--soft)}
+.app .form legend span{color:var(--muted)}
+.app .sets{grid-column:1/-1;display:flex;flex-direction:column;gap:10px;min-width:0;border:0}
+.app .set{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px;padding:14px;border:1px solid var(--line-soft);background:var(--blackout)}
+.app .set .field:nth-child(-n+2),.app .set .btn,.app .rowerr{grid-column:1/-1}
+.app .set .btn{justify-self:start}
+.app .set .field input,.app .set .field select{padding:0 12px}
+/* Rows go side by side when the form, not the window, is wide enough; Role keeps room for "Guest star". */
+@container (min-width:700px){
+  .app .set{grid-template-columns:minmax(0,2fr) minmax(136px,1.3fr) 128px 128px auto;align-items:end}
+  .app .set .field:nth-child(-n+2),.app .set .btn{grid-column:auto}
+  .app .set .btn{min-height:48px}
+}
+.app .addrow{align-self:flex-start}
+.app .warns{list-style:none;display:flex;flex-direction:column;gap:6px;padding:12px 14px;border:1px solid var(--held);font-size:14px;color:var(--held)}
+.app .fs{grid-column:1/-1;display:grid;grid-template-columns:minmax(0,1fr);gap:12px;min-width:0;border:0}
+@container (min-width:560px){.app .fs{grid-template-columns:repeat(3,minmax(0,1fr))}}
+
+@media (prefers-reduced-motion:reduce){
+  .app .navbtn,.app .out,.app .flash,.app .barbtn i,.app .tablewrap tbody tr,.app .evitem,.app .dlg{transition:none}
+  .app .barbtn i{animation:none}
+}
+
+/* Sign in, signed out and the invite page: the fang in the dark on one side, the form on the other. */
+.signin{position:relative;min-height:100vh;min-height:100dvh;display:grid;grid-template-columns:minmax(0,1fr);background:var(--blackout);color:var(--tungsten)}
+.signin-lit{position:relative;min-height:260px}
+.signin-lit .lit::after{content:"";position:absolute;inset:0;background:radial-gradient(circle at 54% 34%,rgba(7,7,10,0) 0,rgba(7,7,10,.6) 22%,#07070A 44%)}
+.signin .sheet{position:relative;width:100%;max-width:600px;display:flex;flex-direction:column;justify-content:center;gap:20px;padding:32px 20px 56px}
+.signin .mark{font-size:16px}
+.signin h1{font-size:clamp(30px,3vw,44px);overflow-wrap:anywhere}
+.signin h1::after{content:"";display:block;width:28px;height:1px;margin-top:18px;background:var(--gel-bright)}
+.signin .sub{font-size:14px}
+.signin form{display:flex;flex-direction:column;gap:20px}
+.signin form>.btn{align-self:flex-start}
+.signin .pw{position:relative}
+.signin .pw input{padding-right:84px}
+.signin .show{position:absolute;right:4px;top:2px;height:44px;padding:0 14px;border:0;border-radius:999px;background:transparent;color:var(--soft);
+  font:500 13px var(--body);cursor:pointer}
+@media (hover:hover) and (pointer:fine){.signin .show:hover{color:var(--tungsten)}}
+@media (min-width:860px){
+  .signin{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+  .signin .sheet{padding:0 clamp(24px,7vw,112px)}
+}

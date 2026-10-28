@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Choose your table on a phone</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="fanglle.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Albert+Sans:wght@400;500&amp;family=Big+Shoulders+Display:wght@100;200;300;400;600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#0C0A0E}
+a{color:#F1ECE4}a:hover{color:#FFFDF8}
+</style>
+</helmet>
+<div class="stage {{gelClass}}" style="width: 390px; min-height: 2300px; background: var(--blackout); color: var(--tungsten); font-family: var(--body); overflow: hidden">
+  <section class="wash" style="position: relative; overflow: hidden">
+    <div style="position: absolute; inset: 0; pointer-events: none"><dc-import name="Crystals" night="{{n}}" solid="" count="8" reach="0.75" hint-size="100%,100%"></dc-import></div>
+    <div class="beam" style="width: 640px; opacity: .4"></div>
+    <header style="position: relative; z-index: 2; height: 60px; padding: 0 16px; display: flex; align-items: center; gap: 12px">
+      <a class="mark" href="HomeMobile.dc.html" style="font-size: 17px; letter-spacing: .12em">The Fanglle <span class="ii">II</span></a>
+      <a class="navlink" href="HomeMobile.dc.html" style="margin-left: auto">Back</a>
+    </header>
+    <div style="position: relative; z-index: 2; padding: 64px 16px 20px; display: flex; flex-direction: column; gap: 14px">
+      <h1 class="night" style="font-size: 76px">Choose your table</h1>
+      <p style="margin: 0; font-size: 15px; line-height: 1.5; color: var(--soft)">We hold your table for 15 minutes while you pay the deposit.</p>
+      <div role="group" aria-label="Night" style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 2px; margin-top: 10px">
+        <sc-for list="{{nights}}" as="x" hint-placeholder-count="4">
+          <button class="swatch" aria-pressed="{{x.pressed}}" aria-label="{{x.aria}}" disabled="{{x.off}}" onClick="{{x.pick}}" style="--sw: {{x.sw}}; padding: 12px 8px; gap: 2px; {{x.offStyle}}">
+            <span class="day" style="font-size: 12px">{{x.short}}</span>
+            <span class="d tnum" style="font-size: 30px">{{x.date}}</span>
+            <span class="st {{x.tablesClass}}" style="font-size: 12px">{{x.tag}}</span>
+          </button>
+        </sc-for>
+      </div>
+    </div>
+  </section>
+
+  <main style="padding: 20px 16px 64px; display: flex; flex-direction: column; gap: 22px">
+    <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px">
+      <span id="g-l" class="flabel">Guests</span>
+      <div role="group" aria-labelledby="g-l" style="display: flex; align-items: center; border: 1px solid var(--line); border-radius: 2px">
+        <button onClick="{{less}}" aria-label="Fewer guests" style="width: 52px; height: 52px; background: transparent; border: 0; color: var(--tungsten); font-size: 22px; cursor: pointer">−</button>
+        <output class="d tnum" aria-live="polite" style="min-width: 52px; text-align: center; font-size: 28px">{{party}}</output>
+        <button onClick="{{more}}" aria-label="More guests" style="width: 52px; height: 52px; background: transparent; border: 0; color: var(--tungsten); font-size: 22px; cursor: pointer">+</button>
+      </div>
+    </div>
+
+    <figure style="margin: 0; display: flex; flex-direction: column; gap: 8px">
+      <div class="plan mini" aria-hidden="true">
+        <div class="zone" style="left: 40%; width: 20%; top: 0; height: 11%; background: var(--gel-deep); color: var(--tungsten)">DJ</div>
+        <div class="zone" style="left: 29%; width: 42%; top: 15%; height: 51%; border: 1px dashed var(--line)">FLOOR</div>
+        <div class="zone" style="left: 26%; width: 48%; top: 87%; height: 8%; background: var(--raised)">BAR</div>
+        <sc-for list="{{tables}}" as="t" hint-placeholder-count="16">
+          <span class="tbl {{t.shape}} {{t.offCls}}" data-s="{{t.st}}" style="{{t.box}}">
+            <sc-for list="{{t.seats}}" as="c" hint-placeholder-count="6"><span class="seat" style="{{c.s}}"></span></sc-for>
+            <span class="top" style="{{t.top}}"><b>{{t.id}}</b></span>
+          </span>
+        </sc-for>
+      </div>
+      <figcaption class="tnum" style="font-size: 14px; color: var(--muted)">{{zone.name}} lit on the plan. {{freeCount}} of 16 tables free on {{night.name}}.</figcaption>
+    </figure>
+
+    <div role="tablist" aria-label="Area" style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border: 1px solid var(--line)">
+      <sc-for list="{{zones}}" as="z" hint-placeholder-count="3">
+        <button role="tab" aria-selected="{{z.on}}" onClick="{{z.pick}}" style="{{z.style}}">
+          <span style="display: block; font-size: 15px">{{z.name}}</span>
+          <span class="tnum" style="display: block; font-size: 12px; color: var(--muted); margin-top: 2px">{{z.free}} of {{z.total}} free</span>
+        </button>
+      </sc-for>
+    </div>
+
+    <div role="tabpanel" aria-label="{{zone.name}}" style="display: flex; flex-direction: column; gap: 12px">
+      <p class="tnum" style="margin: 0; display: flex; justify-content: space-between; font-size: 14px; color: var(--muted)"><span>Minimum spend</span><span>{{zone.min}}</span></p>
+      <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px">
+        <sc-for list="{{cards}}" as="c" hint-placeholder-count="4">
+          <button onClick="{{c.pick}}" aria-pressed="{{c.isSel}}" aria-disabled="{{c.blocked}}" aria-label="{{c.aria}}" style="{{c.card}}">
+            <span style="position: relative; width: 56px; height: 56px; container-type: inline-size; flex: none" aria-hidden="true">
+              <span class="tbl {{c.shape}}" data-s="{{c.st}}" style="left: 50%; top: 50%; min-width: 0; min-height: 0; {{c.gbox}}">
+                <sc-for list="{{c.gseats}}" as="g" hint-placeholder-count="6"><span class="seat" style="{{g.s}}"></span></sc-for>
+                <span class="top" style="{{c.gtop}}"></span>
+              </span>
+            </span>
+            <span style="display: flex; flex-direction: column; gap: 2px; min-width: 0">
+              <span class="d tnum" style="font-size: 30px; {{c.idStyle}}">{{c.id}}</span>
+              <span style="font-size: 14px; color: var(--soft)">Seats {{c.cap}}</span>
+              <span style="font-size: 13px; color: {{c.stateColor}}">{{c.stateName}}</span>
+            </span>
+          </button>
+        </sc-for>
+      </div>
+    </div>
+
+    <section style="background: var(--surface); border: 1px solid var(--line-soft); padding: 22px 18px; display: flex; flex-direction: column; gap: 16px">
+      <sc-if value="{{stepPick}}" hint-placeholder-val="{{ true }}">
+        <p style="margin: 0; font-size: 16px; line-height: 1.6; color: var(--soft)">Tap a free table above. Your deposit is half its minimum spend.</p>
+      </sc-if>
+      <sc-if value="{{stepDetails}}" hint-placeholder-val="{{ false }}">
+        <div class="swap-in" style="display: flex; justify-content: space-between; align-items: flex-end; gap: 12px">
+          <div>
+            <p class="label">{{sel.zoneName}} · seats {{sel.cap}}</p>
+            <h2 class="d" style="font-size: 48px; margin-top: 6px">Table {{sel.id}}</h2>
+          </div>
+          <p class="tnum" style="margin: 0; text-align: right; font-size: 13px; color: var(--muted)">Deposit<span class="d" style="display: block; font-size: 24px; color: var(--tungsten)">{{sel.deposit}}</span></p>
+        </div>
+        <div class="field"><label for="m-name">Name</label><input id="m-name" class="input" autocomplete="name"></div>
+        <div class="field"><label for="m-phone">Phone</label><input id="m-phone" class="input" type="tel" autocomplete="tel" placeholder="+62"><p class="help">We send your QR here on WhatsApp</p></div>
+        <div class="field"><label for="m-mail">Email</label><input id="m-mail" class="input" type="email" autocomplete="email"></div>
+        <label style="display: flex; gap: 12px; align-items: flex-start; font-size: 15px; line-height: 1.5; color: var(--soft)"><input type="checkbox" style="width: 22px; height: 22px; margin: 1px 0 0; accent-color: var(--gel-bright); flex: none">Everyone at the table is 21 or over and will bring ID</label>
+        <button class="btn btn-work btn-wide" onClick="{{hold}}">Hold table {{sel.id}}</button>
+      </sc-if>
+      <sc-if value="{{stepHeld}}" hint-placeholder-val="{{ false }}">
+        <p class="label">Table {{sel.id}} is yours for</p>
+        <p class="d tnum" style="font-size: 96px; font-weight: 200; line-height: .9; margin: 0; color: var(--gel-bright)">{{clock}}</p>
+        <p style="margin: 0; font-size: 15px; line-height: 1.6; color: var(--soft)">Pay {{sel.deposit}} before the time runs out, or the table goes back on the plan.</p>
+        <button class="btn btn-work btn-wide" onClick="{{pay}}">Pay deposit</button>
+        <button class="btn btn-line btn-wide" onClick="{{release}}">Let the table go</button>
+      </sc-if>
+      <sc-if value="{{stepPaid}}" hint-placeholder-val="{{ false }}">
+        <p class="label" style="color: var(--paid)">Deposit received</p>
+        <h2 class="d" style="font-size: 40px">Table {{sel.id}}, {{night.name}}</h2>
+        <p style="margin: 0; font-size: 15px; line-height: 1.6; color: var(--soft)">Your QR is on its way by WhatsApp and email.</p>
+        <a class="btn btn-work btn-wide" href="Pass.dc.html">Open my QR</a>
+      </sc-if>
+    </section>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":2300}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { n: 0, party: 4, sel: null, step: 'pick', zone: 'stage', left: 900 }; }
+  componentDidMount() { this.timer = setInterval(() => { if (this.state.step === 'held' && this.state.left > 0) this.setState({ left: this.state.left - 1 }); }, 1000); }
+  componentWillUnmount() { clearInterval(this.timer); }
+  renderVals() {
+    const idr = (v) => 'IDR ' + v.toLocaleString('en-US');
+    // venue_tables (DatabaseSeeder): code, zone, shape, capacity, x, y on a 1000 x 620 plan.
+    const TABLES = [['S1','stage','round',6,185,150],['S2','stage','round',6,185,285],['S3','stage','round',6,815,150],['S4','stage','round',6,815,285],
+      ['B1','booth','booth',12,72,135],['B2','booth','booth',12,72,265],['B3','booth','booth',8,72,395],['B4','booth','booth',12,928,135],['B5','booth','booth',12,928,265],['B6','booth','booth',8,928,395],
+      ['T1','bar','high',4,300,462],['T2','bar','high',4,380,462],['T3','bar','high',4,460,462],['T4','bar','high',4,540,462],['T5','bar','high',4,620,462],['T6','bar','high',4,700,462]];
+    // k scales the same furniture up for the card glyphs.
+    const furniture = (shape, cap, x, k) => {
+      const q = (v) => +(v * k).toFixed(2);
+      const at = (dx, dy, w, h, extra) => ({ s: `left: calc(50% + ${q(dx)}cqw); top: calc(50% + ${q(dy)}cqw); width: ${q(w)}cqw; height: ${q(h)}cqw; ${extra || ''}` });
+      if (shape === 'round') return { box: `width: ${q(10)}cqw; height: ${q(10)}cqw`, top: `width: ${q(5.4)}cqw; height: ${q(5.4)}cqw; border-radius: 50%`,
+        seats: [0, 1, 2, 3, 4, 5].map((i) => { const a = i * Math.PI / 3 + Math.PI / 6; return at(Math.cos(a) * 3.95, Math.sin(a) * 3.95, 1.5, 1.5, 'border-radius: 50%'); }) };
+      if (shape === 'booth') { const h = cap > 8 ? 11.5 : 9; const left = x < 500;
+        return { box: `width: ${q(8.4)}cqw; height: ${q(h)}cqw`, top: `width: ${q(3.4)}cqw; height: ${q(h - 4.6)}cqw; border-radius: ${q(.5)}cqw; margin-left: ${left ? q(.8) : -q(.8)}cqw`,
+          seats: [{ s: `left: 0; top: 0; right: 0; bottom: 0; transform: none; background: transparent; border: ${q(1.4)}cqw solid var(--seat); ${left ? `border-right-color: transparent; border-radius: ${q(1.6)}cqw 0 0 ${q(1.6)}cqw` : `border-left-color: transparent; border-radius: 0 ${q(1.6)}cqw ${q(1.6)}cqw 0`}` }] }; }
+      return { box: `width: ${q(7)}cqw; height: ${q(7)}cqw`, top: `width: ${q(3.2)}cqw; height: ${q(3.2)}cqw; border-radius: ${q(.4)}cqw`, seats: [[-1, -1], [1, -1], [1, 1], [-1, 1]].map(([a, b]) => at(a * 2.5, b * 2.5, 1.3, 1.3, 'border-radius: 50%')) };
+    };
+    const NIGHTS = [
+      { key: 'thu', short: 'Thu', date: '8', name: 'Descent', sw: '#9A93FF', tag: 'Open', tablesClass: '', min: { stage: 10000000, booth: 15000000, bar: 5000000 }, booked: ['S1', 'B4', 'T2'], held: ['B2'] },
+      { key: 'fri', short: 'Fri', date: '9', name: 'Second Wave', sw: '#F5AE4E', tag: 'Last', tablesClass: 'st-last', min: { stage: 16000000, booth: 24000000, bar: 8000000 }, booked: ['S1', 'S2', 'S3', 'B1', 'B2', 'B4', 'B5', 'T1', 'T2', 'T3', 'T5'], held: ['S4'] },
+      { key: 'sat', short: 'Sat', date: '10', name: 'Fall Line', sw: '#FF6676', tag: 'Sold out', tablesClass: 'st-gone', min: { stage: 20000000, booth: 30000000, bar: 10000000 }, soldOut: true, booked: TABLES.map((t) => t[0]), held: [] },
+      { key: 'sun', short: 'Sun', date: '11', name: 'Afterglow', sw: '#F4A3C0', tag: 'Open', tablesClass: '', min: { stage: 8000000, booth: 12000000, bar: 4000000 }, booked: ['T1'], held: [] },
+    ];
+    const ZONE = { stage: 'Stage front', booth: 'Booth', bar: 'Bar' };
+    const s = this.state;
+    const night = NIGHTS[s.n];
+    const tables = TABLES.map(([id, zone, shape, cap, x, y]) => {
+      const taken = night.booked.includes(id);
+      const held = night.held.includes(id);
+      const small = cap < s.party;
+      const isSel = s.sel === id;
+      const st = isSel ? 'sel' : taken ? 'dark' : held ? 'held' : small ? 'small' : 'lit';
+      const blocked = st === 'dark' || st === 'held' || st === 'small';
+      const stateName = taken ? 'Taken' : held ? 'On hold' : small ? 'Too small' : isSel ? 'Your table' : 'Free';
+      const fz = furniture(shape, cap, x, 1);
+      const gz = furniture(shape, cap, x, 6);
+      return {
+        id, zone, cap, shape: shape === 'high' ? 'high' : '', st, isSel, blocked, stateName, offCls: zone === s.zone ? '' : 'off',
+        zoneName: ZONE[zone], min: idr(night.min[zone]), deposit: idr(night.min[zone] / 2),
+        aria: `Table ${id}, seats ${cap}, ${stateName.toLowerCase()}`,
+        box: `left: ${x / 10}%; top: ${(y / 6.2).toFixed(2)}%; ${fz.box}`, top: fz.top, seats: fz.seats,
+        gbox: gz.box, gtop: gz.top, gseats: gz.seats,
+        stateColor: isSel ? 'var(--gel-bright)' : st === 'lit' ? 'var(--paid)' : 'var(--muted)',
+        idStyle: st === 'dark' ? 'color: var(--muted); text-decoration: line-through' : '',
+        card: `display: flex; align-items: center; gap: 12px; padding: 12px; min-height: 88px; text-align: left; font: inherit; color: inherit; border-radius: 2px; cursor: ${blocked ? 'not-allowed' : 'pointer'}; transition: border-color 250ms ease, background-color 250ms ease, transform 160ms var(--ease-out); ${isSel ? 'border: 1px solid var(--gel-bright); background: var(--raised)' : blocked ? 'border: 1px solid var(--line-soft); background: transparent; opacity: .6' : 'border: 1px solid var(--line); background: var(--surface)'}`,
+        pick: () => { if (!blocked && s.step !== 'held' && s.step !== 'paid') this.setState({ sel: id, step: 'details' }); },
+      };
+    });
+    const sel = tables.find((t) => t.id === s.sel) || tables[0];
+    const zones = [['stage', 'Stage front'], ['booth', 'Booths'], ['bar', 'Bar']].map(([z, name], k) => {
+      const list = tables.filter((t) => t.zone === z);
+      const on = s.zone === z;
+      return {
+        name, on, total: list.length, free: list.filter((t) => !night.booked.includes(t.id) && !night.held.includes(t.id)).length, min: idr(night.min[z]),
+        style: `min-height: 56px; padding: 8px 6px; background: ${on ? 'var(--raised)' : 'transparent'}; border: 0; ${k ? 'border-left: 1px solid var(--line);' : ''} box-shadow: ${on ? 'inset 0 -2px 0 var(--gel-bright)' : 'none'}; color: ${on ? 'var(--tungsten)' : 'var(--soft)'}; font: inherit; cursor: pointer; transition: background-color 250ms ease`,
+        pick: () => this.setState({ zone: z }),
+      };
+    });
+    return {
+      gelClass: 'gel-' + night.key, n: s.n, night, party: s.party,
+      less: () => this.setState({ party: Math.max(1, s.party - 1), sel: null, step: s.step === 'details' ? 'pick' : s.step }),
+      more: () => this.setState({ party: Math.min(12, s.party + 1), sel: null, step: s.step === 'details' ? 'pick' : s.step }),
+      nights: NIGHTS.map((x, k) => ({ ...x, pressed: k === s.n, off: !!x.soldOut, aria: `${x.name}, ${x.short} ${x.date}`, offStyle: x.soldOut ? 'opacity: .55; cursor: not-allowed' : '', pick: () => { if (!x.soldOut && s.step !== 'held' && s.step !== 'paid') this.setState({ n: k, sel: null, step: 'pick', left: 900 }); } })),
+      tables, zones, zone: zones.find((z) => z.on), cards: tables.filter((t) => t.zone === s.zone), sel,
+      freeCount: tables.filter((t) => !night.booked.includes(t.id) && !night.held.includes(t.id)).length,
+      stepPick: s.step === 'pick', stepDetails: s.step === 'details', stepHeld: s.step === 'held', stepPaid: s.step === 'paid',
+      hold: () => this.setState({ step: 'held', left: 900 }), pay: () => this.setState({ step: 'paid' }), release: () => this.setState({ step: 'pick', sel: null, left: 900 }),
+      clock: String(Math.floor(s.left / 60)).padStart(2, '0') + ':' + String(s.left % 60).padStart(2, '0'),
+    };
+  }
+}
+</script>
+</body>
+</html>

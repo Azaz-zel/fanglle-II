@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<title>Sistem Gel dan Kabut</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="fanglle.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Albert+Sans:wght@400;500&amp;family=Big+Shoulders+Display:wght@100;200;300;400;600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#0C0A0E}
+a{color:#F1ECE4}a:hover{color:#FFFDF8}
+</style>
+</helmet>
+<div class="stage gel-thu" style="width: 1440px; min-height: 2600px; box-sizing: border-box; padding: 88px 96px 120px; background: var(--blackout); color: var(--tungsten); font-family: var(--body); display: flex; flex-direction: column; gap: 96px">
+
+  <section style="display: flex; flex-direction: column; gap: 18px">
+    <h1 class="night" style="font-size: 160px">Gel dan Kabut</h1>
+    <p style="margin: 0; font-size: 20px; line-height: 1.55; color: var(--soft); max-width: 62ch">Tiap malam punya cahayanya sendiri. Halaman adalah ruangan berkabut yang disiram gel warna malam terpilih. Satu gel di panggung pada satu waktu; tombol utama memakai putih tungsten, bukan warna gel.</p>
+  </section>
+
+  <section style="display: flex; flex-direction: column; gap: 28px">
+    <h2 class="d" style="font-size: 44px">Ruangan: dasar dan teks</h2>
+    <div style="display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 14px">
+      <div style="display: flex; flex-direction: column; gap: 10px"><div style="height: 96px; background: #0C0A0E; border: 1px solid #3A3441"></div><span style="font-size: 15px">Blackout</span><span class="tnum" style="font-size: 13px; color: var(--muted)">#0C0A0E · dasar</span></div>
+      <div style="display: flex; flex-direction: column; gap: 10px"><div style="height: 96px; background: #16131A"></div><span style="font-size: 15px">Surface</span><span class="tnum" style="font-size: 13px; color: var(--muted)">#16131A · panel</span></div>
+      <div style="display: flex; flex-direction: column; gap: 10px"><div style="height: 96px; background: #211D26"></div><span style="font-size: 15px">Raised</span><span class="tnum" style="font-size: 13px; color: var(--muted)">#211D26 · hover, terpilih</span></div>
+      <div style="display: flex; flex-direction: column; gap: 10px"><div style="height: 96px; background: #3A3441"></div><span style="font-size: 15px">Line</span><span class="tnum" style="font-size: 13px; color: var(--muted)">#3A3441 · garis</span></div>
+      <div style="display: flex; flex-direction: column; gap: 10px"><div style="height: 96px; background: #F1ECE4"></div><span style="font-size: 15px">Tungsten</span><span class="tnum" style="font-size: 13px; color: var(--muted)">#F1ECE4 · teks, tombol utama · 16,8:1</span></div>
+      <div style="display: flex; flex-direction: column; gap: 10px"><div style="height: 96px; background: #9E968C"></div><span style="font-size: 15px">Muted</span><span class="tnum" style="font-size: 13px; color: var(--muted)">#9E968C · teks kedua · 6,7:1</span></div>
+    </div>
+  </section>
+
+  <section style="display: flex; flex-direction: column; gap: 28px">
+    <h2 class="d" style="font-size: 44px">Gel: satu per hari malam</h2>
+    <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px">
+      <div class="gel-thu" style="display: flex; flex-direction: column">
+        <div class="wash" style="height: 220px; position: relative; overflow: hidden; display: flex; align-items: flex-end; padding: 18px"><span class="night" style="font-size: 56px; position: relative">Kamis</span></div>
+        <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr))"><div style="height: 40px; background: #2B21B0"></div><div style="height: 40px; background: #9A93FF"></div><div style="height: 40px; background: #120F2B"></div></div>
+        <span class="tnum" style="margin-top: 10px; font-size: 13px; color: var(--muted)">Congo · deep #2B21B0 · bright #9A93FF · haze #120F2B</span>
+      </div>
+      <div class="gel-fri" style="display: flex; flex-direction: column">
+        <div class="wash" style="height: 220px; position: relative; overflow: hidden; display: flex; align-items: flex-end; padding: 18px"><span class="night" style="font-size: 56px; position: relative">Jumat</span></div>
+        <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr))"><div style="height: 40px; background: #B4600E"></div><div style="height: 40px; background: #F5AE4E"></div><div style="height: 40px; background: #22140A"></div></div>
+        <span class="tnum" style="margin-top: 10px; font-size: 13px; color: var(--muted)">Amber · deep #B4600E · bright #F5AE4E · haze #22140A</span>
+      </div>
+      <div class="gel-sat" style="display: flex; flex-direction: column">
+        <div class="wash" style="height: 220px; position: relative; overflow: hidden; display: flex; align-items: flex-end; padding: 18px"><span class="night" style="font-size: 56px; position: relative">Sabtu</span></div>
+        <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr))"><div style="height: 40px; background: #A30F25"></div><div style="height: 40px; background: #FF6676"></div><div style="height: 40px; background: #210A0F"></div></div>
+        <span class="tnum" style="margin-top: 10px; font-size: 13px; color: var(--muted)">Merah · deep #A30F25 · bright #FF6676 · haze #210A0F</span>
+      </div>
+      <div class="gel-sun" style="display: flex; flex-direction: column">
+        <div class="wash" style="height: 220px; position: relative; overflow: hidden; display: flex; align-items: flex-end; padding: 18px"><span class="night" style="font-size: 56px; position: relative">Minggu</span></div>
+        <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr))"><div style="height: 40px; background: #9C3F66"></div><div style="height: 40px; background: #F4A3C0"></div><div style="height: 40px; background: #1F0F17"></div></div>
+        <span class="tnum" style="margin-top: 10px; font-size: 13px; color: var(--muted)">Rose · deep #9C3F66 · bright #F4A3C0 · haze #1F0F17</span>
+      </div>
+    </div>
+    <p style="margin: 0; font-size: 15px; line-height: 1.55; color: var(--muted); max-width: 80ch">Deep mewarnai ruangan dan sorot. Bright dipakai untuk teks kecil berwarna, cincin fokus, dan pilihan tamu, semuanya di atas 6,9:1 terhadap blackout. Teks kecil tidak pernah diletakkan langsung di atas deep (Jumat hanya 3,9:1). Gel ditentukan hari malam, bukan data; malam di luar Kamis sampai Minggu memakai gel Kamis.</p>
+  </section>
+
+  <section style="display: flex; flex-direction: column; gap: 28px">
+    <h2 class="d" style="font-size: 44px">Huruf</h2>
+    <div style="display: grid; grid-template-columns: 300px minmax(0, 1fr); gap: 24px 40px; align-items: baseline">
+      <span style="font-size: 14px; color: var(--muted)">Nama malam · Big Shoulders Display 100, 264 px, kapital</span>
+      <span class="night" style="font-size: 200px">Descent</span>
+      <span style="font-size: 14px; color: var(--muted)">Judul bagian · 300, 72 px</span>
+      <span class="d" style="font-size: 72px">Two ways in</span>
+      <span style="font-size: 14px; color: var(--muted)">Subjudul · 300, 44 px</span>
+      <span class="d" style="font-size: 44px">A table for the night</span>
+      <span style="font-size: 14px; color: var(--muted)">Angka · 200, tabular</span>
+      <span class="d tnum" style="font-size: 96px; font-weight: 200">14:32</span>
+      <span style="font-size: 14px; color: var(--muted)">Teks · Albert Sans 400, 17 px / 1,6</span>
+      <span style="font-size: 17px; line-height: 1.6; color: var(--soft); max-width: 60ch">Pick your table on the floor plan. Half the minimum spend holds it as a deposit, and all of it goes toward your bill on the night.</span>
+      <span style="font-size: 14px; color: var(--muted)">Label kecil · 500, 13 px, kapital</span>
+      <span class="label">Thursday 8 October · Doors 10 pm</span>
+      <span style="font-size: 14px; color: var(--muted)">Logo teks · 600, 21 px, jarak 0,16 em</span>
+      <span class="mark">The Fanglle <span class="ii">II</span></span>
+    </div>
+  </section>
+
+  <section style="display: flex; flex-direction: column; gap: 28px">
+    <h2 class="d" style="font-size: 44px">Tombol dan isian</h2>
+    <div style="display: flex; gap: 14px; flex-wrap: wrap; align-items: center">
+      <button class="btn btn-work">Book a table</button>
+      <button class="btn btn-line">Join the guestlist</button>
+      <button class="btn btn-work btn-sm">Book a table</button>
+      <button class="btn btn-line" style="outline: 2px solid var(--gel-bright); outline-offset: 3px">Fokus keyboard</button>
+      <button class="btn btn-work" disabled="{{yes}}">Fully booked</button>
+    </div>
+    <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; max-width: 1100px">
+      <div class="field"><label for="s1">Name</label><input id="s1" class="input" value="Ayu Prameswari"><p class="help">As on your ID</p></div>
+      <div class="field"><label for="s2">Phone</label><input id="s2" class="input" value="+62 812 3456 7890" style="outline: 2px solid var(--gel-bright); outline-offset: 2px"><p class="help">We send your QR here</p></div>
+      <div class="field"><label for="s3">Email</label><input id="s3" class="input" value="ayu@" aria-invalid="true" aria-describedby="s3e"><p id="s3e" class="err">Enter a full email address, like name@mail.com</p></div>
+    </div>
+  </section>
+
+  <section style="display: flex; flex-direction: column; gap: 28px">
+    <h2 class="d" style="font-size: 44px">Tiga keadaan cahaya</h2>
+    <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px">
+      <div style="display: flex; flex-direction: column; gap: 14px; align-items: flex-start">
+        <span style="width: 88px; height: 88px; border-radius: 50%; border: 1px solid rgba(241,236,228,.6); background: rgba(241,236,228,.07); display: flex; align-items: center; justify-content: center" class="tnum">S3</span>
+        <span style="font-size: 15px">Menyala · tersedia</span>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 14px; align-items: flex-start">
+        <span style="width: 88px; height: 88px; border-radius: 50%; background: var(--gel-bright); color: var(--ink); display: flex; align-items: center; justify-content: center; box-shadow: 0 0 40px color-mix(in oklab, var(--gel-bright) 45%, transparent)" class="tnum">S3</span>
+        <span style="font-size: 15px">Terpilih · gel penuh, satu-satunya yang bersinar</span>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 14px; align-items: flex-start">
+        <span style="width: 88px; height: 88px; border-radius: 50%; border: 1px dashed var(--muted); color: var(--muted); display: flex; align-items: center; justify-content: center" class="tnum">S4</span>
+        <span style="font-size: 15px">Redup · sedang ditahan</span>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 14px; align-items: flex-start">
+        <span style="width: 88px; height: 88px; border-radius: 50%; border: 1px solid var(--line-soft); background: var(--blackout); color: var(--muted); text-decoration: line-through; display: flex; align-items: center; justify-content: center" class="tnum">S5</span>
+        <span style="font-size: 15px">Gelap · habis, tetap digambar</span>
+      </div>
+    </div>
+    <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0 2px; max-width: 1100px">
+      <button class="swatch" aria-pressed="true" style="--sw: #9A93FF"><span class="day">Thu 8</span><span class="nm">Descent</span><span class="st">From IDR 5,000,000</span></button>
+      <button class="swatch" aria-pressed="false" style="--sw: #F5AE4E"><span class="day">Fri 9</span><span class="nm">Second Wave</span><span class="st st-last">Last tables</span></button>
+      <button class="swatch" aria-pressed="false" style="--sw: #FF6676"><span class="day">Sat 10</span><span class="nm">Fall Line</span><span class="st st-gone">Sold out</span></button>
+      <button class="swatch" aria-pressed="false" style="--sw: #F4A3C0"><span class="day">Sun 11</span><span class="nm">Afterglow</span><span class="st">From IDR 4,000,000</span></button>
+    </div>
+  </section>
+
+  <section style="display: flex; flex-direction: column; gap: 28px">
+    <h2 class="d" style="font-size: 44px">Bingkai foto</h2>
+    <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 14px; max-width: 1100px">
+      <div class="photo" style="aspect-ratio: 16 / 9"><span>[FOTO] Main room from the DJ booth, lights low</span></div>
+      <div class="photo" style="aspect-ratio: 3 / 4"><span>[FOTO] Headliner behind the decks</span></div>
+    </div>
+    <p style="margin: 0; font-size: 15px; line-height: 1.55; color: var(--muted); max-width: 80ch">Sampai foto asli tersedia, setiap tempat foto berbingkai putus-putus dengan brief fotonya. Gel malam yang aktif menyinari bingkai dari atas.</p>
+  </section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":2600}}'>
+class Component extends DCLogic {
+  renderVals() { return { yes: true }; }
+}
+</script>
+</body>
+</html>

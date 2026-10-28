@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>The Fanglle II, home on a phone</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="fanglle.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Albert+Sans:wght@400;500&amp;family=Big+Shoulders+Display:wght@100;200;300;400;600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#0C0A0E}
+a{color:#F1ECE4}a:hover{color:#FFFDF8}
+</style>
+</helmet>
+<div class="stage {{gelClass}}" style="width: 390px; min-height: 3400px; background: var(--blackout); color: var(--tungsten); font-family: var(--body); overflow: hidden; position: relative">
+
+  <section class="wash" style="position: relative; height: 760px; overflow: hidden; display: flex; flex-direction: column">
+    <div style="position: absolute; inset: 0; pointer-events: none"><dc-import name="Crystals" night="{{i}}" solid="" count="9" reach="0.6" hint-size="100%,100%"></dc-import></div>
+    <div class="beam" style="width: 640px"></div>
+    <div class="haze"></div>
+    <div class="house"></div>
+    <header style="position: relative; z-index: 2; height: 64px; padding: 0 16px; display: flex; align-items: center; gap: 10px">
+      <a class="mark" href="HomeMobile.dc.html" style="font-size: 17px; letter-spacing: .12em">The Fanglle <span class="ii">II</span></a>
+      <a class="btn btn-work btn-sm" href="BookMobile.dc.html" style="margin-left: auto; padding: 0 14px">Book a table</a>
+      <button onClick="{{toggleMenu}}" aria-expanded="{{menuOpen}}" style="min-width: 52px; min-height: 44px; background: transparent; border: 0; color: var(--soft); font: 400 15px var(--body); cursor: pointer">Menu</button>
+    </header>
+    <sc-if value="{{menuOpen}}" hint-placeholder-val="{{ false }}">
+      <nav aria-label="Main" class="swap-in" style="position: absolute; top: 64px; left: 0; right: 0; z-index: 5; background: var(--blackout); border-bottom: 1px solid var(--line-soft); padding: 8px 16px 20px; display: flex; flex-direction: column">
+        <a href="#week-m" class="d" style="min-height: 56px; display: flex; align-items: center; font-size: 34px; text-decoration: none">This week</a>
+        <a href="Gallery.dc.html" class="d" style="min-height: 56px; display: flex; align-items: center; font-size: 34px; text-decoration: none">Gallery</a>
+        <a href="About.dc.html" class="d" style="min-height: 56px; display: flex; align-items: center; font-size: 34px; text-decoration: none">About</a>
+        <a href="FindQr.dc.html" class="d" style="min-height: 56px; display: flex; align-items: center; font-size: 34px; text-decoration: none">Find my QR</a>
+      </nav>
+    </sc-if>
+    <div class="{{outCls}}" style="position: relative; z-index: 2; flex: 1; padding: 0 16px 28px; display: flex; flex-direction: column; justify-content: flex-end">
+      <sc-for list="{{nights}}" as="h" hint-placeholder-count="4">
+        <sc-if value="{{h.show}}" hint-placeholder-val="{{ false }}">
+          <p class="label swap-in" style="--d: {{h.dKicker}}; color: var(--soft)">{{h.day}} {{h.date}} Oct · Doors 3 pm</p>
+          <h1 class="night" style="font-size: {{h.nameSize}}; margin-top: 14px">
+            <a href="EventMobile.dc.html" aria-label="{{h.name}}" style="color: inherit; text-decoration: none">
+              <sc-for list="{{h.words}}" as="w" hint-placeholder-count="2">
+                <span aria-hidden="true" style="display: inline-block; white-space: nowrap; margin-right: .2em"><sc-for list="{{w.letters}}" as="l" hint-placeholder-count="6"><span class="letter" style="--d: {{l.d}}">{{l.c}}</span></sc-for></span>
+              </sc-for>
+            </a>
+          </h1>
+          <p class="swap-in" style="--d: {{h.dLine}}; margin: 16px 0 0; font-size: 17px; line-height: 1.5; color: var(--soft)">{{h.head}}, with {{h.support}}<br>{{h.genre}}</p>
+          <div class="swap-in" style="--d: {{h.dCta}}; display: flex; flex-direction: column; gap: 10px; margin-top: 24px">
+            <sc-if value="{{h.open}}" hint-placeholder-val="{{ true }}">
+              <a class="btn btn-work btn-wide" href="BookMobile.dc.html">Book a table</a>
+              <a class="btn btn-line btn-wide" href="GuestlistMobile.dc.html">Join the guestlist</a>
+            </sc-if>
+            <sc-if value="{{h.soldOut}}" hint-placeholder-val="{{ false }}">
+              <button class="btn btn-work btn-wide" disabled="{{yes}}">Fully booked</button>
+            </sc-if>
+          </div>
+        </sc-if>
+      </sc-for>
+    </div>
+  </section>
+
+  <div id="week-m" style="padding: 0 16px">
+    <div role="group" aria-label="This week" style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 2px">
+      <sc-for list="{{nights}}" as="n" hint-placeholder-count="4">
+        <button class="swatch" aria-pressed="{{n.pressed}}" aria-label="{{n.aria}}" onClick="{{n.pick}}" style="--sw: {{n.sw}}; padding: 14px 10px 14px; gap: 2px; align-items: flex-start">
+          <span class="day" style="font-size: 12px">{{n.short}}</span>
+          <span class="d tnum" style="font-size: 34px; font-weight: 300">{{n.date}}</span>
+        </button>
+      </sc-for>
+    </div>
+    <div class="{{outCls}}">
+      <sc-for list="{{nights}}" as="h" hint-placeholder-count="4">
+        <sc-if value="{{h.show}}" hint-placeholder-val="{{ false }}">
+          <p class="swap-in" style="--d: 120; margin: 14px 0 0; font-size: 15px; line-height: 1.5; color: var(--muted)"><span class="{{h.tablesClass}}">{{h.tablesLong}}</span><br>{{h.guestLine}}</p>
+        </sc-if>
+      </sc-for>
+    </div>
+  </div>
+
+  <section style="padding: 88px 16px 0">
+    <div class="{{outCls}}">
+      <sc-for list="{{nights}}" as="h" hint-placeholder-count="4">
+        <sc-if value="{{h.show}}" hint-placeholder-val="{{ false }}">
+          <h2 class="d swap-in" style="--d: 40; font-size: 48px">{{h.name}}, hour by hour</h2>
+          <div aria-hidden="true" class="swap-in" style="--d: 40; position: relative; height: 18px; margin-top: 28px">
+            <sc-for list="{{h.mticks}}" as="k" hint-placeholder-count="4">
+              <span class="tnum" style="position: absolute; left: {{k.left}}%; transform: translateX({{k.shift}}); font-size: 12px; color: var(--muted); white-space: nowrap">{{k.label}}</span>
+            </sc-for>
+          </div>
+          <ol style="list-style: none; margin: 10px 0 0; padding: 0; border-bottom: 1px solid var(--line-soft)">
+            <sc-for list="{{h.rows}}" as="s" hint-placeholder-count="3">
+              <li style="padding: 14px 0 16px; border-top: 1px solid var(--line-soft); display: flex; flex-direction: column; gap: 12px">
+                <div class="swap-in" style="--d: {{s.d}}; display: flex; justify-content: space-between; align-items: baseline; gap: 12px">
+                  <span><span class="d" style="display: block; font-size: 28px; font-weight: 200; line-height: 1.05">{{s.dj}}</span><span style="display: block; margin-top: 4px; font-size: 13px; color: {{s.roleColor}}">{{s.role}}</span></span>
+                  <span class="tnum" style="font-size: 13px; color: var(--muted); white-space: nowrap">{{s.t}} to {{s.end}}</span>
+                </div>
+                <div aria-hidden="true" style="position: relative; height: 10px">
+                  <sc-for list="{{h.mticks}}" as="k" hint-placeholder-count="4"><span style="position: absolute; top: -3px; bottom: -3px; left: {{k.left}}%; width: 1px; background: var(--line-soft)"></span></sc-for>
+                  <span class="grow" style="--d: {{s.dBar}}; position: absolute; top: 0; height: 10px; {{s.pos}} border-radius: 2px; background: {{s.bg}}"></span>
+                </div>
+              </li>
+            </sc-for>
+          </ol>
+          <p class="swap-in" style="--d: 480; margin: 18px 0 0; font-size: 15px; color: var(--muted)">Doors 3 pm · guestlist closes {{h.cutoff}}<br>Close {{h.close}}</p>
+        </sc-if>
+      </sc-for>
+    </div>
+    <div role="group" aria-label="Night" style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 2px; margin-top: 24px">
+      <sc-for list="{{nights}}" as="n" hint-placeholder-count="4">
+        <button class="swatch" aria-pressed="{{n.pressed}}" aria-label="{{n.aria}}" onClick="{{n.pick}}" style="--sw: {{n.sw}}; padding: 10px 8px; gap: 0; align-items: center"><span class="day" style="font-size: 12px">{{n.short}} {{n.date}}</span></button>
+      </sc-for>
+    </div>
+  </section>
+
+  <section style="padding: 88px 16px 0; display: flex; flex-direction: column; gap: 14px">
+    <h2 class="d" style="font-size: 48px">Two ways in</h2>
+    <article style="background: var(--surface); border: 1px solid var(--line-soft); padding: 24px 20px; display: flex; flex-direction: column; gap: 16px">
+      <h3 class="d" style="font-size: 34px">A table for the night</h3>
+      <p style="margin: 0; font-size: 16px; line-height: 1.6; color: var(--soft)">Pick your table on the floor plan. Half the minimum spend holds it, and all of it goes toward your bill.</p>
+      <p class="{{night.tablesClass}}" style="margin: 0; font-size: 15px; color: var(--muted)">{{night.tablesLong}}</p>
+      <sc-if value="{{open}}" hint-placeholder-val="{{ true }}">
+        <a class="btn btn-work btn-wide" href="BookMobile.dc.html">Book a table</a>
+      </sc-if>
+    </article>
+    <article style="border: 1px solid var(--line); padding: 24px 20px; display: flex; flex-direction: column; gap: 16px">
+      <sc-if value="{{hasPlaces}}" hint-placeholder-val="{{ true }}">
+        <span style="display: flex; align-items: baseline; gap: 12px"><span class="d tnum" style="font-size: 80px; font-weight: 200; line-height: .85; color: var(--gel-bright)">{{night.places}}</span><span style="font-size: 15px; color: var(--soft)">places left on the list</span></span>
+      </sc-if>
+      <h3 class="d" style="font-size: 34px">The guestlist</h3>
+      <p style="margin: 0; font-size: 16px; line-height: 1.6; color: var(--soft)">Free entry before {{night.cutoff}}. Up to ten names, one QR for the group or one each.</p>
+      <sc-if value="{{hasPlaces}}" hint-placeholder-val="{{ true }}">
+        <a class="btn btn-line btn-wide" href="GuestlistMobile.dc.html">Join the guestlist</a>
+      </sc-if>
+      <sc-if value="{{noPlaces}}" hint-placeholder-val="{{ false }}">
+        <button class="btn btn-line btn-wide" disabled="{{yes}}">Guestlist full</button>
+      </sc-if>
+    </article>
+  </section>
+
+  <section style="padding: 88px 16px 0">
+    <h2 class="d" style="font-size: 48px">Before you come</h2>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0; margin-top: 24px; border-top: 1px solid var(--line)">
+      <div style="padding: 20px 12px 20px 0; border-bottom: 1px solid var(--line-soft); border-right: 1px solid var(--line-soft)"><p class="label">Age</p><p class="d" style="font-size: 40px; margin-top: 8px">21+</p><p style="margin: 6px 0 0; font-size: 14px; color: var(--muted)">Valid ID, every night</p></div>
+      <div style="padding: 20px 0 20px 14px; border-bottom: 1px solid var(--line-soft)"><p class="label">Dress</p><p class="d" style="font-size: 40px; margin-top: 8px">Smart</p><p style="margin: 6px 0 0; font-size: 14px; color: var(--muted)">No sportswear, no flip-flops</p></div>
+      <div style="padding: 20px 12px 20px 0; border-right: 1px solid var(--line-soft)"><p class="label">Doors</p><p class="d tnum" style="font-size: 40px; margin-top: 8px">From 3 pm</p><p style="margin: 6px 0 0; font-size: 14px; color: var(--muted)">Thursday to Sunday</p></div>
+      <div style="padding: 20px 0 20px 14px"><p class="label">Where</p><p class="d" style="font-size: 40px; margin-top: 8px">Canggu</p><p style="margin: 6px 0 0; font-size: 14px; color: var(--muted)">Exact location sent with your booking</p></div>
+    </div>
+  </section>
+
+  <section style="position: relative; overflow: hidden; padding: 120px 16px 130px; text-align: center">
+    <div class="beam narrow"></div>
+    <p class="d" style="position: relative; font-size: 44px; font-weight: 200; line-height: 1.12; margin: 0">Some fall once. The second time, you choose to.</p>
+  </section>
+
+  <footer style="border-top: 1px solid var(--line-soft); padding: 36px 16px 48px">
+    <a class="mark" href="HomeMobile.dc.html" style="font-size: 18px">The Fanglle <span class="ii">II</span></a>
+    <nav aria-label="Footer" style="display: flex; gap: 4px 22px; flex-wrap: wrap; margin-top: 18px">
+      <a class="navlink" href="#week-m">This week</a>
+      <a class="navlink" href="Gallery.dc.html">Gallery</a>
+      <a class="navlink" href="About.dc.html">About</a>
+      <a class="navlink" href="FindQr.dc.html">Find my QR</a>
+    </nav>
+    <p style="margin: 20px 0 0; font-size: 14px; line-height: 1.5; color: var(--muted)">A fictional venue. Portfolio concept by Ralph de Vinca Group.</p>
+  </footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":3400}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { i: 0, menu: false, out: false, moved: false }; }
+  componentWillUnmount() { clearTimeout(this.t); }
+  go(k) {
+    if (k === this.state.i || this.state.out) return;
+    this.setState({ out: true });
+    clearTimeout(this.t);
+    this.t = setTimeout(() => this.setState({ i: k, out: false, moved: true }), 260);
+  }
+  renderVals() {
+    const nm = (t) => { const [h, m] = t.split(':').map(Number); return (h < 12 ? h + 24 : h) * 60 + m; };
+    const ROLE = { 'Warm-up': 'var(--muted)', 'Guest star': 'var(--soft)', Headliner: 'var(--gel-bright)', Closing: 'var(--muted)' };
+    const BG = {
+      'Warm-up': 'color-mix(in oklab, var(--gel-deep) 45%, var(--surface))',
+      'Guest star': 'color-mix(in oklab, var(--gel-deep) 70%, var(--surface))',
+      Headliner: 'linear-gradient(90deg, var(--gel-deep), var(--gel-bright))',
+      Closing: 'color-mix(in oklab, var(--gel-deep) 60%, var(--surface))',
+    };
+    const N = [
+      { key: 'thu', day: 'Thu', short: 'Thu', date: '8', name: 'Descent', head: 'Ilse Varga', support: 'Rafi Hartono', genre: 'Melodic techno', sw: '#9A93FF', cutoff: '11 pm', close: '4 am', cutoffT: '23:00', closeT: '04:00',
+        tablesLong: 'Tables from IDR 5,000,000', tablesClass: '', places: 42,
+        sets: [['Rafi Hartono', 'Warm-up', '22:00', '00:00'], ['Ilse Varga', 'Headliner', '00:00', '03:00'], ['Rafi Hartono', 'Closing', '03:00', '04:00']] },
+      { key: 'fri', day: 'Fri', short: 'Fri', date: '9', name: 'Second Wave', head: 'Marcel Oduya', support: 'Kirana, Bayu Kencana and Lintang', genre: 'Afro house', sw: '#F5AE4E', cutoff: '11 pm', close: '4 am', cutoffT: '23:00', closeT: '04:00',
+        tablesLong: 'Last tables, from IDR 8,000,000', tablesClass: 'st-last', places: 6,
+        sets: [['Kirana', 'Warm-up', '22:00', '23:30'], ['Bayu Kencana', 'Guest star', '23:30', '00:30'], ['Marcel Oduya', 'Headliner', '00:30', '02:30'], ['Lintang', 'Guest star', '02:30', '03:30'], ['Kirana', 'Closing', '03:30', '04:00']] },
+      { key: 'sat', day: 'Sat', short: 'Sat', date: '10', name: 'Fall Line', head: 'Nadia Sorrel', support: 'Dewa Anom', genre: 'Tech house', sw: '#FF6676', cutoff: '11 pm', close: '4 am', cutoffT: '23:00', closeT: '04:00',
+        tablesLong: 'Tables sold out', tablesClass: 'st-gone', places: 0, soldOut: true,
+        sets: [['Dewa Anom', 'Warm-up', '22:00', '00:00'], ['Nadia Sorrel', 'Headliner', '00:00', '03:00'], ['Dewa Anom', 'Closing', '03:00', '04:00']] },
+      { key: 'sun', day: 'Sun', short: 'Sun', date: '11', name: 'Afterglow', head: 'Theo Brandt', support: 'Saka', genre: 'Deep house', sw: '#F4A3C0', cutoff: '11:30 pm', close: '3 am', cutoffT: '23:30', closeT: '03:00',
+        tablesLong: 'Tables from IDR 4,000,000', tablesClass: '', places: 60,
+        sets: [['Saka', 'Warm-up', '22:00', '00:00'], ['Theo Brandt', 'Headliner', '00:00', '03:00'], ['Saka', 'Closing', '03:00', '04:00']] },
+    ];
+    const s = this.state;
+    const night = N[s.i];
+    const base = s.moved ? 0 : 760;
+    const nights = N.map((n, k) => {
+      let at = 0;
+      const words = n.name.split(' ').map((w) => ({ letters: [...w].map((c) => ({ c, d: base + 120 + (at++) * 34 })) }));
+      const a0 = nm('22:00');
+      const a1 = Math.max(nm(n.closeT), ...n.sets.map((x) => nm(x[3])));
+      const pc = (t) => +((nm(t) - a0) / (a1 - a0) * 100).toFixed(2);
+      const lab = (m) => { const h = Math.floor(m / 60) % 24; return `${h % 12 || 12} ${h < 12 ? 'am' : 'pm'}`; };
+      const hours = [];
+      for (let m = a0; m <= a1; m += 60) hours.push(m);
+      const tick = (list) => list.map((m, j) => ({ left: +((m - a0) / (a1 - a0) * 100).toFixed(2), label: lab(m), shift: j === 0 ? '0' : j === list.length - 1 ? '-100%' : '-50%' }));
+      const rows = n.sets.map(([dj, role, a, b], j) => ({ dj, role, t: a, end: b, roleColor: ROLE[role], bg: BG[role], d: 60 + j * 70, dBar: 160 + j * 70,
+        pos: `left: ${pc(a)}%; width: ${+(pc(b) - pc(a)).toFixed(2)}%;` }));
+      return {
+        ...n, show: k === s.i, pressed: k === s.i, aria: `${n.name}, ${n.day} ${n.date}`, pick: () => this.go(k),
+        open: !n.soldOut, soldOut: !!n.soldOut, guestLine: n.places ? `Guestlist open until ${n.cutoff}, ${n.places} places left` : 'Guestlist full',
+        nameSize: Math.min(104, Math.floor(340 / (Math.max(...n.name.split(' ').map((w) => w.length)) * 0.46))) + 'px',
+        words, dKicker: base + 40, dLine: base + 160 + at * 34, dCta: base + 260 + at * 34,
+        rows, mticks: tick(hours.filter((m) => (m - a0) % 120 === 0)),
+      };
+    });
+    return {
+      yes: true, i: s.i,
+      gelClass: 'gel-' + night.key,
+      outCls: s.out ? 'swap-out' : '',
+      night, nights,
+      open: !night.soldOut,
+      hasPlaces: night.places > 0, noPlaces: night.places === 0,
+      menuOpen: s.menu,
+      toggleMenu: () => this.setState({ menu: !s.menu }),
+    };
+  }
+}
+</script>
+</body>
+</html>

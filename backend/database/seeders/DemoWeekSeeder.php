@@ -32,34 +32,34 @@ class DemoWeekSeeder extends Seeder
         }
     }
 
-    /** From EVENTS in docs/mockup/fanglle-pengelola-mockup.jsx, Thursday first. */
+    /** Night names, hours and prices from EVENTS in the old manager mockup; the line-ups are the owner's demo names (24 Oct 2026). Thursday first. */
     private function events(): array
     {
         return [
             [
-                ['name' => 'Descent', 'genre' => 'Melodic techno', 'blurb' => 'Long, slow builds and a room that gets darker as it gets louder.',
+                ['name' => 'Descent', 'genre' => 'R&B', 'blurb' => 'Long, slow builds and a room that gets darker as it gets louder.',
                     'guestlist_quota' => 200, 'guestlist_cutoff' => '23:00', 'close_time' => '04:00',
                     'min_spend_stage' => 10000000, 'min_spend_booth' => 15000000, 'min_spend_bar' => 5000000],
-                [['Rafi Hartono', R::WarmUp, '22:00', '00:00'], ['Ilse Varga', R::Headliner, '00:00', '03:00'], ['Rafi Hartono', R::Closing, '03:00', '04:00']],
+                [['Don Toliver', R::WarmUp, '22:00', '00:00'], ['The Weeknd', R::Headliner, '00:00', '03:00'], ['Metro Boomin', R::Closing, '03:00', '04:00']],
             ],
             [
-                ['name' => 'Second Wave', 'genre' => 'Afro house', 'blurb' => 'Percussion from the first record to the last.',
+                ['name' => 'Second Wave', 'genre' => 'Hip-hop', 'blurb' => 'Hooks from the first record to the last.',
                     'guestlist_quota' => 200, 'guestlist_cutoff' => '23:00', 'close_time' => '04:00',
                     'min_spend_stage' => 16000000, 'min_spend_booth' => 24000000, 'min_spend_bar' => 8000000],
-                [['Kirana', R::WarmUp, '22:00', '23:30'], ['Bayu Kencana', R::GuestStar, '23:30', '00:30'], ['Marcel Oduya', R::Headliner, '00:30', '02:30'],
-                    ['Lintang', R::GuestStar, '02:30', '03:30'], ['Kirana', R::Closing, '03:30', '04:00']],
+                [['21 Savage', R::WarmUp, '22:00', '23:30'], ['Future', R::GuestStar, '23:30', '00:30'], ['Drake', R::Headliner, '00:30', '02:30'],
+                    ['Lil Baby', R::GuestStar, '02:30', '03:30'], ['PartyNextDoor', R::Closing, '03:30', '04:00']],
             ],
             [
-                ['name' => 'Fall Line', 'genre' => 'Tech house', 'blurb' => 'The busiest night of the week.',
+                ['name' => 'Fall Line', 'genre' => 'Rage', 'blurb' => 'The busiest night of the week.',
                     'guestlist_quota' => 250, 'guestlist_cutoff' => '23:00', 'close_time' => '04:00',
                     'min_spend_stage' => 20000000, 'min_spend_booth' => 30000000, 'min_spend_bar' => 10000000],
-                [['Dewa Anom', R::WarmUp, '22:00', '00:00'], ['Nadia Sorrel', R::Headliner, '00:00', '03:00'], ['Dewa Anom', R::Closing, '03:00', '04:00']],
+                [['Ken Carson', R::WarmUp, '22:00', '00:00'], ['Playboi Carti', R::Headliner, '00:00', '03:00'], ['Destroy Lonely', R::Closing, '03:00', '04:00']],
             ],
             [
-                ['name' => 'Afterglow', 'genre' => 'Deep house', 'blurb' => 'A slower Sunday, with more room to talk at the bar.',
+                ['name' => 'Afterglow', 'genre' => 'Trap', 'blurb' => 'A slower Sunday, with more room to talk at the bar.',
                     'guestlist_quota' => 200, 'guestlist_cutoff' => '23:30', 'close_time' => '03:00',
                     'min_spend_stage' => 8000000, 'min_spend_booth' => 12000000, 'min_spend_bar' => 4000000],
-                [['Saka', R::WarmUp, '22:00', '00:00'], ['Theo Brandt', R::Headliner, '00:00', '03:00'], ['Saka', R::Closing, '03:00', '04:00']],
+                [['Lil Uzi Vert', R::WarmUp, '22:00', '00:00'], ['Travis Scott', R::Headliner, '00:00', '03:00'], ['Sheck Wes', R::Closing, '03:00', '04:00']],
             ],
         ];
     }

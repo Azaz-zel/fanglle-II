@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Join the guestlist on a phone</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="fanglle.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Albert+Sans:wght@400;500&amp;family=Big+Shoulders+Display:wght@100;200;300;400;600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#0C0A0E}
+a{color:#F1ECE4}a:hover{color:#FFFDF8}
+</style>
+</helmet>
+<div class="stage gel-fri" style="width: 390px; min-height: 2100px; background: var(--blackout); color: var(--tungsten); font-family: var(--body); overflow: hidden">
+  <header style="height: 60px; padding: 0 16px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--line-soft)">
+    <a class="mark" href="HomeMobile.dc.html" style="font-size: 17px; letter-spacing: .12em">The Fanglle <span class="ii">II</span></a>
+    <a class="navlink" href="HomeMobile.dc.html" style="margin-left: auto">Back</a>
+  </header>
+
+  <section class="wash" style="position: relative; overflow: hidden; padding: 112px 16px 28px">
+    <div style="position: absolute; inset: 0; pointer-events: none"><dc-import name="Crystals" night="1" solid="" count="8" reach="0.75" hint-size="100%,100%"></dc-import></div>
+    <div class="beam" style="width: 640px; animation: none"></div>
+    <p class="label" style="position: relative; color: var(--soft)">Friday 9 October</p>
+    <p class="night" style="position: relative; font-size: 84px; margin-top: 10px">Second Wave</p>
+    <p style="position: relative; margin: 14px 0 0; font-size: 15px; color: var(--soft)"><span class="st-last">6 places left</span>, free before 11 pm</p>
+  </section>
+
+  <form style="padding: 32px 16px 64px; display: flex; flex-direction: column; gap: 28px">
+    <h1 class="d" style="font-size: 44px">Join the guestlist</h1>
+
+    <div role="group" aria-label="Night" style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 2px; margin-top: -8px">
+      <button type="button" class="swatch" aria-pressed="false" style="--sw: #9A93FF; padding: 12px 8px; gap: 2px"><span class="day" style="font-size: 12px">Thu</span><span class="d tnum" style="font-size: 30px">8</span><span class="st" style="font-size: 12px">42 left</span></button>
+      <button type="button" class="swatch" aria-pressed="true" style="--sw: #F5AE4E; padding: 12px 8px; gap: 2px"><span class="day" style="font-size: 12px">Fri</span><span class="d tnum" style="font-size: 30px">9</span><span class="st st-last" style="font-size: 12px">6 left</span></button>
+      <button type="button" class="swatch" aria-pressed="false" disabled="{{yes}}" style="--sw: #FF6676; padding: 12px 8px; gap: 2px; opacity: .55; cursor: not-allowed"><span class="day" style="font-size: 12px">Sat</span><span class="d tnum" style="font-size: 30px">10</span><span class="st st-gone" style="font-size: 12px">Full</span></button>
+      <button type="button" class="swatch" aria-pressed="false" style="--sw: #F4A3C0; padding: 12px 8px; gap: 2px"><span class="day" style="font-size: 12px">Sun</span><span class="d tnum" style="font-size: 30px">11</span><span class="st" style="font-size: 12px">60 left</span></button>
+    </div>
+
+    <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px">
+      <span id="p-l" class="flabel">People, including you</span>
+      <div role="group" aria-labelledby="p-l" style="display: flex; align-items: center; border: 1px solid var(--line); border-radius: 2px">
+        <button type="button" aria-label="Fewer people" style="width: 52px; height: 52px; background: transparent; border: 0; color: var(--tungsten); font-size: 22px">−</button>
+        <output class="d tnum" style="min-width: 52px; text-align: center; font-size: 28px">3</output>
+        <button type="button" aria-label="More people" style="width: 52px; height: 52px; background: transparent; border: 0; color: var(--tungsten); font-size: 22px">+</button>
+      </div>
+    </div>
+
+    <div role="radiogroup" aria-label="QR for the group" style="display: flex; flex-direction: column; gap: 10px">
+      <label style="display: flex; gap: 14px; align-items: flex-start; padding: 16px; border: 1px solid var(--line); border-radius: 2px"><input type="radio" name="mm" style="width: 20px; height: 20px; margin: 2px 0 0; accent-color: var(--gel-bright); flex: none"><span><span style="display: block; font-size: 16px">One QR for the group</span><span style="display: block; margin-top: 4px; font-size: 14px; color: var(--muted)">You hold it. Everyone walks in with you.</span></span></label>
+      <label style="display: flex; gap: 14px; align-items: flex-start; padding: 16px; border: 1px solid var(--gel-bright); background: var(--raised); border-radius: 2px"><input type="radio" name="mm" checked="{{yes}}" style="width: 20px; height: 20px; margin: 2px 0 0; accent-color: var(--gel-bright); flex: none"><span><span style="display: block; font-size: 16px">One QR each</span><span style="display: block; margin-top: 4px; font-size: 14px; color: var(--muted)">Everyone can arrive on their own. Names needed.</span></span></label>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 16px">
+      <p class="label">Your details</p>
+      <div class="field"><label for="gm-name">Name</label><input id="gm-name" class="input" value="Ayu Prameswari"><p class="help">As on your ID</p></div>
+      <div class="field"><label for="gm-phone">Phone</label><input id="gm-phone" class="input" type="tel" value="+62 812 3456 7890"></div>
+      <div class="field"><label for="gm-mail">Email</label><input id="gm-mail" class="input" type="email" value="ayu@mail" aria-invalid="true" aria-describedby="gm-mail-e"><p id="gm-mail-e" class="err">Enter a full email address, like name@mail.com</p></div>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 16px">
+      <p class="label">Names in your group</p>
+      <div class="field"><label for="gm-2">Second person</label><input id="gm-2" class="input" value="Dimas Wirawan"></div>
+      <div class="field"><label for="gm-3">Third person</label><input id="gm-3" class="input"></div>
+    </div>
+
+    <label style="display: flex; gap: 12px; align-items: flex-start; font-size: 15px; line-height: 1.5; color: var(--soft)"><input type="checkbox" style="width: 22px; height: 22px; margin: 1px 0 0; accent-color: var(--gel-bright); flex: none">Everyone in my group is 21 or over</label>
+    <div style="height: 66px; border: 1px dashed var(--line); display: flex; align-items: center; justify-content: center; font-size: 14px; color: var(--muted)">[Cloudflare Turnstile check]</div>
+    <a class="btn btn-work btn-wide" href="GuestlistDone.dc.html">Join the guestlist</a>
+  </form>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":2100}}'>
+class Component extends DCLogic {
+  renderVals() { return { yes: true }; }
+}
+</script>
+</body>
+</html>

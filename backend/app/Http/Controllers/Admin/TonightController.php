@@ -13,13 +13,22 @@ use App\Models\TableBooking;
 use App\Models\VenueTable;
 use App\Support\Night;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
-/** The manager's overview: the big card, the three small ones, arrivals per hour and what needs attention. No phone numbers. */
+/**
+ * The manager's overview: the big card, the three small ones, arrivals per hour and what needs attention. No phone numbers.
+ * ?date= picks the night; without it, tonight, else the next night, else the last one, so the panel is never empty between nights.
+ */
 class TonightController extends Controller
 {
-    public function __invoke(): JsonResponse
+    public function __invoke(Request $request): JsonResponse
     {
-        $event = Event::with('lineupSlots')->firstWhere('date', Night::tonight()->toDateString());
+        $date = $request->validate(['date' => ['nullable', 'date_format:Y-m-d']])['date'] ?? null;
+        $tonight = Night::tonight()->toDateString();
+        $events = Event::with('lineupSlots');
+        $event = $date
+            ? $events->firstWhere('date', $date)
+            : ($events->clone()->where('date', '>=', $tonight)->orderBy('date')->first() ?? $events->latest('date')->first());
         if (! $event) {
             return response()->json(['event' => null]);
         }
@@ -44,6 +53,7 @@ class TonightController extends Controller
 
         return response()->json([
             'now' => now()->toIso8601String(), // the club's clock for the timeline, whatever zone the manager's device is in
+            'tonight' => $tonight, // the night happening now (F2), to tell tonight from a night ahead or past
             'event' => [
                 'date' => $event->date->toDateString(),
                 'name' => $event->name,
